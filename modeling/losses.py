@@ -1,32 +1,7 @@
 import torch
-import torchvision.models as models
 import torch.nn.functional as F
 import torch.nn as nn
-
-
-_rgb_to_yuv_kernel = torch.tensor([
-    [0.299, -0.14714119, 0.61497538],
-    [0.587, -0.28886916, -0.51496512],
-    [0.114, 0.43601035, -0.10001026]
-])
-
-def gram(input):
-    b, c, w, h = input.size()
-
-    x = input.view(b * c, w * h)
-
-    G = torch.mm(x, x.T)
-
-    # normalize by total elements
-    return G.div(b * c * w * h)
-
-
-def rgb_to_yuv(image)
-    '''
-    https://en.wikipedia.org/wiki/YUV
-    '''
-
-    return torch.mm(image, _rgb_to_yuv_kernel)
+from util import gram, rgb_to_yuv
 
 
 class LeastSquareLossD(nn.Module):
@@ -68,10 +43,16 @@ class GramLoss(nn.Module):
         return self.l1(gram(feature), gram(feature_g))
 
 
-class RecontructionLoss(nn.Module):
+class ColorLoss(nn.Module):
     def __init__(self):
-        super(RecontructionLoss, self).__init__()
+        super(ColorLoss, self).__init__()
         self.l1 = nn.L1Loss()
+        self.huber = nn.HuberLoss()
 
-    def forward(self, feature, feature_g):
-        return self.l1(gram(feature), gram(feature_g))
+    def forward(self, image, image_g):
+        image = rgb_to_yuv(image)
+        image_g = rgb_to_yuv(image_g)
+
+        return (self.l1(image[0, ...], image_g[0, ...]) +
+                self.huber(image[1, ...], image_g[1, ...]) +
+                self.huber(image[2, ...], image_g[2, ...])
