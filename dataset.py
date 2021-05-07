@@ -37,7 +37,8 @@ class AnimeDataSet(Dataset):
             image_gray = image_gray.transpose(2, 0, 1)
             image_gray = torch.tensor(image_gray)
         else:
-            image_gray = np.zeros_like(image)
+            h, w, c = image.shape
+            image_gray = np.zeros((c, h, w))
 
         image = self._transform(image)
         image = image.transpose(2, 0, 1)
