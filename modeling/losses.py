@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
-from util import gram, rgb_to_yuv
+from util import gram, rgb_to_yuv_batch
 
 
 class LeastSquareLossD(nn.Module):
@@ -50,8 +50,8 @@ class ColorLoss(nn.Module):
         self.huber = nn.SmoothL1Loss()
 
     def forward(self, image, image_g):
-        image = rgb_to_yuv(image)
-        image_g = rgb_to_yuv(image_g)
+        image = rgb_to_yuv_batch(image)
+        image_g = rgb_to_yuv_batch(image_g)
 
         return (self.l1(image[0, ...], image_g[0, ...]) +
                 self.huber(image[1, ...], image_g[1, ...]) +
