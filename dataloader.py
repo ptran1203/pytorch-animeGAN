@@ -38,10 +38,13 @@ class DataLoader(Dataset):
         else:
             image_gray = None
 
+        image = self._transform(image)
+        image = image.transpose(2, 0, 1)
         return torch.tensor(image), image_gray
 
     def _transform(self, img):
         if self.transform is not None:
             img =  self.transform(image=img)['image'].astype(np.float32)
 
+        img = img / 255.0
         return img

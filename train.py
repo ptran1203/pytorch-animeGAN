@@ -46,8 +46,8 @@ def main():
     optimizer_g = optim.Adam(G.parameters(), lr=args.lr_g)
     optimizer_d = optim.Adam(D.parameters(), lr=args.lr_d)
 
-    for e in args.epochs:
-        print(f"Epoch {e}/{len(args.epochs)}")
+    for e in range(args.epochs):
+        print(f"Epoch {e}/{args.epochs}")
 
         for photo, _ in tqdm(photo_loader):
             anime, anime_gray = anime_loader.next()
