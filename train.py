@@ -6,11 +6,7 @@ from multiprocessing import cpu_count
 from torch.utils.data import DataLoader
 from modeling.anime_gan import Generator
 from modeling.anime_gan import Discriminator
-from modeling.losses import LeastSquareLossD
-from modeling.losses import LeastSquareLossG
-from modeling.losses import ContentLoss
-from modeling.losses import ColorLoss
-from modeling.losses import GramLoss
+from modeling.losses import AnimeGanLoss
 from modeling.vgg import get_vgg19
 from dataset import AnimeDataSet
 from tqdm import tqdm
@@ -28,7 +24,10 @@ def parse_args():
     parser.add_argument('--save-interval', type=int, default=2)
     parser.add_argument('--lr-g', type=float, default=0.001)
     parser.add_argument('--lg-d', type=float, default=0.002)
-
+    parser.add_argument('--wadv', type=float, default=300.0, help='Adversarial loss weight')
+    parser.add_argument('--wcon', type=float, default=1.5, help='Content loss weight')
+    parser.add_argument('--wgra', type=float, default=3, help='Gram loss weight')
+    parser.add_argument('--wcol', type=float, default=10, help='Color loss weight')
 
     return parser.parse_args()
 
@@ -44,6 +43,8 @@ def main():
     G = Generator().cuda()
     D = Discriminator().cuda()
     vgg19 = get_vgg19().cuda()
+    
+    loss_fn = AnimeGanLoss(args)
 
     # Create DataLoader
     num_workers = cpu_count()
@@ -78,12 +79,12 @@ def main():
     for e in range(args.epochs):
         print(f"Epoch {e}/{args.epochs}")
 
-        for photo, _ in tqdm(photo_loader):
+        for img, _ in tqdm(photo_loader):
             anime, anime_gray = anime_loader.next()
             anime_smt, anime_gray_smt = anime_smooth_loader.next()
 
             # To cuda
-            photo = photo.cuda().float()
+            img = img.cuda().float()
             anime_gray = anime_gray.cuda().float()
             anime_smt = anime_smt.cuda().float()
             anime_gray_smt = anime_gray_smt.cuda().float()
@@ -91,13 +92,14 @@ def main():
             # ---------------- TRAIN G ---------------- #
             optimizer_g.zero_grad()
 
-            fake = G(photo)
-            validity = D(fake)
-            feature_fake = vgg19(fake)
-            feature_anime = vgg19(anime_gray)
-            feature_photo = vgg19(photo)
+            fake_img = G(img)
+            fake_d = D(fake_img)
+            fake_feat = vgg19(fake_img)
+            anime_feat = vgg19(anime_gray)
+            img_feat = vgg19(img)
 
-            loss_g = get_loss_G(fake, photo, validity, feature_fake, feature_anime, feature_photo)
+            loss_g = loss_fn.compute_loss_G(
+                fake_img, img, fake_d, fake_feat, anime_feat, img_feat)
             loss_g.backward()
 
             optimizer_g.step()
@@ -105,10 +107,10 @@ def main():
             # ---------------- TRAIN D ---------------- #
             optimizer_d.zero_grad()
 
-            fake_d = D(fake.detach())
-            real_d = D(photo)
+            fake_d = D(fake_img.detach())
+            real_d = D(img)
 
-            loss_d = get_loss_D(real_d, fake_d)
+            loss_d = img_feat.compute_loss_D(real_d, fake_d)
             loss_d.backward()
 
             optimizer_d.step()
