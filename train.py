@@ -22,7 +22,7 @@ def parse_args():
     parser.add_argument('--checkpoint-dir', type=str, default='/content/checkpoints')
     parser.add_argument('--save-interval', type=int, default=2)
     parser.add_argument('--lr-g', type=float, default=0.001)
-    parser.add_argument('--lg-d', type=float, default=0.002)
+    parser.add_argument('--lr-d', type=float, default=0.002)
     parser.add_argument('--wadv', type=float, default=300.0, help='Adversarial loss weight')
     parser.add_argument('--wcon', type=float, default=1.5, help='Content loss weight')
     parser.add_argument('--wgra', type=float, default=3, help='Gram loss weight')
