@@ -22,7 +22,7 @@ class LeastSquareLossG(nn.Module):
         self.c = c
 
     def forward(self, pred_g):
-        return 0.5 * torch.mean((pred_g - c) ** 2)
+        return 0.5 * torch.mean((pred_g - self.c) ** 2)
 
 
 class ContentLoss(nn.Module):
