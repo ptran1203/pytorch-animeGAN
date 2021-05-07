@@ -6,7 +6,7 @@ import torch
 # import albumentations as A
 from torch.utils.data import Dataset
 
-class DataLoader(Dataset):
+class AnimeDataSet(Dataset):
     def __init__(self, image_dir, transform=None):
         """
         
@@ -53,11 +53,10 @@ class DataLoader(Dataset):
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
+    from torch.utils.data import DataLoader
 
-    anime_loader = DataLoader('dataset/Hayao/smooth')
+    anime_loader = DataLoader(AnimeDataSet('dataset/Hayao/smooth'), batch_size=2, shuffle=True)
 
-
-    for img, img_gray in anime_loader:
-        plt.imshow(img_gray.numpy().transpose(1, 2, 0))
-        plt.show()
-        break
+    img, img_gray = iter(anime_loader).next()
+    plt.imshow(img[1].numpy().transpose(1, 2, 0))
+    plt.show()

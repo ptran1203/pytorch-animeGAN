@@ -2,6 +2,8 @@ import torch
 import argparse
 import os
 import torch.optim as optim
+from multiprocessing import cpu_count
+from torch.utils.data import DataLoader
 from modeling.anime_gan import Generator
 from modeling.anime_gan import Discriminator
 from modeling.losses import LeastSquareLossD
@@ -10,7 +12,7 @@ from modeling.losses import ContentLoss
 from modeling.losses import ColorLoss
 from modeling.losses import GramLoss
 from modeling.vgg import get_vgg19
-from dataloader import DataLoader
+from dataset import AnimeDataSet
 from tqdm import tqdm
 
 
@@ -40,9 +42,30 @@ def main():
     D = Discriminator()
     vgg19 = get_vgg19()
 
-    photo_loader = DataLoader(os.path.join(args.data_dir, 'train_photo'))
-    anime_loader = DataLoader(os.path.join(args.data_dir, args.dataset, 'style'))
-    anime_smooth_loader = DataLoader(os.path.join(args.data_dir, args.dataset, 'smooth'))
+    # Create DataLoader
+    num_workers = cpu_count()
+    photo_loader = DataLoader(
+        AnimeDataSet(os.path.join(args.data_dir, 'train_photo'))
+        batch_size=args.batch_size,
+        num_workers=num_workers,
+        shuffle=True,
+    )
+    anime_loader = DataLoader(
+        AnimeDataSet(os.path.join(args.data_dir, args.dataset, 'style')),
+        batch_size=args.batch_size,
+        num_workers=num_workers,
+        shuffle=True,
+    )
+    anime_smooth_loader = DataLoader(
+        AnimeDataSet(os.path.join(args.data_dir, args.dataset, 'smooth')),
+        batch_size=args.batch_size,
+        num_workers=num_workers,
+        shuffle=True,
+    )
+
+    anime_loader = iter(anime_loader)
+    anime_smooth_loader = iter(anime_smooth_loader)
+
     optimizer_g = optim.Adam(G.parameters(), lr=args.lr_g)
     optimizer_d = optim.Adam(D.parameters(), lr=args.lr_d)
 
@@ -83,12 +106,6 @@ def main():
 
         if e % args.plot_interval == 0:
             save_sample(G)
-
-
-
-
-
-
 
 
 if __name__ == '__main__':
