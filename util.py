@@ -32,3 +32,12 @@ def rgb_to_yuv(image, channel_last=False):
         print(image.shape)
 
     return torch.tensordot(image, _rgb_to_yuv_kernel, dims=([0], [0]))
+
+
+class DictToObject(object):
+    def __init__(self, d):
+        for a, b in d.items():
+            if isinstance(b, (list, tuple)):
+               setattr(self, a, [obj(x) if isinstance(x, dict) else x for x in b])
+            else:
+               setattr(self, a, obj(b) if isinstance(b, dict) else b)
