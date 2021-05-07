@@ -45,7 +45,7 @@ def rgb_to_yuv_batch(images, channel_last=False):
     if channel_last:
         images = images.permute(0, 3, 1, 2).type(torch.float32)
 
-    yuv_img = torch.tensordot(images.float(), _rgb_to_yuv_kernel, dims=([0], [0]))
+    yuv_img = torch.tensordot(images.float(), _rgb_to_yuv_kernel, dims=([1], [0]))
 
     if not channel_last:
         yuv_img = yuv_img.permute(0, 3, 1 ,2)
