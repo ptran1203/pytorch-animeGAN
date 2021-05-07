@@ -34,21 +34,21 @@ def parse_args():
 
 def collate_fn(batch):
     img, img_gray = zip(*batch)
-    return img, img_gray
+    return torch.stack(img, 0), torch.stack(img_gray, 0)
 
 def main():
     args = parse_args()
 
     print("Init models...")
 
-    G = Generator()
-    D = Discriminator()
-    vgg19 = get_vgg19()
+    G = Generator().cuda()
+    D = Discriminator().cuda()
+    vgg19 = get_vgg19().cuda()
 
     # Create DataLoader
     num_workers = cpu_count()
     photo_loader = DataLoader(
-        AnimeDataSet(os.path.join(args.data_dir, 'train_photo'))
+        AnimeDataSet(os.path.join(args.data_dir, 'train_photo')),
         batch_size=args.batch_size,
         num_workers=num_workers,
         shuffle=True,
@@ -58,14 +58,14 @@ def main():
         AnimeDataSet(os.path.join(args.data_dir, args.dataset, 'style')),
         batch_size=args.batch_size,
         num_workers=num_workers,
-        # shuffle=True,
+        shuffle=True,
         collate_fn=collate_fn,
     )
     anime_smooth_loader = DataLoader(
         AnimeDataSet(os.path.join(args.data_dir, args.dataset, 'smooth')),
         batch_size=args.batch_size,
         num_workers=num_workers,
-        # shuffle=True,
+        shuffle=True,
         collate_fn=collate_fn,
     )
 
@@ -81,6 +81,12 @@ def main():
         for photo, _ in tqdm(photo_loader):
             anime, anime_gray = anime_loader.next()
             anime_smt, anime_gray_smt = anime_smooth_loader.next()
+
+            # To cuda
+            photo = photo.cuda().float()
+            anime_gray = anime_gray.cuda().float()
+            anime_smt = anime_smt.cuda().float()
+            anime_gray_smt = anime_gray_smt.cuda().float()
 
             # ---------------- TRAIN G ---------------- #
             optimizer_g.zero_grad()
