@@ -32,6 +32,9 @@ def parse_args():
 
     return parser.parse_args()
 
+def collate_fn(batch):
+    img, img_gray = zip(*batch)
+    return img, img_gray
 
 def main():
     args = parse_args()
@@ -49,18 +52,21 @@ def main():
         batch_size=args.batch_size,
         num_workers=num_workers,
         shuffle=True,
+        collate_fn=collate_fn,
     )
     anime_loader = DataLoader(
         AnimeDataSet(os.path.join(args.data_dir, args.dataset, 'style')),
         batch_size=args.batch_size,
         num_workers=num_workers,
-        shuffle=True,
+        # shuffle=True,
+        collate_fn=collate_fn,
     )
     anime_smooth_loader = DataLoader(
         AnimeDataSet(os.path.join(args.data_dir, args.dataset, 'smooth')),
         batch_size=args.batch_size,
         num_workers=num_workers,
-        shuffle=True,
+        # shuffle=True,
+        collate_fn=collate_fn,
     )
 
     anime_loader = iter(anime_loader)
