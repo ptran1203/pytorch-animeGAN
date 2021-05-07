@@ -56,3 +56,4 @@ class ColorLoss(nn.Module):
         return (self.l1(image[0, ...], image_g[0, ...]) +
                 self.huber(image[1, ...], image_g[1, ...]) +
                 self.huber(image[2, ...], image_g[2, ...])
+

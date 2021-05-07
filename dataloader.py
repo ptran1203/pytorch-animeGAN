@@ -7,7 +7,7 @@ import albumentations as A
 from torch.utils.data import Dataset
 
 class DataLoader(Dataset):
-    def __init__(self, csv, mode='train', transform=None, image_dir=''):
+    def __init__(self, image_dir, transform=None):
         """
         
         image_dir has the format: {dir}/{photo|anime|anime_smooth}/
@@ -21,10 +21,10 @@ class DataLoader(Dataset):
             raise Exception(f'{self.img_dir} has no files')
 
         self.transform = transform
-        self.is_anime = 'anime' in image_dir
+        self.is_anime = 'anime' in image_dir or 'style' in image_dir
 
     def __len__(self):
-        return self.csv.shape[0]
+        return len(self.image_files)
 
     def __getitem__(self, index):
         fname = self.image_files[index]
