@@ -18,7 +18,7 @@ def parse_args():
     parser.add_argument('--dataset', type=str, default='Hayao')
     parser.add_argument('--data-dir', type=str, default='/content')
     parser.add_argument('--epochs', type=int, default=10)
-    parser.add_argument('--batch', type=int, default=16)
+    parser.add_argument('--batch-size', type=int, default=16)
     parser.add_argument('--checkpoint-dir', type=str, default='/content/checkpoints')
     parser.add_argument('--save-interval', type=int, default=2)
     parser.add_argument('--lr-g', type=float, default=0.001)
