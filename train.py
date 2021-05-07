@@ -14,8 +14,7 @@ from tqdm import tqdm
 
 
 def parse_args():
-    desc = "get the mean values of  b,g,r on the whole dataset"
-    parser = argparse.ArgumentParser(description=desc)
+    parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str, default='Hayao')
     parser.add_argument('--data-dir', type=str, default='/content')
     parser.add_argument('--epochs', type=int, default=10)

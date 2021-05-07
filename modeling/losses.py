@@ -47,7 +47,7 @@ class ColorLoss(nn.Module):
     def __init__(self):
         super(ColorLoss, self).__init__()
         self.l1 = nn.L1Loss()
-        self.huber = nn.HuberLoss()
+        self.huber = nn.SmoothL1Loss()
 
     def forward(self, image, image_g):
         image = rgb_to_yuv(image)
