@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import pandas as pd
 import torch
-import albumentations as A
+# import albumentations as A
 from torch.utils.data import Dataset
 
 class DataLoader(Dataset):
@@ -21,7 +21,7 @@ class DataLoader(Dataset):
             raise Exception(f'{self.img_dir} has no files')
 
         self.transform = transform
-        self.is_anime = 'anime' in image_dir or 'style' in image_dir
+        self.is_anime = any(x in image_dir for x in ['anime', 'style', 'smooth'])
 
     def __len__(self):
         return len(self.image_files)
@@ -32,6 +32,7 @@ class DataLoader(Dataset):
 
         if self.is_anime:
             image_gray = cv2.cvtColor(image.copy(), cv2.COLOR_BGR2GRAY)
+            image_gray = np.stack([image_gray, image_gray, image_gray], axis=-1)
             image_gray = self._transform(image_gray)
             image_gray = image_gray.transpose(2, 0, 1)
             image_gray = torch.tensor(image_gray)
@@ -40,6 +41,7 @@ class DataLoader(Dataset):
 
         image = self._transform(image)
         image = image.transpose(2, 0, 1)
+
         return torch.tensor(image), image_gray
 
     def _transform(self, img):
@@ -48,3 +50,14 @@ class DataLoader(Dataset):
 
         img = img / 255.0
         return img
+
+if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+
+    anime_loader = DataLoader('dataset/Hayao/smooth')
+
+
+    for img, img_gray in anime_loader:
+        plt.imshow(img_gray.numpy().transpose(1, 2, 0))
+        plt.show()
+        break
