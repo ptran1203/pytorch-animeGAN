@@ -97,7 +97,7 @@ def main():
     # Create DataLoader
     num_workers = cpu_count()
     data_loader = DataLoader(
-        AnimeDataSet(os.path.join(args.data_dir, 'train_photo')),
+        AnimeDataSet(args.data_dir, args.dataset),
         batch_size=args.batch_size,
         num_workers=num_workers,
         shuffle=True,
