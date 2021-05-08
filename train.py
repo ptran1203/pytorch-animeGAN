@@ -21,10 +21,11 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str, default='Hayao')
     parser.add_argument('--data-dir', type=str, default='/content')
-    parser.add_argument('--epochs', type=int, default=10)
+    parser.add_argument('--epochs', type=int, default=100)
     parser.add_argument('--batch-size', type=int, default=16)
     parser.add_argument('--checkpoint-dir', type=str, default='/content/checkpoints')
     parser.add_argument('--save-image-dir', type=str, default='/content/images')
+    parser.add_argument('--continu', type=bool, default=False)
     parser.add_argument('--display-image', type=bool, default=True)
     parser.add_argument('--save-interval', type=int, default=2)
     parser.add_argument('--debug-samples', type=int, default=0)
@@ -124,7 +125,16 @@ def main():
     optimizer_g = optim.Adam(G.parameters(), lr=args.lr_g)
     optimizer_d = optim.Adam(D.parameters(), lr=args.lr_d)
 
-    for e in range(args.epochs):
+    start_e = 0
+    if args.continu:
+        try:
+            load_checkpoint(G, args)
+            start_e = load_checkpoint(D, args)
+        except Exception as e:
+            print('Could not load checkpoint, train from scratch', e)
+
+
+    for e in range(start_e, args.epochs):
         print(f"Epoch {e}/{args.epochs}")
         bar = tqdm(data_loader)
 
