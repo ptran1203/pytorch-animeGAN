@@ -66,6 +66,11 @@ def save_samples(generator, loader, args, max_imgs=5):
     '''
     Generate and save images after a number of epochs
     '''
+    def toint(img):
+        img = img * 127.5 + 127.5
+        img = img.astype(np.int16)
+        return img
+
     max_iter = (max_imgs // args.batch_size) + 1
     fake_imgs = []
     real_imgs = []
@@ -75,8 +80,9 @@ def save_samples(generator, loader, args, max_imgs=5):
         fake_img = fake_img.detach().cpu().numpy()
         # Channel first -> channel last
         fake_img  = fake_img.transpose(0, 2, 3, 1)
-        fake_imgs.append(fake_img)
-        real_imgs.append(img.permute(0, 2, 3 ,1).detach().cpu().numpy())
+        fake_imgs.append(toint(fake_img))
+        real_imgs.append(
+            toint(img.permute(0, 2, 3 ,1).detach().cpu().numpy()))
 
         if i + 1== max_iter:
             break
@@ -85,11 +91,12 @@ def save_samples(generator, loader, args, max_imgs=5):
     real_imgs = np.concatenate(real_imgs, axis=0)
 
     if args.display_image:
-        show_images(np.concatenate([real_imgs, fake_imgs]))
+        show_images(np.concatenate([real_imgs, fake_imgs]), save=False)
 
     for i, img in enumerate(fake_imgs):
         save_path = os.path.join(args.save_image_dir, f'gen_{i}.jpg')
-        cv2.imwrite(save_path, img * 127.5 + 127.5)
+        cv2.imwrite(save_path, img)
+
 
 def main():
     args = parse_args()
