@@ -59,7 +59,7 @@ def show_images(images, rows=2):
     height = 4
     width = height * columns // 2
 
-    fig = plt.figure((height, width))
+    fig = plt.figure(figsize=(height, width))
 
     for i, img in enumerate(images):
         fig.add_subplot(rows, columns, i)
