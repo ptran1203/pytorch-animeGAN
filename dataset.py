@@ -28,7 +28,7 @@ class AnimeDataSet(Dataset):
 
         self.data_dir = data_dir
         self.image_files =  {}
-        self.photo = 'photo'
+        self.photo = 'train_photo'
         self.style = f'{anime_dir}/style'
         self.smooth =  f'{anime_dir}/smooth'
 
