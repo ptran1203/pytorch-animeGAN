@@ -119,10 +119,10 @@ def main():
         for img, anime, anime_gray, anime_smt_gray in bar:
 
             # To cuda
-            img = img.cuda().float()
-            anime = anime.cuda().float()
-            anime_gray = anime_gray.cuda().float()
-            anime_smt_gray = anime_smt_gray.cuda().float()
+            img = img.cuda()
+            anime = anime.cuda()
+            anime_gray = anime_gray.cuda()
+            anime_smt_gray = anime_smt_gray.cuda()
 
             # ---------------- TRAIN G ---------------- #
             optimizer_g.zero_grad()

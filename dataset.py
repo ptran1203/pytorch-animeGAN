@@ -86,8 +86,9 @@ class AnimeDataSet(Dataset):
 
     def _transform(self, img):
         if self.transform is not None:
-            img =  self.transform(image=img)['image'].astype(np.float32)
+            img =  self.transform(image=img)['image']
 
+        img = img.astype(np.float32)
         img = img / 255.0
         return img
 
