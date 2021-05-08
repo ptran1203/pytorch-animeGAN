@@ -1,6 +1,7 @@
 import torch
 import argparse
 import os
+import cv2
 import torch.optim as optim
 from multiprocessing import cpu_count
 from torch.utils.data import DataLoader
@@ -9,8 +10,10 @@ from modeling.anime_gan import Discriminator
 from modeling.losses import AnimeGanLoss
 from modeling.vgg import get_vgg19
 from dataset import AnimeDataSet
+from util import show_images
+from util import save_checkpoint
+from util import load_checkpoint
 from tqdm import tqdm
-
 
 
 def parse_args():
@@ -20,6 +23,8 @@ def parse_args():
     parser.add_argument('--epochs', type=int, default=10)
     parser.add_argument('--batch-size', type=int, default=16)
     parser.add_argument('--checkpoint-dir', type=str, default='/content/checkpoints')
+    parser.add_argument('--save-image-dir', type=str, default='/content/images')
+    parser.add_argument('--display-image', type=bool, default=True)
     parser.add_argument('--save-interval', type=int, default=2)
     parser.add_argument('--lr-g', type=float, default=0.001)
     parser.add_argument('--lr-d', type=float, default=0.002)
@@ -30,12 +35,55 @@ def parse_args():
 
     return parser.parse_args()
 
+
 def collate_fn(batch):
     img, img_gray = zip(*batch)
     return torch.stack(img, 0), torch.stack(img_gray, 0)
 
+
+def check_params(args):
+    data_path = os.path.join(args.data_dir, args.dataset)
+    if not os.path.exists(data_path):
+        raise FileNotFoundError(f'Dataset not found {data_path}')
+
+    if not os.path.exists(args.save_image_dir):
+        print(f'* {args.save_image_dir} does not exist, creating...')
+        os.makedirs(args.save_image_dir)
+
+    if not os.path.exists(args.checkpoint_dir):
+        print(f'* {args.checkpoint_dir} does not exist, creating...')
+        os.makedirs(args.checkpoint_dir)
+
+
+def save_samples(generator, loader, args, max_imgs=3):
+    '''
+    Generate and save images after a number of epochs
+    '''
+    max_iter = max_imgs // args.batch_size
+    fake_imgs = []
+
+    for i, (img, _) in enumerate(loader):
+        fake_img = generator(img)
+        fake_img = fake_img.detach().cpu().numpy()
+        # Channel first -> channel last
+        fake_img  = fake_img.transpose(0, 2, 3, 1)
+        fake_imgs.append(fake_img)
+
+        if i + 1== max_iter:
+            break
+
+    if args.display_image:
+        show_images(fake_imgs)
+
+    for i, img in enumerate(fake_imgs):
+        save_path = os.path.join(args.save_image_dir, f'gen_{i}.jpg')
+        cv2.imwrite(save_path, img)
+    
+
 def main():
     args = parse_args()
+
+    check_params(args)
 
     print("Init models...")
 
@@ -109,16 +157,17 @@ def main():
             fake_d = D(fake_img.detach())
             real_d = D(img)
 
-            loss_d = img_feat.compute_loss_D(real_d, fake_d)
+            loss_d = loss_fn.compute_loss_D(real_d, fake_d)
             loss_d.backward()
 
             optimizer_d.step()
 
         if e % args.save_interval == 0:
-            save_weight(G, D)
+            save_checkpoint(G, optimizer_g, e, args)
+            save_checkpoint(D, optimizer_d, e, args)
 
         if e % args.plot_interval == 0:
-            save_sample(G)
+            save_samples(G, photo_loader, args)
 
 
 if __name__ == '__main__':

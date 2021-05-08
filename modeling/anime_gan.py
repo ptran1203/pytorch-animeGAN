@@ -14,7 +14,7 @@ from modeling.conv_blocks import ConvBlock
 class Generator(nn.Module):
     def __init__(self):
         super(Generator, self).__init__()
-
+        self.name = 'generator'
         self.encode_blocks = nn.Sequential(
             ConvBlock(3, 64),
             ConvBlock(64, 128),
@@ -59,6 +59,7 @@ class Generator(nn.Module):
 class Discriminator(nn.Module):
     def __init__(self):
         super(Discriminator, self).__init__()
+        self.name = 'discriminator'
         self.discriminate = nn.Sequential(
             nn.Conv2d(3, 32, kernel_size=3, stride=1),
             nn.LeakyReLU(),
