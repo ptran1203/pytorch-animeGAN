@@ -26,6 +26,7 @@ def parse_args():
     parser.add_argument('--save-image-dir', type=str, default='/content/images')
     parser.add_argument('--display-image', type=bool, default=True)
     parser.add_argument('--save-interval', type=int, default=2)
+    parser.add_argument('--debug-samples', type=int, default=0)
     parser.add_argument('--lr-g', type=float, default=0.001)
     parser.add_argument('--lr-d', type=float, default=0.002)
     parser.add_argument('--wadv', type=float, default=300.0, help='Adversarial loss weight')
@@ -102,7 +103,7 @@ def main():
     # Create DataLoader
     num_workers = cpu_count()
     data_loader = DataLoader(
-        AnimeDataSet(args.data_dir, args.dataset),
+        AnimeDataSet(args),
         batch_size=args.batch_size,
         num_workers=num_workers,
         shuffle=True,
@@ -163,8 +164,6 @@ def main():
         if e % args.save_interval == 0:
             save_checkpoint(G, optimizer_g, e, args)
             save_checkpoint(D, optimizer_d, e, args)
-
-        if e % args.plot_interval == 0:
             save_samples(G, data_loader, args)
 
 

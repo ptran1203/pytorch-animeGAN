@@ -7,7 +7,7 @@ import torch
 from torch.utils.data import Dataset
 
 class AnimeDataSet(Dataset):
-    def __init__(self, data_dir, dataset, transform=None):
+    def __init__(self, args, transform=None):
         """   
         folder structure:
             - {data_dir}
@@ -19,6 +19,9 @@ class AnimeDataSet(Dataset):
                     style
                         1.jpg, ..., n.jpg
         """
+        data_dir = args.data_dir
+        dataset = args.dataset
+
         anime_dir = os.path.join(data_dir, dataset)
         if not os.path.exists(data_dir):
             raise FileNotFoundError(f'Folder {data_dir} does not exist')
@@ -26,6 +29,7 @@ class AnimeDataSet(Dataset):
         if not os.path.exists(anime_dir):
             raise FileNotFoundError(f'Folder {anime_dir} does not exist')
 
+        self.debug_samples = args.debug_samples or 0
         self.data_dir = data_dir
         self.image_files =  {}
         self.photo = 'train_photo'
@@ -41,7 +45,7 @@ class AnimeDataSet(Dataset):
         self.transform = transform
 
     def __len__(self):
-        return len(self.image_files[self.photo])
+        return self.debug_samples or len(self.image_files[self.photo])
 
     @property
     def len_anime(self):
