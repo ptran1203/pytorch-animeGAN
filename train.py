@@ -167,7 +167,7 @@ def main():
             # Set bar desc
             loss_g = loss_g.detach().cpu().numpy()
             loss_d = loss_d.detach().cpu().numpy()
-            bar.set_description(f'loss G: {loss_g}, loss D: {loss_d}')
+            bar.set_description(f'loss G: {loss_g:2f}, loss D: {loss_d:2f}')
 
         if e % args.save_interval == 0:
             save_checkpoint(G, optimizer_g, e, args)
