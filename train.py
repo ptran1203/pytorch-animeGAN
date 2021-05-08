@@ -96,47 +96,28 @@ def main():
 
     # Create DataLoader
     num_workers = cpu_count()
-    photo_loader = DataLoader(
+    data_loader = DataLoader(
         AnimeDataSet(os.path.join(args.data_dir, 'train_photo')),
         batch_size=args.batch_size,
         num_workers=num_workers,
         shuffle=True,
         collate_fn=collate_fn,
     )
-    anime_loader = DataLoader(
-        AnimeDataSet(os.path.join(args.data_dir, args.dataset, 'style')),
-        batch_size=args.batch_size,
-        num_workers=num_workers,
-        shuffle=True,
-        collate_fn=collate_fn,
-    )
-    anime_smooth_loader = DataLoader(
-        AnimeDataSet(os.path.join(args.data_dir, args.dataset, 'smooth')),
-        batch_size=args.batch_size,
-        num_workers=num_workers,
-        shuffle=True,
-        collate_fn=collate_fn,
-    )
-
-    anime_loader = iter(anime_loader)
-    anime_smooth_loader = iter(anime_smooth_loader)
 
     optimizer_g = optim.Adam(G.parameters(), lr=args.lr_g)
     optimizer_d = optim.Adam(D.parameters(), lr=args.lr_d)
 
     for e in range(args.epochs):
         print(f"Epoch {e}/{args.epochs}")
-        bar = tqdm(photo_loader)
+        bar = tqdm(data_loader)
 
-        for img, _ in bar:
-            anime, anime_gray = anime_loader.next()
-            anime_smt, anime_gray_smt = anime_smooth_loader.next()
+        for img, anime, anime_gray, anime_smt_gray in bar:
 
             # To cuda
             img = img.cuda().float()
             anime_gray = anime_gray.cuda().float()
             anime_smt = anime_smt.cuda().float()
-            anime_gray_smt = anime_gray_smt.cuda().float()
+            anime_smt_gray = anime_smt_gray.cuda().float()
 
             # ---------------- TRAIN G ---------------- #
             optimizer_g.zero_grad()
@@ -144,11 +125,12 @@ def main():
             fake_img = G(img)
             fake_d = D(fake_img)
             fake_feat = vgg19(fake_img)
-            anime_feat = vgg19(anime_gray)
+            anime_feat = vgg19(anime_smt_gray)
             img_feat = vgg19(img)
 
             loss_g = loss_fn.compute_loss_G(
                 fake_img, img, fake_d, fake_feat, anime_feat, img_feat)
+
             loss_g.backward()
 
             optimizer_g.step()
@@ -157,9 +139,13 @@ def main():
             optimizer_d.zero_grad()
 
             fake_d = D(fake_img.detach())
-            real_d = D(img)
+            real_anime_d = D(anime)
+            real_anime_gray_d = D(anime_gray)
+            real_anime_smt_gray_d = D(anime_smt_gray)
 
-            loss_d = loss_fn.compute_loss_D(real_d, fake_d)
+            loss_d = loss_fn.compute_loss_D(
+                fake_d, real_anime_d, real_anime_gray_d, real_anime_smt_gray_d)
+
             loss_d.backward()
 
             optimizer_d.step()

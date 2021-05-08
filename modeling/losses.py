@@ -22,7 +22,7 @@ class LeastSquareLossG(nn.Module):
         self.c = c
 
     def forward(self, pred_g):
-        return 0.5 * torch.mean((pred_g - self.c) ** 2)
+        return torch.mean((pred_g - self.c) ** 2)
 
 
 class ContentLoss(nn.Module):
@@ -61,7 +61,6 @@ class ColorLoss(nn.Module):
 class AnimeGanLoss:
     def __init__(self, args):
         self.adv_loss_g = LeastSquareLossG()
-        self.adv_loss_d = LeastSquareLossD()
         self.content_loss = ContentLoss()
         self.gram_loss = GramLoss()
         self.color_loss = ColorLoss()
@@ -80,7 +79,7 @@ class AnimeGanLoss:
             - img: image
             - fake_d: output of Discriminator given fake image
             - gen_feat: feature of fake image via VGG19
-            - anime_feat: feature of anime image via VGG19
+            - anime_feat: feature of anime grayscale image via VGG19
             - img_feat: feature of photo via VGG19
 
         @Returns:
@@ -93,5 +92,10 @@ class AnimeGanLoss:
             self.wcol * self.color_loss(img, gen_img)
         )
 
-    def compute_loss_D(self, real_d, fake_d):
-        return self.wadv * self.adv_loss_d(real_d, fake_d)
+    def compute_loss_D(self, fake_img_d, real_anime_d, real_anime_gray_d, real_anime_smooth_gray_d):
+        return (
+            self.wadv * torch.mean((real_anime_d - 1) ** 2) +
+            torch.mean(fake_img_d ** 2) +
+            torch.mean(real_anime_gray_d ** 2) +
+            0.1 * torch.mean(real_anime_smooth_gray_d ** 2)
+        )
