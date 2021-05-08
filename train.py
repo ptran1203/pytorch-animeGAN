@@ -62,12 +62,13 @@ def check_params(args):
         os.makedirs(args.checkpoint_dir)
 
 
-def save_samples(generator, loader, args, max_imgs=3):
+def save_samples(generator, loader, args, max_imgs=5):
     '''
     Generate and save images after a number of epochs
     '''
-    max_iter = max_imgs // args.batch_size
+    max_iter = (max_imgs // args.batch_size) + 1
     fake_imgs = []
+    real_imgs = []
 
     for i, (img, *_) in enumerate(loader):
         fake_img = generator(img.cuda())
@@ -75,17 +76,20 @@ def save_samples(generator, loader, args, max_imgs=3):
         # Channel first -> channel last
         fake_img  = fake_img.transpose(0, 2, 3, 1)
         fake_imgs.append(fake_img)
+        real_imgs.append(img.permute(0, 2, 3 ,1).detach().cpu().numpy())
 
         if i + 1== max_iter:
             break
 
-    fake_imgs = np.stack(fake_imgs, axis=0)
+    fake_imgs = np.concatenate(fake_imgs, axis=0)
+    real_imgs = np.concatenate(real_imgs, axis=0)
+
     if args.display_image:
-        show_images(fake_imgs)
+        show_images(np.concatenate([real_imgs, fake_imgs]))
 
     for i, img in enumerate(fake_imgs):
         save_path = os.path.join(args.save_image_dir, f'gen_{i}.jpg')
-        cv2.imwrite(save_path, img * 255.0)
+        cv2.imwrite(save_path, img * 127.5 + 127.5)
 
 def main():
     args = parse_args()

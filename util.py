@@ -2,6 +2,8 @@ import torch
 import matplotlib.pyplot as plt
 import gc
 import os
+from time import gmtime, strftime
+
 
 _rgb_to_yuv_kernel = torch.tensor([
     [0.299, -0.14714119, 0.61497538],
@@ -54,19 +56,25 @@ def rgb_to_yuv_batch(images, channel_last=False):
     return yuv_img
 
 
-def show_images(images, rows=2):
+def show_images(images, rows=2, height=10, save=True):
     cols = len(images)
-    height = 4
     width = height * cols // 2
 
     fig = plt.figure(figsize=(height, width))
 
     for i in range(1, rows * cols + 1):
-        img = images[i]
+        if i > cols:
+            break
+
+        img = images[i - 1]
         fig.add_subplot(rows, cols, i)
         plt.imshow(img)
 
-    plt.show()
+    if save:
+        now = strftime("%Y-%m-%d_%H:%M:%S", gmtime())
+        plt.savefig(f'/content/{now}.png')
+    else:
+        plt.show()
 
 
 def save_checkpoint(model, optimizer, epoch, args):
@@ -91,10 +99,19 @@ def load_checkpoint(model, args):
     return epoch
 
 
-class DictToObject(object):
-    def __init__(self, d):
-        for a, b in d.items():
-            if isinstance(b, (list, tuple)):
-               setattr(self, a, [obj(x) if isinstance(x, dict) else x for x in b])
-            else:
-               setattr(self, a, obj(b) if isinstance(b, dict) else b)
+class DefaultArgs():
+    dataset ='Hayao'
+    data_dir ='/content'
+    epochs =10
+    batch_size =16
+    checkpoint_dir ='/content/checkpoints'
+    save_image_dir ='/content/images'
+    display_image =True
+    save_interval =2
+    debug_samples =0
+    lr_g =0.001
+    lr_d =0.002
+    wadv =300.0
+    wcon =1.5
+    wgra =3
+    wcol =10

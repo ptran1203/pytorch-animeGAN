@@ -89,7 +89,7 @@ class AnimeDataSet(Dataset):
             img =  self.transform(image=img)['image']
 
         img = img.astype(np.float32)
-        img = img / 255.0
+        img = (img - 127.5) / 127.5
         return img
 
 if __name__ == '__main__':
