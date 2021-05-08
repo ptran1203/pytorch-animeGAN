@@ -72,12 +72,13 @@ def save_samples(generator, loader, args, max_imgs=3):
         if i + 1== max_iter:
             break
 
+    fake_imgs = np.stack(fake_imgs, axis=0)
     if args.display_image:
         show_images(fake_imgs)
 
     for i, img in enumerate(fake_imgs):
         save_path = os.path.join(args.save_image_dir, f'gen_{i}.jpg')
-        cv2.imwrite(save_path, img)
+        cv2.imwrite(save_path, img * 255.0)
     
 
 def main():
@@ -125,8 +126,9 @@ def main():
 
     for e in range(args.epochs):
         print(f"Epoch {e}/{args.epochs}")
+        bar = tqdm(photo_loader)
 
-        for img, _ in tqdm(photo_loader):
+        for img, _ in bar:
             anime, anime_gray = anime_loader.next()
             anime_smt, anime_gray_smt = anime_smooth_loader.next()
 
@@ -161,6 +163,11 @@ def main():
             loss_d.backward()
 
             optimizer_d.step()
+
+            # Set bar desc
+            loss_g = loss_g.detach().cpu().numpy()
+            loss_d = loss_d.detach().cpu().numpy()
+            bar.set_description(f'loss G: {loss_g}, loss D: {loss_d}')
 
         if e % args.save_interval == 0:
             save_checkpoint(G, optimizer_g, e, args)
