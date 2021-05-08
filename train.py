@@ -62,7 +62,7 @@ def check_params(args):
         os.makedirs(args.checkpoint_dir)
 
 
-def save_samples(generator, loader, args, max_imgs=5):
+def save_samples(generator, loader, args, max_imgs=2):
     '''
     Generate and save images after a number of epochs
     '''
