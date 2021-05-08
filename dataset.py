@@ -62,8 +62,8 @@ class AnimeDataSet(Dataset):
 
 
     def load_images(self, index, opt):
-        fname = self.image_files[opt][index]
-        image = cv2.imread(os.path.join(self.img_dir, fname))[:,:,::-1]
+        fpath = self.image_files[opt][index]
+        image = cv2.imread(fpath)[:,:,::-1]
 
         if opt in {self.style, self.smooth}:
             image_gray = cv2.cvtColor(image.copy(), cv2.COLOR_BGR2GRAY)
