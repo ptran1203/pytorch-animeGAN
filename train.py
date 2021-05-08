@@ -2,6 +2,7 @@ import torch
 import argparse
 import os
 import cv2
+import numpy as np
 import torch.optim as optim
 from multiprocessing import cpu_count
 from torch.utils.data import DataLoader
