@@ -37,8 +37,13 @@ def parse_args():
 
 
 def collate_fn(batch):
-    img, img_gray = zip(*batch)
-    return torch.stack(img, 0), torch.stack(img_gray, 0)
+    img, anime, anime_gray, anime_smt_gray = zip(*batch)
+    return (
+        torch.stack(img, 0),
+        torch.stack(anime, 0),
+        torch.stack(anime_gray, 0),
+        torch.stack(anime_smt_gray, 0),
+    )
 
 
 def check_params(args):
@@ -62,7 +67,7 @@ def save_samples(generator, loader, args, max_imgs=3):
     max_iter = max_imgs // args.batch_size
     fake_imgs = []
 
-    for i, (img, _) in enumerate(loader):
+    for i, (img, *_) in enumerate(loader):
         fake_img = generator(img)
         fake_img = fake_img.detach().cpu().numpy()
         # Channel first -> channel last
