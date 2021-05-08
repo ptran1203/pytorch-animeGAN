@@ -120,8 +120,8 @@ def main():
 
             # To cuda
             img = img.cuda().float()
+            anime = anime.cuda().float()
             anime_gray = anime_gray.cuda().float()
-            anime_smt = anime_smt.cuda().float()
             anime_smt_gray = anime_smt_gray.cuda().float()
 
             # ---------------- TRAIN G ---------------- #
@@ -165,7 +165,7 @@ def main():
             save_checkpoint(D, optimizer_d, e, args)
 
         if e % args.plot_interval == 0:
-            save_samples(G, photo_loader, args)
+            save_samples(G, data_loader, args)
 
 
 if __name__ == '__main__':
