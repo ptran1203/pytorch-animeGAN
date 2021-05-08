@@ -69,7 +69,7 @@ def save_samples(generator, loader, args, max_imgs=3):
     fake_imgs = []
 
     for i, (img, *_) in enumerate(loader):
-        fake_img = generator(img)
+        fake_img = generator(img.cuda())
         fake_img = fake_img.detach().cpu().numpy()
         # Channel first -> channel last
         fake_img  = fake_img.transpose(0, 2, 3, 1)
@@ -85,7 +85,6 @@ def save_samples(generator, loader, args, max_imgs=3):
     for i, img in enumerate(fake_imgs):
         save_path = os.path.join(args.save_image_dir, f'gen_{i}.jpg')
         cv2.imwrite(save_path, img * 255.0)
-    
 
 def main():
     args = parse_args()
