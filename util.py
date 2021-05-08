@@ -55,14 +55,15 @@ def rgb_to_yuv_batch(images, channel_last=False):
 
 
 def show_images(images, rows=2):
-    columns = len(images)
+    cols = len(images)
     height = 4
-    width = height * columns // 2
+    width = height * cols // 2
 
     fig = plt.figure(figsize=(height, width))
 
-    for i, img in enumerate(images):
-        fig.add_subplot(rows, columns, i)
+    for i in range(1, rows * cols + 1):
+        img = images[i]
+        fig.add_subplot(rows, cols, i)
         plt.imshow(img)
 
     plt.show()
