@@ -68,9 +68,8 @@ class AnimeDataSet(Dataset):
 
     def cache_images(self):
         for opt in [self.photo, self.style, self.smooth]:
-            for idx in self.image_files[opt]:
-                fpath = self.image_files[opt][idx]
-                image = cv2.imread(fpath)[:,:,::-1]
+            for i, path in enumerate(self.image_files[opt]):
+                image = cv2.imread(path)[:,:,::-1]
                 self.cache[opt].append(image)
 
     def load_images(self, index, opt):
