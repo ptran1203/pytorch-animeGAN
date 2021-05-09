@@ -67,10 +67,13 @@ class AnimeDataSet(Dataset):
         return image, anime, anime_gray, smooth_gray
 
     def cache_images(self):
+        print('Caching images ...')
         for opt in [self.photo, self.style, self.smooth]:
             for i, path in enumerate(self.image_files[opt]):
                 image = cv2.imread(path)[:,:,::-1]
                 self.cache[opt].append(image)
+
+            print(f'{opt} - {len(self.cache[opt])} images')
 
     def load_images(self, index, opt):
         is_style = opt in {self.style, self.smooth}
@@ -85,7 +88,6 @@ class AnimeDataSet(Dataset):
             image = cv2.imread(fpath)[:,:,::-1]
 
         if is_style:
-            self.cache[opt].append(image)
             image_gray = cv2.cvtColor(image.copy(), cv2.COLOR_BGR2GRAY)
             image_gray = np.stack([image_gray, image_gray, image_gray], axis=-1)
             image_gray = self._transform(image_gray)
