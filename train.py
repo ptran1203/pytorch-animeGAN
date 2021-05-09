@@ -25,7 +25,7 @@ def parse_args():
     parser.add_argument('--batch-size', type=int, default=16)
     parser.add_argument('--checkpoint-dir', type=str, default='/content/checkpoints')
     parser.add_argument('--save-image-dir', type=str, default='/content/images')
-    parser.add_argument('--continu', type=bool, default=False)
+    parser.add_argument('--continu', action='store_true')
     parser.add_argument('--display-image', type=bool, default=True)
     parser.add_argument('--save-interval', type=int, default=2)
     parser.add_argument('--debug-samples', type=int, default=0)
