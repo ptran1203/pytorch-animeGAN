@@ -26,7 +26,7 @@ class UpConv(nn.Module):
         super(UpConv, self).__init__()
 
         self.dsconv = DsConv(channels, channels, kernel_size=3, stride=1)
-        self.upsample = nn.Upsample(scale_factor=2, mode='nearest')
+        self.upsample = nn.Upsample(scale_factor=2.0, mode='nearest')
 
     def forward(self, x):
         out = self.upsample(x)

@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 from modeling.anime_gan import Generator
 from modeling.anime_gan import Discriminator
 from modeling.losses import AnimeGanLoss
+from modeling.losses import ContentLoss
 from modeling.vgg import Vgg19
 from dataset import AnimeDataSet
 from util import show_images
@@ -22,6 +23,7 @@ def parse_args():
     parser.add_argument('--dataset', type=str, default='Hayao')
     parser.add_argument('--data-dir', type=str, default='/content')
     parser.add_argument('--epochs', type=int, default=100)
+    parser.add_argument('--init-epochs', type=int, default=1)
     parser.add_argument('--batch-size', type=int, default=16)
     parser.add_argument('--checkpoint-dir', type=str, default='/content/checkpoints')
     parser.add_argument('--save-image-dir', type=str, default='/content/images')
@@ -137,6 +139,23 @@ def main():
     for e in range(start_e, args.epochs):
         print(f"Epoch {e}/{args.epochs}")
         bar = tqdm(data_loader)
+
+        if e < args.init_epochs:
+            # Train with content loss only
+            for img, *_ in bar:
+                img = img.cuda()
+                
+                optimizer_g.zero_grad()
+
+                fake_img = G(img)
+                fake_feat = vgg19(fake_img)
+                img_feat = vgg19(img)
+
+                loss_g = ContentLoss()(img_feat, fake_feat)
+                loss_g.backward()
+                optimizer_g.step()
+
+            continue
 
         for img, anime, anime_gray, anime_smt_gray in bar:
 
