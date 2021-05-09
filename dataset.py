@@ -35,6 +35,7 @@ class AnimeDataSet(Dataset):
         self.photo = 'train_photo'
         self.style = f'{anime_dir}/style'
         self.smooth =  f'{anime_dir}/smooth'
+        self.cache = {self.style: [], self.smooth: []}
 
         for opt in [self.photo, self.style, self.smooth]:
             folder = os.path.join(data_dir, opt)
@@ -64,12 +65,21 @@ class AnimeDataSet(Dataset):
 
         return image, anime, anime_gray, smooth_gray
 
-
     def load_images(self, index, opt):
-        fpath = self.image_files[opt][index]
-        image = cv2.imread(fpath)[:,:,::-1]
+        is_style = opt in {self.style, self.smooth}
 
-        if opt in {self.style, self.smooth}:
+        image = None
+        if is_style:
+            # Try to get cache_image
+            if len(self.cache[opt]) > index:
+                image = self.cache[opt][index]
+
+        if image is None:
+            fpath = self.image_files[opt][index]
+            image = cv2.imread(fpath)[:,:,::-1]
+
+        if is_style:
+            self.cache[opt].append(image)
             image_gray = cv2.cvtColor(image.copy(), cv2.COLOR_BGR2GRAY)
             image_gray = np.stack([image_gray, image_gray, image_gray], axis=-1)
             image_gray = self._transform(image_gray)
@@ -83,6 +93,7 @@ class AnimeDataSet(Dataset):
         image = image.transpose(2, 0, 1)
 
         return torch.tensor(image), image_gray
+
 
     def _transform(self, img):
         if self.transform is not None:
