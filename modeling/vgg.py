@@ -6,6 +6,8 @@ class Vgg19(nn.Module):
     def __init__(self):
         super(Vgg19, self).__init__()
         self.vgg19 = self.get_vgg19()
+        self.mean = vgg_mean.view(-1, 1 ,1)
+        self.std = vgg_std.view(-1, 1, 1)
 
     def forward(self, x):
         return self.vgg19(self.normalize_vgg(x))
@@ -38,11 +40,9 @@ class Vgg19(nn.Module):
         model = nn.Sequential(*model_list)
         return model
 
-
-    @staticmethod
-    def normalize_vgg(image):
+    def normalize_vgg(self, image):
         '''
         Expect input in range -1 1
         '''
         image = (image + 1.0) / 2.0
-        return (image - vgg_mean) / vgg_std
+        return (image - self.mean) / self.std
