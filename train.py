@@ -155,6 +155,8 @@ def main():
                 loss_g.backward()
                 optimizer_g.step()
 
+                bar.set_description(f'[Init Training G] content loss: {loss_g:2f}')
+
             continue
 
         for img, anime, anime_gray, anime_smt_gray in bar:
