@@ -33,6 +33,7 @@ def parse_args():
     parser.add_argument('--debug-samples', type=int, default=0)
     parser.add_argument('--lr-g', type=float, default=0.001)
     parser.add_argument('--lr-d', type=float, default=0.002)
+    parser.add_argument('--init-lr', type=float, default=0.0001)
     parser.add_argument('--wadv', type=float, default=300.0, help='Adversarial loss weight')
     parser.add_argument('--wcon', type=float, default=1.5, help='Content loss weight')
     parser.add_argument('--wgra', type=float, default=3, help='Gram loss weight')
@@ -101,6 +102,11 @@ def save_samples(generator, loader, args, max_imgs=2):
         cv2.imwrite(save_path, img)
 
 
+def set_lr(optimizer, lr):
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = lr
+
+
 def main():
     args = parse_args()
 
@@ -143,6 +149,7 @@ def main():
 
         if e < args.init_epochs:
             # Train with content loss only
+            set_lr(optimizer_g, args.init_lr)
             for img, *_ in bar:
                 img = img.cuda()
                 
@@ -158,6 +165,7 @@ def main():
 
                 bar.set_description(f'[Init Training G] content loss: {loss_g:2f}')
 
+            set_lr(optimizer_g, args.lr_g)
             continue
 
         for img, anime, anime_gray, anime_smt_gray in bar:
