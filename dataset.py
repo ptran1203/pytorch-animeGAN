@@ -37,8 +37,6 @@ class AnimeDataSet(Dataset):
         self.smooth =  f'{anime_dir}/smooth'
         self.cache = {self.style: [], self.smooth: [], self.photo: []}
 
-        self.cache_images()
-
         for opt in [self.photo, self.style, self.smooth]:
             folder = os.path.join(data_dir, opt)
             files = os.listdir(folder)
@@ -46,6 +44,7 @@ class AnimeDataSet(Dataset):
             self.image_files[opt] = [os.path.join(folder, fi) for fi in files]
 
         self.transform = transform
+        self.cache_images()
 
     def __len__(self):
         return self.debug_samples or len(self.image_files[self.photo])
