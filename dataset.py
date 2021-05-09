@@ -35,7 +35,9 @@ class AnimeDataSet(Dataset):
         self.photo = 'train_photo'
         self.style = f'{anime_dir}/style'
         self.smooth =  f'{anime_dir}/smooth'
-        self.cache = {self.style: [], self.smooth: []}
+        self.cache = {self.style: [], self.smooth: [], self.photo: []}
+
+        self.cache_images()
 
         for opt in [self.photo, self.style, self.smooth]:
             folder = os.path.join(data_dir, opt)
@@ -65,14 +67,20 @@ class AnimeDataSet(Dataset):
 
         return image, anime, anime_gray, smooth_gray
 
+    def cache_images(self):
+        for opt in [self.photo, self.style, self.smooth]:
+            for idx in self.image_files[opt]:
+                fpath = self.image_files[opt][idx]
+                image = cv2.imread(fpath)[:,:,::-1]
+                self.cache[opt].append(image)
+
     def load_images(self, index, opt):
         is_style = opt in {self.style, self.smooth}
 
         image = None
-        if is_style:
-            # Try to get cache_image
-            if len(self.cache[opt]) > index:
-                image = self.cache[opt][index]
+        # Try to get cache_image
+        if opt in self.cache and len(self.cache[opt]) > index:
+            image = self.cache[opt][index]
 
         if image is None:
             fpath = self.image_files[opt][index]
