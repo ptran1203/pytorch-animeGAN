@@ -44,7 +44,7 @@ def rgb_to_yuv_batch(images, channel_last=False):
     '''
     Extend of rgb_to_yuv to run on batch
     '''
-
+    images = (images + 1.0)  / 2.0
     if channel_last:
         images = images.permute(0, 3, 1, 2).type(torch.float32)
 
