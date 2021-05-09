@@ -100,6 +100,10 @@ class AnimeDataSet(Dataset):
             img =  self.transform(image=img)['image']
 
         img = img.astype(np.float32)
+        img[:,:, 0] += -4.4661
+        img[:,:, 1] += -8.6698
+        img[:,:, 2] += 13.1360
+    
         img = (img - 127.5) / 127.5
         return img
 
