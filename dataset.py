@@ -44,7 +44,7 @@ class AnimeDataSet(Dataset):
             self.image_files[opt] = [os.path.join(folder, fi) for fi in files]
 
         self.transform = transform
-        self.cache_images()
+        # self.cache_images()
 
     def __len__(self):
         return self.debug_samples or len(self.image_files[self.photo])
@@ -80,12 +80,12 @@ class AnimeDataSet(Dataset):
 
         image = None
         # Try to get cache_image
-        if opt in self.cache and len(self.cache[opt]) > index:
-            image = self.cache[opt][index]
+        # if opt in self.cache and len(self.cache[opt]) > index:
+        #     image = self.cache[opt][index]
 
-        if image is None:
-            fpath = self.image_files[opt][index]
-            image = cv2.imread(fpath)[:,:,::-1]
+        # if image is None:
+        fpath = self.image_files[opt][index]
+        image = cv2.imread(fpath)[:,:,::-1]
 
         if is_style:
             image_gray = cv2.cvtColor(image.copy(), cv2.COLOR_BGR2GRAY)
