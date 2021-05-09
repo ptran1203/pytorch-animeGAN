@@ -9,8 +9,15 @@ _rgb_to_yuv_kernel = torch.tensor([
     [0.299, -0.14714119, 0.61497538],
     [0.587, -0.28886916, -0.51496512],
     [0.114, 0.43601035, -0.10001026]
-]).cuda().float()
+]).float()
 
+vgg_mean = torch.tensor([0.485, 0.456, 0.406]).float()
+vgg_std = torch.tensor([0.229, 0.224, 0.225]).float()
+
+if torch.cuda.is_available():
+    _rgb_to_yuv_kernel = _rgb_to_yuv_kernel.cuda()
+    vgg_std = vgg_std.cuda()
+    vgg_mean = vgg_mean.cuda()
 
 def gram(input):
     b, c, w, h = input.size()
@@ -22,11 +29,12 @@ def gram(input):
     # normalize by total elements
     return G.div(b * c * w * h)
 
-
 def rgb_to_yuv(image, channel_last=False):
     '''
     https://en.wikipedia.org/wiki/YUV
     '''
+    # -1 1 -> 0 1
+    image = (image + 1.0) / 2.0
 
     # Conver to channel first
     if channel_last:

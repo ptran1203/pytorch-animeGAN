@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 from modeling.anime_gan import Generator
 from modeling.anime_gan import Discriminator
 from modeling.losses import AnimeGanLoss
-from modeling.vgg import get_vgg19
+from modeling.vgg import Vgg19
 from dataset import AnimeDataSet
 from util import show_images
 from util import save_checkpoint
@@ -108,7 +108,7 @@ def main():
 
     G = Generator().cuda()
     D = Discriminator().cuda()
-    vgg19 = get_vgg19().cuda()
+    vgg19 = Vgg19().cuda()
     
     loss_fn = AnimeGanLoss(args)
 
