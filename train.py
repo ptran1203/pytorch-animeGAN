@@ -120,6 +120,7 @@ def main():
         AnimeDataSet(args),
         batch_size=args.batch_size,
         num_workers=num_workers,
+        pin_memory=True,
         shuffle=True,
         collate_fn=collate_fn,
     )
