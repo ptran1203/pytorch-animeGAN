@@ -79,10 +79,10 @@ class InvertedResBlock(nn.Module):
         super(InvertedResBlock, self).__init__()
 
         K = 1
-        self.conv_block = ConvBlock(channels, 512, kernel_size=1, stride=1, padding=0)
-        self.depthwise_conv = nn.Conv2d(512, K * 512,
+        self.conv_block = ConvBlock(channels, channels, kernel_size=1, stride=1, padding=0)
+        self.depthwise_conv = nn.Conv2d(channels, K * channels,
             kernel_size=3, groups=channels, stride=1, padding=1)
-        self.conv = nn.Conv2d(512, out_channels,
+        self.conv = nn.Conv2d(channels, out_channels,
             kernel_size=1, stride=1)
 
         self.ins_norm1 = nn.InstanceNorm2d(out_channels)
