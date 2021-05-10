@@ -90,29 +90,30 @@ class AnimeDataSet(Dataset):
         if is_style:
             image_gray = cv2.cvtColor(image.copy(), cv2.COLOR_BGR2GRAY)
             image_gray = np.stack([image_gray, image_gray, image_gray], axis=-1)
-            image_gray = self._transform(image_gray)
+            image_gray = self._transform(image_gray, addmean=False)
             image_gray = image_gray.transpose(2, 0, 1)
             image_gray = torch.tensor(image_gray)
         else:
             h, w, c = image.shape
             image_gray = torch.tensor(np.zeros((c, h, w)))
 
-        image = self._transform(image)
+        image = self._transform(image, addmean=is_style)
         image = image.transpose(2, 0, 1)
 
         return torch.tensor(image), image_gray
 
 
-    def _transform(self, img):
+    def _transform(self, img, addmean=True):
         if self.transform is not None:
             img =  self.transform(image=img)['image']
 
         img = img.astype(np.float32)
-        img[:,:, 0] += -4.4661
-        img[:,:, 1] += -8.6698
-        img[:,:, 2] += 13.1360
+        if addmean:
+            img[:,:, 0] += -4.4661
+            img[:,:, 1] += -8.6698
+            img[:,:, 2] += 13.1360
     
-        img = (img - 127.5) / 127.5
+        img = img / 127.5 - 1.0
         return img
 
 if __name__ == '__main__':
