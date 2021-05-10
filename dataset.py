@@ -59,10 +59,10 @@ class AnimeDataSet(Dataset):
 
     def __getitem__(self, index):
         index_anm = np.random.randint(0, self.len_anime - 1)
-        index_smt = np.random.randint(0, self.len_smooth - 1)
         image, _ = self.load_images(index, self.photo)
+
         anime, anime_gray = self.load_images(index_anm, self.style)
-        _, smooth_gray = self.load_images(index_smt, self.smooth)
+        _, smooth_gray = self.load_images(index_anm, self.smooth)
 
         return image, anime, anime_gray, smooth_gray
 
