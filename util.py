@@ -19,6 +19,7 @@ if torch.cuda.is_available():
     vgg_std = vgg_std.cuda()
     vgg_mean = vgg_mean.cuda()
 
+
 def gram(input):
     b, c, w, h = input.size()
 
@@ -28,6 +29,7 @@ def gram(input):
 
     # normalize by total elements
     return G.div(b * c * w * h)
+
 
 def rgb_to_yuv(image, channel_last=False):
     '''

@@ -5,7 +5,7 @@ from util import vgg_mean, vgg_std
 class Vgg19(nn.Module):
     def __init__(self):
         super(Vgg19, self).__init__()
-        self.vgg19 = self.get_vgg19()
+        self.vgg19 = self.get_vgg19().eval()
         self.mean = vgg_mean.view(-1, 1 ,1)
         self.std = vgg_std.view(-1, 1, 1)
 
@@ -39,6 +39,7 @@ class Vgg19(nn.Module):
 
         model = nn.Sequential(*model_list)
         return model
+
 
     def normalize_vgg(self, image):
         '''

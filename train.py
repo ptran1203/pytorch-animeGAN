@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument('--data-dir', type=str, default='/content')
     parser.add_argument('--epochs', type=int, default=100)
     parser.add_argument('--init-epochs', type=int, default=1)
-    parser.add_argument('--batch-size', type=int, default=16)
+    parser.add_argument('--batch-size', type=int, default=4)
     parser.add_argument('--checkpoint-dir', type=str, default='/content/checkpoints')
     parser.add_argument('--save-image-dir', type=str, default='/content/images')
     parser.add_argument('--continu', action='store_true')
@@ -33,7 +33,7 @@ def parse_args():
     parser.add_argument('--debug-samples', type=int, default=0)
     parser.add_argument('--lr-g', type=float, default=0.001)
     parser.add_argument('--lr-d', type=float, default=0.002)
-    parser.add_argument('--init-lr', type=float, default=0.0001)
+    parser.add_argument('--init-lr', type=float, default=2e-4)
     parser.add_argument('--wadv', type=float, default=300.0, help='Adversarial loss weight')
     parser.add_argument('--wcon', type=float, default=1.5, help='Content loss weight')
     parser.add_argument('--wgra', type=float, default=3, help='Gram loss weight')
@@ -95,7 +95,7 @@ def save_samples(generator, loader, args, max_imgs=2):
     real_imgs = np.concatenate(real_imgs, axis=0)
 
     if args.display_image:
-        show_images(np.concatenate([real_imgs, fake_imgs]), save=False)
+        show_images(np.concatenate([real_imgs, fake_imgs]), save=True)
 
     for i, img in enumerate(fake_imgs):
         save_path = os.path.join(args.save_image_dir, f'gen_{i}.jpg')
