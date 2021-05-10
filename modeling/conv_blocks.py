@@ -17,7 +17,7 @@ class DownConv(nn.Module):
         out2 = F.interpolate(x, scale_factor=0.5, mode='bilinear')
         out2 = self.dsconv2(out2)
 
-        return out2 + out1
+        return out1 + out2
 
 
 class UpConv(nn.Module):
