@@ -72,6 +72,7 @@ def save_samples(generator, loader, args, max_imgs=2):
     '''
     Generate and save images after a number of epochs
     '''
+    generator.eval()
     def toint(img):
         img = img * 127.5 + 127.5
         img = img.astype(np.int16)
@@ -155,6 +156,7 @@ def main():
     for e in range(start_e, args.epochs):
         print(f"Epoch {e}/{args.epochs}")
         bar = tqdm(data_loader)
+        G.train()
 
         if e < args.init_epochs:
             # Train with content loss only
