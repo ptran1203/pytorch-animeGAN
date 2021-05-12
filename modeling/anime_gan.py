@@ -14,6 +14,7 @@ from modeling.conv_blocks import ConvBlock
 def initialize_weights(net):
     total = 0
     init = 0
+    return
     for m in net.modules():
         total += 1
         try:
