@@ -76,6 +76,6 @@ class AnimeGanLoss:
         return self.wadvd * (
             1.7 * torch.mean((real_anime_d - 1) ** 2) +
             1.7 * torch.mean(fake_img_d ** 2) +
-            1.7 * torch.mean(real_anime_gray_d ** 2) +
-            0.8 * torch.mean(real_anime_smooth_gray_d ** 2)
+            # 1.7 * torch.mean(real_anime_gray_d ** 2) +
+            # 0.8 * torch.mean(real_anime_smooth_gray_d ** 2)
         )
