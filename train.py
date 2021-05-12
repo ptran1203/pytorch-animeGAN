@@ -8,6 +8,7 @@ from multiprocessing import cpu_count
 from torch.utils.data import DataLoader
 from modeling.anime_gan import Generator
 from modeling.anime_gan import Discriminator
+from modeling.anime_gan import initialize_weights
 from modeling.losses import AnimeGanLoss
 from modeling.losses import ContentLoss
 from modeling.vgg import Vgg19
@@ -107,16 +108,6 @@ def set_lr(optimizer, lr):
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
-
-def weights_init_normal(m):
-    classname = m.__class__.__name__
-    if classname.find("Conv") != -1:
-        torch.nn.init.normal_(m.weight.data, 0.0, 0.02)
-    elif classname.find("InstanceNorm2d") != -1:
-        torch.nn.init.normal_(m.weight.data, 1.0, 0.02)
-        torch.nn.init.constant_(m.bias.data, 0.0)
-
-
 def main():
     args = parse_args()
 
@@ -126,6 +117,9 @@ def main():
 
     G = Generator().cuda()
     D = Discriminator().cuda()
+
+    initialize_weights(G)
+    initialize_weights(D)
 
     # Init weight
     # G.apply(weights_init_normal)
@@ -191,26 +185,9 @@ def main():
             anime_gray = anime_gray.cuda()
             anime_smt_gray = anime_smt_gray.cuda()
 
-            # ---------------- TRAIN G ---------------- #
-            optimizer_g.zero_grad()
-
-            fake_img = G(img)
-            fake_d = D(fake_img)
-            fake_feat = vgg19(fake_img)
-            anime_feat = vgg19(anime_smt_gray)
-            img_feat = vgg19(img)
-
-            loss_g = loss_fn.compute_loss_G(
-                fake_img, img, fake_d, fake_feat, anime_feat, img_feat)
-
-            loss_g.backward()
-
-            optimizer_g.step()
-
             # ---------------- TRAIN D ---------------- #
             optimizer_d.zero_grad()
 
-            
             with torch.no_grad():
                 fake_image_for_d = G(img)
 
@@ -226,6 +203,22 @@ def main():
             loss_d.backward()
 
             optimizer_d.step()
+
+            # ---------------- TRAIN G ---------------- #
+            optimizer_g.zero_grad()
+
+            fake_img = G(img)
+            fake_d = D(fake_img)
+            fake_feat = vgg19(fake_img)
+            anime_feat = vgg19(anime_smt_gray)
+            img_feat = vgg19(img)
+
+            loss_g = loss_fn.compute_loss_G(
+                fake_img, img, fake_d, fake_feat, anime_feat, img_feat)
+
+            loss_g.backward()
+
+            optimizer_g.step()
 
             # Set bar desc
             loss_g = loss_g.detach().cpu().numpy()

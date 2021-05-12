@@ -24,9 +24,9 @@ yuv_img = (yuv_img.numpy() + 1) / 2
 img = np.expand_dims(img, 0)
 print(yuv_img.shape)
 
-ax[0].imshow((np_img + 1) / 2)
-ax[1].imshow(yuv_img)
-plt.show()
+# ax[0].imshow((np_img + 1) / 2)
+# ax[1].imshow(yuv_img)
+# plt.show()
 
 
 # img = img.transpose((0, 3, 1 ,2))

@@ -11,6 +11,22 @@ from modeling.conv_blocks import InvertedResBlock
 from modeling.conv_blocks import ConvBlock
 
 
+def initialize_weights(net):
+    for m in net.modules():
+        if isinstance(m, nn.Conv2d):
+            m.weight.data.normal_(0, 0.02)
+            m.bias.data.zero_()
+        elif isinstance(m, nn.ConvTranspose2d):
+            m.weight.data.normal_(0, 0.02)
+            m.bias.data.zero_()
+        elif isinstance(m, nn.Linear):
+            m.weight.data.normal_(0, 0.02)
+            m.bias.data.zero_()
+        elif isinstance(m, nn.BatchNorm2d):
+            m.weight.data.fill_(1)
+            m.bias.data.zero_()
+
+
 class Generator(nn.Module):
     def __init__(self):
         super(Generator, self).__init__()
@@ -62,13 +78,14 @@ class Discriminator(nn.Module):
         self.name = 'discriminator'
         self.discriminate = nn.Sequential(
             nn.Conv2d(3, 32, kernel_size=3, stride=1, bias=False),
-            nn.LeakyReLU(0.2),
+            nn.LeakyReLU(0.2, True),
             *self.conv_blocks(32, level=1),
             *self.conv_blocks(128, level=2),
             nn.Conv2d(256, 256, kernel_size=3, stride=1),
             nn.InstanceNorm2d(256),
-            nn.LeakyReLU(0.2),
+            nn.LeakyReLU(0.2, True),
             nn.Conv2d(256, 1, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Sigmoid(),
         )
 
 
@@ -78,10 +95,10 @@ class Discriminator(nn.Module):
         outs =  level * 128
         return [
             nn.Conv2d(in_channels, ins, kernel_size=3, stride=2, bias=False),
-            nn.LeakyReLU(0.2),
+            nn.LeakyReLU(0.2, True),
             nn.Conv2d(ins, outs, kernel_size=3, stride=1, bias=False),
             nn.InstanceNorm2d(outs),
-            nn.LeakyReLU(0.2),
+            nn.LeakyReLU(0.2, True),
         ]
 
     def forward(self, img):

@@ -45,7 +45,7 @@ class DsConv(nn.Module):
             kernel_size=kernel_size, groups=channels, stride=1, padding=1)
 
         self.ins_norm = nn.InstanceNorm2d(channels)
-        self.activation = nn.LeakyReLU()
+        self.activation = nn.LeakyReLU(0.2, True)
         self.conv_block = ConvBlock(channels, out_channels, kernel_size=3, stride=stride)
 
     def forward(self, x):
@@ -64,7 +64,7 @@ class ConvBlock(nn.Module):
         self.conv = nn.Conv2d(channels, out_channels,
             kernel_size=kernel_size, stride=stride, padding=padding)
         self.ins_norm = nn.InstanceNorm2d(out_channels)
-        self.activation = nn.LeakyReLU()
+        self.activation = nn.LeakyReLU(0.2, True)
 
     def forward(self, x):
         out = self.conv(x)
@@ -87,7 +87,7 @@ class InvertedResBlock(nn.Module):
 
         self.ins_norm1 = nn.InstanceNorm2d(out_channels)
         self.ins_norm2 = nn.InstanceNorm2d(out_channels)
-        self.activation = nn.LeakyReLU()
+        self.activation = nn.LeakyReLU(0.2, True)
 
     def forward(self, x):
         out = self.conv_block(x)
