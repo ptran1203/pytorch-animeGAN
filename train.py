@@ -128,8 +128,8 @@ def main():
     D = Discriminator().cuda()
 
     # Init weight
-    G.apply(weights_init_normal)
-    D.apply(weights_init_normal)
+    # G.apply(weights_init_normal)
+    # D.apply(weights_init_normal)
 
     vgg19 = Vgg19().cuda().eval()
     
