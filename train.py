@@ -108,6 +108,15 @@ def set_lr(optimizer, lr):
         param_group['lr'] = lr
 
 
+def weights_init_normal(m):
+    classname = m.__class__.__name__
+    if classname.find("Conv") != -1:
+        torch.nn.init.normal_(m.weight.data, 0.0, 0.02)
+    elif classname.find("InstanceNorm2d") != -1:
+        torch.nn.init.normal_(m.weight.data, 1.0, 0.02)
+        torch.nn.init.constant_(m.bias.data, 0.0)
+
+
 def main():
     args = parse_args()
 
@@ -117,6 +126,11 @@ def main():
 
     G = Generator().cuda()
     D = Discriminator().cuda()
+
+    # Init weight
+    G.apply(weights_init_normal)
+    D.apply(weights_init_normal)
+
     vgg19 = Vgg19().cuda().eval()
     
     loss_fn = AnimeGanLoss(args)
