@@ -95,7 +95,7 @@ class Discriminator(nn.Module):
             nn.InstanceNorm2d(256),
             nn.LeakyReLU(0.2, True),
             nn.Conv2d(256, 1, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.Sigmoid(),
+            # nn.Sigmoid(),
         )
 
 
