@@ -117,7 +117,7 @@ def main():
 
     G = Generator().cuda()
     D = Discriminator().cuda()
-    vgg19 = Vgg19().cuda()
+    vgg19 = Vgg19().cuda().eval()
     
     loss_fn = AnimeGanLoss(args)
 
@@ -132,8 +132,8 @@ def main():
         collate_fn=collate_fn,
     )
 
-    optimizer_g = optim.Adam(G.parameters(), lr=args.lr_g)
-    optimizer_d = optim.Adam(D.parameters(), lr=args.lr_d)
+    optimizer_g = optim.Adam(G.parameters(), lr=args.lr_g, betas=(0.5, 0.999))
+    optimizer_d = optim.Adam(D.parameters(), lr=args.lr_d, betas=(0.5, 0.999))
 
     start_e = 0
     if args.continu:
@@ -196,7 +196,12 @@ def main():
             # ---------------- TRAIN D ---------------- #
             optimizer_d.zero_grad()
 
-            fake_d = D(fake_img.detach())
+            
+            with torch.no_grad():
+                fake_image_for_d = G(img)
+
+            # fake_d = D(fake_img.detach())
+            fake_d = D(fake_image_for_d)
             real_anime_d = D(anime)
             real_anime_gray_d = D(anime_gray)
             real_anime_smt_gray_d = D(anime_smt_gray)
