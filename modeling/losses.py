@@ -32,9 +32,11 @@ class ColorLoss(nn.Module):
         image = rgb_to_yuv_batch(image)
         image_g = rgb_to_yuv_batch(image_g)
 
-        return (self.l1(image[:, 0, ...], image_g[:, 0, ...]) +
-                self.huber(image[:, 1, ...], image_g[:, 1, ...]) +
-                self.huber(image[:, 2, ...], image_g[:, 2, ...]))
+        # After convert to yuv, both images have channel last
+
+        return (self.l1(image[:, :, :, 0], image_g[:, :, :, 0]) +
+                self.huber(image[:, :, :, 1], image_g[:, :, :, 1]) +
+                self.huber(image[:, :, :, 2], image_g[:, :, :, 2]))
 
 
 class AnimeGanLoss:
