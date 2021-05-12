@@ -3,13 +3,15 @@ from PIL import Image
 from util import rgb_to_yuv, rgb_to_yuv_batch
 import numpy as np
 import torch
+from util import gram
+
 
 image = Image.open("example/10.jpg")
+image = image.resize((256, 256))
 np_img = np.array(image).astype('float32')
 np_img = (np_img / 127.5) - 1
 
 img = torch.from_numpy(np_img)
-
 
 yuv_img = rgb_to_yuv(img, channel_last=True)
 
@@ -26,20 +28,14 @@ print(img.shape)
 # ax[1].imshow(yuv_img)
 # plt.show()
 
-import tensorflow as tf
-from util import gram
 
-def tf_gram(x):
-    shape_x = tf.shape(x)
-    b = shape_x[0]
-    c = shape_x[3]
-    x = tf.reshape(x, [b, -1, c])
-    return tf.matmul(tf.transpose(x, [0, 2, 1]), x) / tf.cast((tf.size(x) // b), tf.float32)
+# img = img.transpose((0, 3, 1 ,2))
+# grammat = gram(torch.from_numpy(img))
+# print(grammat)
 
 
+from modeling.anime_gan import Generator, Discriminator
 
-print(tf_gram(img))
-img = img.transpose((0, 3, 1 ,2))
-
-grammat = gram(torch.from_numpy(img))
-print(grammat)
+D = Discriminator()
+img = img.transpose(0, 3, 1, 2)
+pred = D(torch.from_numpy(img))

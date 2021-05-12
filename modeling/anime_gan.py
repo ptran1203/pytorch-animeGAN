@@ -85,4 +85,6 @@ class Discriminator(nn.Module):
         ]
 
     def forward(self, img):
-        return self.discriminate(img)
+        x = self.discriminate(img).mean(dim=(2, 3))
+        # print(x.size()[:2], x.size())
+        return x
