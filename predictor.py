@@ -80,9 +80,6 @@ class Predictor:
             - images: torch.tensor
         '''
         images = images.astype(np.float32)
-        images[..., 0] += -4.4661
-        images[..., 1] += -8.6698
-        images[..., 2] += 13.1360
 
         # Normalize to [-1, 1]
         images = (images / 127.5) - 1.0
