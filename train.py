@@ -110,9 +110,7 @@ def set_lr(optimizer, lr):
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
-def main():
-    args = parse_args()
-
+def main(args):
     check_params(args)
 
     print("Init models...")
@@ -237,4 +235,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    args = parse_args()
+    main(args)
