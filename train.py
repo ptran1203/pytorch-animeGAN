@@ -92,14 +92,14 @@ def save_samples(generator, loader, args, max_imgs=2, subname='gen'):
             real_imgs.append(
                 toint(img.permute(0, 2, 3 ,1).detach().cpu().numpy()))
 
-        if i + 1== max_iter:
+        if i + 1 == max_iter:
             break
 
     fake_imgs = np.concatenate(fake_imgs, axis=0)
     real_imgs = np.concatenate(real_imgs, axis=0)
 
     if args.display_image:
-        show_images(np.concatenate([real_imgs, fake_imgs]), save=True)
+        show_images(np.concatenate(fake_imgs), save=True)
 
     for i, img in enumerate(fake_imgs):
         save_path = os.path.join(args.save_image_dir, f'{subname}_{i}.jpg')
@@ -117,6 +117,8 @@ def main(args):
 
     G = Generator().cuda()
     D = Discriminator().cuda()
+
+    os.makedirs('/content/generated', exist_ok=True)
 
     initialize_weights(G)
     initialize_weights(D)

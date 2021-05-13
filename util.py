@@ -80,7 +80,7 @@ def show_images(images, rows=2, height=10, save=True):
 
     if save:
         now = strftime("%Y-%m-%d_%H:%M:%S", gmtime())
-        plt.savefig(f'/content/{now}.png')
+        plt.savefig(f'/content/generated/{now}.png')
     else:
         plt.show()
 
