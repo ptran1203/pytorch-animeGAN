@@ -34,7 +34,7 @@ def initialize_weights(net):
         except:
             pass
 
-    print(f'Init {init}/{total}')            
+    print(f'Init {init}/{total}')
 
 
 class Generator(nn.Module):

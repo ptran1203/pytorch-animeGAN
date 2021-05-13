@@ -95,8 +95,8 @@ def save_checkpoint(model, optimizer, epoch, args):
     torch.save(checkpoint, path)
 
 
-def load_checkpoint(model, args):
-    path = os.path.join(args.checkpoint_dir, f'{model.name}.pth')
+def load_checkpoint(model, checkpoint_dir):
+    path = os.path.join(checkpoint_dir, f'{model.name}.pth')
     checkpoint = torch.load(path,  map_location='cuda:0')
     model.load_state_dict(checkpoint['model_state_dict'], strict=True)
     epoch = checkpoint['epoch']
