@@ -94,7 +94,7 @@ class Predictor:
             images = images.unsqueeze(0)
 
         # channel last
-        images = images.permute(2, 0, 1)
+        images = images.permute(0, 3, 1, 2)
 
         return images
 
