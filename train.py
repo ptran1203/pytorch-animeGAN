@@ -70,7 +70,7 @@ def check_params(args):
 
 def save_samples(generator, loader, args, max_imgs=2, subname='gen'):
     '''
-    Generate and save images after a number of epochs
+    Generate and save images
     '''
     generator.eval()
     def toint(img):
