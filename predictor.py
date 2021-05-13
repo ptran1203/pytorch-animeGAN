@@ -3,7 +3,7 @@ import cv2
 import os
 import numpy as np
 from modeling.anime_gan import Generator
-from util import load_checkpoint
+from util import load_checkpoint, resize_image
 from tqdm import tqdm
 
 
@@ -44,7 +44,7 @@ class Predictor:
             return fake
 
 
-    def predict_dir(self, img_dir, dest_dir, max_images=0):
+    def predict_dir(self, img_dir, dest_dir, max_images=0, img_size=512):
         '''
         Read all images from img_dir, predict and write the result
         to dest_dir
@@ -61,6 +61,7 @@ class Predictor:
 
         for fname in tqdm(files):
             image = cv2.imread(os.path.join(img_dir, fname))[:,:,::-1]
+            image = resize_image(image, img_size)
             anime_img = self.predict(image)
             ext = fname.split('.')[-1]
             fname = fname.replace(f'.{ext}', '')

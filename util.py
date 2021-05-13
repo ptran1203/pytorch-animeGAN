@@ -107,6 +107,25 @@ def load_checkpoint(model, checkpoint_dir):
     return epoch
 
 
+def resize_image(img, size):
+    h, w = img.shape[:2]
+
+    if h <= size[0]:
+        h = size[0]
+    else:
+        x = h % 32
+        h = h - x
+
+    if w < size[1]:
+        w = size[1]
+    else:
+        y = w % 32
+        w = w - y
+
+    img = cv2.resize(img, (w, h))
+    return img
+
+
 class DefaultArgs():
     dataset ='Hayao'
     data_dir ='/content'
