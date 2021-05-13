@@ -1,5 +1,5 @@
 import argparse
-from inference.predictor import Predictor
+from predictor import Predictor
 
 
 def parse_args():
