@@ -68,7 +68,7 @@ def check_params(args):
         os.makedirs(args.checkpoint_dir)
 
 
-def save_samples(generator, loader, args, max_imgs=2):
+def save_samples(generator, loader, args, max_imgs=2, subname='gen'):
     '''
     Generate and save images after a number of epochs
     '''
@@ -101,7 +101,7 @@ def save_samples(generator, loader, args, max_imgs=2):
         show_images(np.concatenate([real_imgs, fake_imgs]), save=True)
 
     for i, img in enumerate(fake_imgs):
-        save_path = os.path.join(args.save_image_dir, f'gen_{i}.jpg')
+        save_path = os.path.join(args.save_image_dir, f'{subname}_{i}.jpg')
         cv2.imwrite(save_path, img)
 
 
@@ -177,6 +177,7 @@ def main():
                 bar.set_description(f'[Init Training G] content loss: {loss_g:2f}')
 
             set_lr(optimizer_g, args.lr_g)
+            save_samples(G, data_loader, args, subname='initg')
             continue
 
         for img, anime, anime_gray, anime_smt_gray in bar:
