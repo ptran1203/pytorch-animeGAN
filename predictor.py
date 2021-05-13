@@ -28,7 +28,7 @@ class Predictor:
 
     def predict(self, image):
         with torch.no_grad():
-            fake = self.G(preprocess_images(image))
+            fake = self.G(self.preprocess_images(image))
             fake = fake.detach().cpu().numpy()[0]
             fake = fake.transpose(1, 2, 0)
             fake = (fake + 1.0) / 2.0
@@ -36,7 +36,7 @@ class Predictor:
 
     def predict_batch(self, images):
         with torch.no_grad():
-            fake = self.G(preprocess_images(images))
+            fake = self.G(self.preprocess_images(images))
             fake = fake.detach().cpu().numpy()
             fake = fake.transpose(0, 2, 3, 1)
             fake = (fake + 1.0) / 2.0
