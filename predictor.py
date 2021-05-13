@@ -1,6 +1,7 @@
 import torch
 import cv2
 import os
+import numpy as np
 from modeling.anime_gan import Generator
 from util import load_checkpoint
 from tqdm import tqdm
