@@ -84,7 +84,7 @@ class Predictor:
 
         # Normalize to [-1, 1]
         images = (images / 127.5) - 1.0
-        images = torch.from_numpy(image)
+        images = torch.from_numpy(images)
 
         if cuda_available:
             images = images.cuda()
