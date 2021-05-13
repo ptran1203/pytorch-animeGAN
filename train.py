@@ -83,13 +83,14 @@ def save_samples(generator, loader, args, max_imgs=2, subname='gen'):
     real_imgs = []
 
     for i, (img, *_) in enumerate(loader):
-        fake_img = generator(img.cuda())
-        fake_img = fake_img.detach().cpu().numpy()
-        # Channel first -> channel last
-        fake_img  = fake_img.transpose(0, 2, 3, 1)
-        fake_imgs.append(toint(fake_img))
-        real_imgs.append(
-            toint(img.permute(0, 2, 3 ,1).detach().cpu().numpy()))
+        with torch.no_grad():
+            fake_img = generator(img.cuda())
+            fake_img = fake_img.detach().cpu().numpy()
+            # Channel first -> channel last
+            fake_img  = fake_img.transpose(0, 2, 3, 1)
+            fake_imgs.append(toint(fake_img))
+            real_imgs.append(
+                toint(img.permute(0, 2, 3 ,1).detach().cpu().numpy()))
 
         if i + 1== max_iter:
             break
@@ -211,7 +212,8 @@ def main():
             optimizer_g.zero_grad()
 
             fake_img = G(img)
-            fake_d = D(fake_img)
+            with torch.no_grad():
+                fake_d = D(fake_img)
             fake_feat = vgg19(fake_img)
             anime_feat = vgg19(anime_smt_gray)
             img_feat = vgg19(img)
