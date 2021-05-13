@@ -37,5 +37,11 @@ print(yuv_img.shape)
 from modeling.anime_gan import Generator, Discriminator
 
 D = Discriminator()
+G = Generator()
+
 img = img.transpose(0, 3, 1, 2)
+
+fake = G(torch.from_numpy(img))
 pred = D(torch.from_numpy(img))
+
+print(f'G: {fake.shape}, D: {pred.shape}')

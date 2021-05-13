@@ -6,7 +6,7 @@ import torch.nn.functional as F
 import torch
 from modeling.conv_blocks import DownConv
 from modeling.conv_blocks import UpConv
-from modeling.conv_blocks import DsConv
+from modeling.conv_blocks import SeparableConv2D
 from modeling.conv_blocks import InvertedResBlock
 from modeling.conv_blocks import ConvBlock
 
@@ -46,7 +46,7 @@ class Generator(nn.Module):
             ConvBlock(64, 128),
             DownConv(128),
             ConvBlock(128, 128),
-            DsConv(128, 256),
+            SeparableConv2D(128, 256),
             DownConv(256),
             ConvBlock(256, 256),
         )
@@ -65,7 +65,7 @@ class Generator(nn.Module):
         self.decode_blocks = nn.Sequential(
             ConvBlock(256, 128),
             UpConv(128),
-            DsConv(128, 128),
+            SeparableConv2D(128, 128),
             ConvBlock(128, 128),
             UpConv(128),
             ConvBlock(128, 64),
@@ -95,7 +95,7 @@ class Discriminator(nn.Module):
             nn.InstanceNorm2d(256),
             nn.LeakyReLU(0.2, True),
             nn.Conv2d(256, 1, kernel_size=3, stride=1, padding=1, bias=False),
-            # nn.Sigmoid(),
+            # nn.Linear(1, ),
         )
 
 

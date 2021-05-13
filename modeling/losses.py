@@ -68,7 +68,7 @@ class AnimeGanLoss:
             loss
         '''
         return (
-            self.wadvg * torch.mean((fake_d - 1.0) ** 2) +
+            self.wadvg * torch.mean(torch.square(fake_d - 1.0)) +
             self.wcon * self.content_loss(img_feat, gen_feat) +
             self.wgra * self.gram_loss(anime_feat, gen_feat) +
             self.wcol * self.color_loss(img, gen_img)
@@ -76,8 +76,8 @@ class AnimeGanLoss:
 
     def compute_loss_D(self, fake_img_d, real_anime_d, real_anime_gray_d, real_anime_smooth_gray_d):
         return self.wadvd * (
-            torch.mean((real_anime_d - 1) ** 2) +
-            torch.mean(fake_img_d ** 2) +
-            torch.mean(real_anime_gray_d ** 2) +
-            0.3 * torch.mean(real_anime_smooth_gray_d ** 2)
+            torch.mean(torch.square(real_anime_d - 1.0)) +
+            torch.mean(torch.square(fake_img_d)) +
+            torch.mean(torch.square(real_anime_gray_d)) +
+            0.3 * torch.mean(torch.square(real_anime_smooth_gray_d))
         )
