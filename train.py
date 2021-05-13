@@ -103,7 +103,7 @@ def save_samples(generator, loader, args, max_imgs=2, subname='gen'):
 
     for i, img in enumerate(fake_imgs):
         save_path = os.path.join(args.save_image_dir, f'{subname}_{i}.jpg')
-        cv2.imwrite(save_path, img)
+        cv2.imwrite(save_path, cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
 
 
 def set_lr(optimizer, lr):
