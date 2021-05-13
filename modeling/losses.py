@@ -34,6 +34,8 @@ class ColorLoss(nn.Module):
 
         # After convert to yuv, both images have channel last
 
+        print(image.shape, image_g.shape)
+
         return (self.l1(image[:, :, :, 0], image_g[:, :, :, 0]) +
                 self.huber(image[:, :, :, 1], image_g[:, :, :, 1]) +
                 self.huber(image[:, :, :, 2], image_g[:, :, :, 2]))
@@ -74,8 +76,8 @@ class AnimeGanLoss:
 
     def compute_loss_D(self, fake_img_d, real_anime_d, real_anime_gray_d, real_anime_smooth_gray_d):
         return self.wadvd * (
-            1.7 * torch.mean((real_anime_d - 1) ** 2) +
-            1.7 * torch.mean(fake_img_d ** 2)
-            # 1.7 * torch.mean(real_anime_gray_d ** 2) +
-            # 0.8 * torch.mean(real_anime_smooth_gray_d ** 2)
+            torch.mean((real_anime_d - 1) ** 2) +
+            torch.mean(fake_img_d ** 2) +
+            torch.mean(real_anime_gray_d ** 2) +
+            0.3 * torch.mean(real_anime_smooth_gray_d ** 2)
         )
