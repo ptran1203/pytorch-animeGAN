@@ -65,6 +65,7 @@ class Predictor:
             anime_img = self.predict(image)
             ext = fname.split('.')[-1]
             fname = fname.replace(f'.{ext}', '')
+            anime_img = self.toint16(anime_img)
             cv2.imwrite(os.path.join(dest_dir, f'{fname}_anime.jpg'), anime_img[..., ::-1])
 
     @staticmethod
@@ -104,3 +105,9 @@ class Predictor:
     def is_valid_file(fname):
         ext = fname.split('.')[-1]
         return ext in VALID_FORMATS
+
+    @staticmethod
+    def toint16(img):
+        img = img * 127.5 + 127.5
+        img = img.astype(np.int16)
+        return img
