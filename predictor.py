@@ -44,7 +44,7 @@ class Predictor:
             return fake
 
 
-    def predict_dir(self, img_dir, dest_dir, max_images=0, img_size=512):
+    def predict_dir(self, img_dir, dest_dir, max_images=0, img_size=(512, 512)):
         '''
         Read all images from img_dir, predict and write the result
         to dest_dir
