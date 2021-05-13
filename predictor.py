@@ -32,7 +32,6 @@ class Predictor:
             fake = self.G(self.preprocess_images(image))
             fake = fake.detach().cpu().numpy()[0]
             fake = fake.transpose(1, 2, 0)
-            fake = (fake + 1.0) / 2.0
             return fake
 
     def predict_batch(self, images):
@@ -40,7 +39,6 @@ class Predictor:
             fake = self.G(self.preprocess_images(images))
             fake = fake.detach().cpu().numpy()
             fake = fake.transpose(0, 2, 3, 1)
-            fake = (fake + 1.0) / 2.0
             return fake
 
 
@@ -92,7 +90,7 @@ class Predictor:
         if len(images.shape) == 3:
             images = images.unsqueeze(0)
 
-        # channel last
+        # channel first
         images = images.permute(0, 3, 1, 2)
 
         return images
