@@ -96,14 +96,13 @@ class ConvBlock(nn.Module):
 
 
 class InvertedResBlock(nn.Module):
-    def __init__(self, channels=512, out_channels=256):
+    def __init__(self, channels=512, out_channels=256, expand_ratio=2):
         super(InvertedResBlock, self).__init__()
-
-        K = 1
-        self.conv_block = ConvBlock(channels, channels, kernel_size=1, stride=1, padding=0, bias=False)
-        self.depthwise_conv = nn.Conv2d(channels, K * channels,
-            kernel_size=3, groups=channels, stride=1, padding=1, bias=False)
-        self.conv = nn.Conv2d(channels, out_channels,
+        bottleneck_dim = round(expand_ratio * channels)
+        self.conv_block = ConvBlock(channels, bottleneck_dim, kernel_size=1, stride=1, padding=0, bias=False)
+        self.depthwise_conv = nn.Conv2d(bottleneck_dim, bottleneck_dim,
+            kernel_size=3, groups=bottleneck_dim, stride=1, padding=1, bias=False)
+        self.conv = nn.Conv2d(bottleneck_dim, out_channels,
             kernel_size=1, stride=1)
 
         self.ins_norm1 = nn.InstanceNorm2d(out_channels)
