@@ -4,6 +4,7 @@ import math
 import torch.nn as nn
 import torch.nn.functional as F
 import torch
+from torch.nn.utils import spectral_norm
 from modeling.conv_blocks import DownConv
 from modeling.conv_blocks import UpConv
 from modeling.conv_blocks import SeparableConv2D
@@ -84,35 +85,53 @@ class Generator(nn.Module):
 
 class Discriminator(nn.Module):
     def __init__(self):
-        super(Discriminator, self).__init__()
+        super(Discriminator, self, use_sn=False).__init__()
         self.name = 'discriminator'
-        self.discriminate = nn.Sequential(
-            nn.Conv2d(3, 32, kernel_size=3, stride=1, bias=False),
-            nn.LeakyReLU(0.2, True),
-            *self.conv_blocks(32, level=1),
-            *self.conv_blocks(128, level=2),
-            nn.Conv2d(256, 256, kernel_size=3, stride=1),
-            nn.InstanceNorm2d(256),
-            nn.LeakyReLU(0.2, True),
-            nn.Conv2d(256, 1, kernel_size=3, stride=1, padding=1, bias=False),
-            # nn.Linear(1, ),
-        )
+
+        if use_sn:
+            self.discriminate = nn.Sequential(
+                spectral_norm(Conv2d(3, 32, kernel_size=3, stride=1, bias=False)),
+                nn.LeakyReLU(0.2, True),
+                *self.conv_blocks(32, level=1, use_sn),
+                *self.conv_blocks(128, level=2, use_sn),
+                spectral_norm(nn.Conv2d(256, 256, kernel_size=3, stride=1)),
+                nn.InstanceNorm2d(256),
+                nn.LeakyReLU(0.2, True),
+                spectral_norm(nn.Conv2d(256, 1, kernel_size=3, stride=1, padding=1, bias=False)),
+            )
+        else:
+            self.discriminate = nn.Sequential(
+                nn.Conv2d(3, 32, kernel_size=3, stride=1, bias=False),
+                nn.LeakyReLU(0.2, True),
+                *self.conv_blocks(32, level=1),
+                *self.conv_blocks(128, level=2),
+                nn.Conv2d(256, 256, kernel_size=3, stride=1),
+                nn.InstanceNorm2d(256),
+                nn.LeakyReLU(0.2, True),
+                nn.Conv2d(256, 1, kernel_size=3, stride=1, padding=1, bias=False),
+            )
 
 
     @staticmethod
-    def conv_blocks(in_channels, level):
+    def conv_blocks(in_channels, level, use_sn=False):
         ins =  level * 64
         outs =  level * 128
+
+        conv1 = nn.Conv2d(in_channels, ins, kernel_size=3, stride=2, bias=False)
+        conv2 = nn.Conv2d(ins, outs, kernel_size=3, stride=1, bias=False)
+
+        if use_sn:
+            conv1 = spectral_norm(conv1)
+            conv2 = spectral_norm(conv2)
+
         return [
-            nn.Conv2d(in_channels, ins, kernel_size=3, stride=2, bias=False),
+            conv1,
             nn.LeakyReLU(0.2, True),
-            nn.Conv2d(ins, outs, kernel_size=3, stride=1, bias=False),
+            conv2,
             nn.InstanceNorm2d(outs),
             nn.LeakyReLU(0.2, True),
         ]
 
     def forward(self, img):
         x = self.discriminate(img)
-        # x = x.mean(dim=(2, 3))
-        # print(x.size()[:2], x.size())
         return x

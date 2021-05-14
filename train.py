@@ -29,6 +29,7 @@ def parse_args():
     parser.add_argument('--checkpoint-dir', type=str, default='/content/checkpoints')
     parser.add_argument('--save-image-dir', type=str, default='/content/images')
     parser.add_argument('--continu', action='store_true')
+    parser.add_argument('--use_sn', action='store_true')
     parser.add_argument('--display-image', type=bool, default=True)
     parser.add_argument('--save-interval', type=int, default=2)
     parser.add_argument('--debug-samples', type=int, default=0)
@@ -116,7 +117,7 @@ def main(args):
     print("Init models...")
 
     G = Generator().cuda()
-    D = Discriminator().cuda()
+    D = Discriminator(use_sn=args.use_sn).cuda()
 
     os.makedirs('/content/generated', exist_ok=True)
 
@@ -195,7 +196,6 @@ def main(args):
             with torch.no_grad():
                 fake_image_for_d = G(img)
 
-            # fake_d = D(fake_img.detach())
             fake_d = D(fake_image_for_d)
             real_anime_d = D(anime)
             real_anime_gray_d = D(anime_gray)
@@ -215,7 +215,7 @@ def main(args):
             with torch.no_grad():
                 fake_d = D(fake_img)
             fake_feat = vgg19(fake_img)
-            anime_feat = vgg19(anime_smt_gray)
+            anime_feat = vgg19(anime_gray)
             img_feat = vgg19(img)
 
             loss_g = loss_fn.compute_loss_G(
