@@ -92,8 +92,8 @@ class Discriminator(nn.Module):
             self.discriminate = nn.Sequential(
                 spectral_norm(Conv2d(3, 32, kernel_size=3, stride=1, bias=False)),
                 nn.LeakyReLU(0.2, True),
-                *self.conv_blocks(32, level=1, use_sn),
-                *self.conv_blocks(128, level=2, use_sn),
+                *self.conv_blocks(32, level=1, use_sn=use_sn),
+                *self.conv_blocks(128, level=2, use_sn=use_sn),
                 spectral_norm(nn.Conv2d(256, 256, kernel_size=3, stride=1)),
                 nn.InstanceNorm2d(256),
                 nn.LeakyReLU(0.2, True),
