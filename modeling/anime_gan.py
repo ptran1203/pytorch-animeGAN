@@ -84,8 +84,8 @@ class Generator(nn.Module):
 
 
 class Discriminator(nn.Module):
-    def __init__(self):
-        super(Discriminator, self, use_sn=False).__init__()
+    def __init__(self,  use_sn=False):
+        super(Discriminator, self).__init__()
         self.name = 'discriminator'
 
         if use_sn:
