@@ -34,8 +34,6 @@ class ColorLoss(nn.Module):
 
         # After convert to yuv, both images have channel last
 
-        # print(image.shape, image_g.shape)
-
         return (self.l1(image[:, :, :, 0], image_g[:, :, :, 0]) +
                 self.huber(image[:, :, :, 1], image_g[:, :, :, 1]) +
                 self.huber(image[:, :, :, 2], image_g[:, :, :, 2]))
