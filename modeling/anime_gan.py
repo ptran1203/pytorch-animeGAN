@@ -71,7 +71,7 @@ class Generator(nn.Module):
             UpConv(128),
             ConvBlock(128, 64),
             ConvBlock(64, 64),
-            nn.Conv2d(64, 3, kernel_size=5, stride=1, padding=2),
+            nn.Conv2d(64, 3, kernel_size=3, stride=1, padding=1),
             nn.Tanh(),
         )
 
