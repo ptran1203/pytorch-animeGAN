@@ -11,7 +11,6 @@ from modeling.anime_gan import Discriminator
 from modeling.anime_gan import initialize_weights
 from modeling.losses import AnimeGanLoss
 from modeling.losses import ContentLoss
-from modeling.vgg import Vgg19
 from dataset import AnimeDataSet
 from util import show_images
 from util import save_checkpoint
@@ -127,8 +126,6 @@ def main(args):
     # Init weight
     # G.apply(weights_init_normal)
     # D.apply(weights_init_normal)
-
-    vgg19 = Vgg19().cuda().eval()
     
     loss_fn = AnimeGanLoss(args)
 
@@ -169,11 +166,8 @@ def main(args):
                 optimizer_g.zero_grad()
 
                 fake_img = G(img)
-                fake_feat = vgg19(fake_img)
-                img_feat = vgg19(img)
-
-                loss_g = ContentLoss()(img_feat, fake_feat)
-                loss_g.backward()
+                loss = loss_fn.content_loss()(img, fake_img)
+                loss.backward()
                 optimizer_g.step()
 
                 bar.set_description(f'[Init Training G] content loss: {loss_g:2f}')
@@ -214,12 +208,9 @@ def main(args):
             fake_img = G(img)
             with torch.no_grad():
                 fake_d = D(fake_img)
-            fake_feat = vgg19(fake_img)
-            anime_feat = vgg19(anime_gray)
-            img_feat = vgg19(img)
 
             loss_g = loss_fn.compute_loss_G(
-                fake_img, img, fake_d, fake_feat, anime_feat, img_feat)
+                fake_img, img, fake_d, anime_gray)
 
             loss_g.backward()
 

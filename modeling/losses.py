@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
+from modeling.vgg import Vgg19
 from util import gram, rgb_to_yuv_batch
 
 
@@ -49,27 +50,31 @@ class AnimeGanLoss:
         self.wcon = args.wcon
         self.wgra = args.wgra
         self.wcol = args.wcol
+        self.vgg19 = Vgg19().cuda().eval()
 
-    def compute_loss_G(self, gen_img, img, fake_d, gen_feat, anime_feat, img_feat):
+    def compute_loss_G(self, fake_img, img, fake_logit, anime_gray):
         '''
         Compute loss for Generator
 
         @Arugments:
-            - gen_img: generated image
+            - fake_img: generated image
             - img: image
-            - fake_d: output of Discriminator given fake image
-            - gen_feat: feature of fake image via VGG19
-            - anime_feat: feature of anime grayscale image via VGG19
-            - img_feat: feature of photo via VGG19
+            - fake_logit: output of Discriminator given fake image
+            - anime_gray: grayscale of anime image
 
         @Returns:
             loss
         '''
+        with torch.no_grad():
+            fake_feat = self.vgg19(fake_img)
+            anime_feat = self.vgg19(anime_gray)
+            img_feat = self.vgg19(img)
+
         return (
-            self.wadvg * torch.mean(torch.square(fake_d - 1.0)) +
-            self.wcon * self.content_loss(img_feat, gen_feat) +
-            self.wgra * self.gram_loss(anime_feat, gen_feat) +
-            self.wcol * self.color_loss(img, gen_img)
+            self.wadvg * torch.mean(torch.square(fake_logit - 1.0)) +
+            self.wcon * self.content_loss(img_feat, fake_feat) +
+            self.wgra * self.gram_loss(anime_feat, fake_feat) +
+            self.wcol * self.color_loss(img, fake_img)
         )
 
     def compute_loss_D(self, fake_img_d, real_anime_d, real_anime_gray_d, real_anime_smooth_gray_d):
