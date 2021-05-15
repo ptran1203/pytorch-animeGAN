@@ -170,7 +170,7 @@ def main(args):
                 loss.backward()
                 optimizer_g.step()
 
-                bar.set_description(f'[Init Training G] content loss: {loss_g:2f}')
+                bar.set_description(f'[Init Training G] content loss: {loss:2f}')
 
             set_lr(optimizer_g, args.lr_g)
             save_samples(G, data_loader, args, subname='initg')
