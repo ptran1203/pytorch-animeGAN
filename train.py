@@ -209,9 +209,10 @@ def main(args):
             with torch.no_grad():
                 fake_d = D(fake_img)
 
-            loss_g = loss_fn.compute_loss_G(
+            adv_loss, con_loss, gra_loss, col_loss = loss_fn.compute_loss_G(
                 fake_img, img, fake_d, anime_gray)
 
+            loss_g = adv_loss + con_loss + gra_loss + col_loss
             loss_g.backward()
 
             optimizer_g.step()
@@ -219,7 +220,7 @@ def main(args):
             # Set bar desc
             loss_g = loss_g.detach().cpu().numpy()
             loss_d = loss_d.detach().cpu().numpy()
-            bar.set_description(f'loss G: {loss_g:2f}, loss D: {loss_d:2f}')
+            bar.set_description(f'loss G: adv {adv_loss:2f} con {con_loss:2f} gram {gra_loss:2f} color {col_loss:2f} / loss D: {loss_d:2f}')
 
         if e % args.save_interval == 0:
             save_checkpoint(G, optimizer_g, e, args)
