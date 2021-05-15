@@ -42,9 +42,9 @@ class ColorLoss(nn.Module):
 
 class AnimeGanLoss:
     def __init__(self, args):
-        self.content_loss = ContentLoss()
-        self.gram_loss = GramLoss()
-        self.color_loss = ColorLoss()
+        self.content_loss = ContentLoss().cuda()
+        self.gram_loss = GramLoss().cuda()
+        self.color_loss = ColorLoss().cuda()
         self.wadvg = args.wadvg
         self.wadvd = args.wadvd
         self.wcon = args.wcon
