@@ -12,7 +12,6 @@ class DownConv(nn.Module):
         self.conv2 = SeparableConv2D(channels, channels, stride=1)
 
     def forward(self, x):
-
         out1 = self.conv1(x)
         out2 = F.interpolate(x, scale_factor=0.5, mode='bilinear')
         out2 = self.conv2(out2)
@@ -21,15 +20,13 @@ class DownConv(nn.Module):
 
 
 class UpConv(nn.Module):
-
-    def __init__(self, channels, kernel_size=3):
+    def __init__(self, channels):
         super(UpConv, self).__init__()
 
         self.conv = SeparableConv2D(channels, channels, stride=1)
-        self.upsample = nn.Upsample(scale_factor=2.0, mode='nearest')
 
     def forward(self, x):
-        out = self.upsample(x)
+        out = F.interpolate(x, scale_factor=2.0, mode='bilinear')
         out = self.conv(out)
 
         return out
@@ -96,12 +93,12 @@ class ConvBlock(nn.Module):
 
 
 class InvertedResBlock(nn.Module):
-    def __init__(self, channels=512, out_channels=256, expand_ratio=2):
+    def __init__(self, channels=512, out_channels=256, expand_ratio=2, bias=True):
         super(InvertedResBlock, self).__init__()
         bottleneck_dim = round(expand_ratio * channels)
-        self.conv_block = ConvBlock(channels, bottleneck_dim, kernel_size=1, stride=1, padding=0, bias=False)
+        self.conv_block = ConvBlock(channels, bottleneck_dim, kernel_size=1, stride=1, padding=0, bias=bias)
         self.depthwise_conv = nn.Conv2d(bottleneck_dim, bottleneck_dim,
-            kernel_size=3, groups=bottleneck_dim, stride=1, padding=1, bias=False)
+            kernel_size=3, groups=bottleneck_dim, stride=1, padding=1, bias=bias)
         self.conv = nn.Conv2d(bottleneck_dim, out_channels,
             kernel_size=1, stride=1)
 

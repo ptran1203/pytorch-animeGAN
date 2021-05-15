@@ -87,38 +87,37 @@ class Discriminator(nn.Module):
     def __init__(self,  use_sn=False):
         super(Discriminator, self).__init__()
         self.name = 'discriminator'
+        self.bias = True
 
         if use_sn:
             self.discriminate = nn.Sequential(
-                spectral_norm(nn.Conv2d(3, 32, kernel_size=3, stride=1, bias=False)),
+                spectral_norm(nn.Conv2d(3, 32, kernel_size=3, stride=1, bias=self.bias)),
                 nn.LeakyReLU(0.2, True),
                 *self.conv_blocks(32, level=1, use_sn=use_sn),
                 *self.conv_blocks(128, level=2, use_sn=use_sn),
                 spectral_norm(nn.Conv2d(256, 256, kernel_size=3, stride=1)),
                 nn.InstanceNorm2d(256),
                 nn.LeakyReLU(0.2, True),
-                spectral_norm(nn.Conv2d(256, 1, kernel_size=3, stride=1, padding=1, bias=False)),
+                spectral_norm(nn.Conv2d(256, 1, kernel_size=3, stride=1, padding=1, bias=self.bias)),
             )
         else:
             self.discriminate = nn.Sequential(
-                nn.Conv2d(3, 32, kernel_size=3, stride=1, bias=False),
+                nn.Conv2d(3, 32, kernel_size=3, stride=1, bias=self.bias),
                 nn.LeakyReLU(0.2, True),
                 *self.conv_blocks(32, level=1),
                 *self.conv_blocks(128, level=2),
                 nn.Conv2d(256, 256, kernel_size=3, stride=1),
                 nn.InstanceNorm2d(256),
                 nn.LeakyReLU(0.2, True),
-                nn.Conv2d(256, 1, kernel_size=3, stride=1, padding=1, bias=False),
+                nn.Conv2d(256, 1, kernel_size=3, stride=1, padding=1, bias=self.bias),
             )
 
-
-    @staticmethod
-    def conv_blocks(in_channels, level, use_sn=False):
+    def conv_blocks(self, in_channels, level, use_sn=False):
         ins =  level * 64
         outs =  level * 128
 
-        conv1 = nn.Conv2d(in_channels, ins, kernel_size=3, stride=2, bias=False)
-        conv2 = nn.Conv2d(ins, outs, kernel_size=3, stride=1, bias=False)
+        conv1 = nn.Conv2d(in_channels, ins, kernel_size=3, stride=2, bias=self.bias)
+        conv2 = nn.Conv2d(ins, outs, kernel_size=3, stride=1, bias=self.bias)
 
         if use_sn:
             conv1 = spectral_norm(conv1)
