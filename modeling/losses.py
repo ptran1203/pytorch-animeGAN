@@ -84,3 +84,11 @@ class AnimeGanLoss:
             1.7 * torch.mean(torch.square(real_anime_gray_d)) +
             0.8 * torch.mean(torch.square(real_anime_smooth_gray_d))
         )
+
+
+    def content_loss_vgg(self, image, recontruction):
+        with torch.no_grad():
+            feat = self.vgg19(image)
+            re_feat = self.vgg19(recontruction)
+
+        return self.content_loss(feat, re_feat)

@@ -166,7 +166,7 @@ def main(args):
                 optimizer_g.zero_grad()
 
                 fake_img = G(img)
-                loss = loss_fn.content_loss()(img, fake_img)
+                loss = loss_fn.content_loss_vgg(img, fake_img)
                 loss.backward()
                 optimizer_g.step()
 
