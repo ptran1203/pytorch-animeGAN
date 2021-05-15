@@ -87,8 +87,7 @@ class AnimeGanLoss:
 
 
     def content_loss_vgg(self, image, recontruction):
-        with torch.no_grad():
-            feat = self.vgg19(image)
-            re_feat = self.vgg19(recontruction)
+        feat = self.vgg19(image)
+        re_feat = self.vgg19(recontruction)
 
         return self.content_loss(feat, re_feat)
