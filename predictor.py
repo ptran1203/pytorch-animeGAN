@@ -31,6 +31,7 @@ class Predictor:
         with torch.no_grad():
             fake = self.G(self.preprocess_images(image))
             fake = fake.detach().cpu().numpy()[0]
+            # Channel last
             fake = fake.transpose(1, 2, 0)
             return fake
 
@@ -38,6 +39,7 @@ class Predictor:
         with torch.no_grad():
             fake = self.G(self.preprocess_images(images))
             fake = fake.detach().cpu().numpy()
+            # Channel last
             fake = fake.transpose(0, 2, 3, 1)
             return fake
 
