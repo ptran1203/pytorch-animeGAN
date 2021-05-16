@@ -10,7 +10,6 @@ from modeling.anime_gan import Generator
 from modeling.anime_gan import Discriminator
 from modeling.anime_gan import initialize_weights
 from modeling.losses import AnimeGanLoss
-from modeling.losses import ContentLoss
 from dataset import AnimeDataSet
 from util import show_images
 from util import save_checkpoint
