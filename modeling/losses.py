@@ -102,7 +102,7 @@ class LossSummary:
         )
 
     def avg_loss_D(self):
-        return self._avg(self.loss_d_adv),
+        return self._avg(self.loss_d_adv)
 
 
     @staticmethod
