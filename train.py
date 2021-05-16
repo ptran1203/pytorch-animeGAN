@@ -10,6 +10,7 @@ from modeling.anime_gan import Generator
 from modeling.anime_gan import Discriminator
 from modeling.anime_gan import initialize_weights
 from modeling.losses import AnimeGanLoss
+from modeling.losses import LossSummary
 from dataset import AnimeDataSet
 from util import show_images
 from util import save_checkpoint
@@ -122,6 +123,8 @@ def main(args):
     initialize_weights(G)
     initialize_weights(D)
 
+    loss_tracker = LossSummary()
+
     # Init weight
     # G.apply(weights_init_normal)
     # D.apply(weights_init_normal)
@@ -156,6 +159,8 @@ def main(args):
         bar = tqdm(data_loader)
         G.train()
 
+        init_losses = []
+
         if e < args.init_epochs:
             # Train with content loss only
             set_lr(optimizer_g, args.init_lr)
@@ -169,14 +174,16 @@ def main(args):
                 loss.backward()
                 optimizer_g.step()
 
-                bar.set_description(f'[Init Training G] content loss: {loss:2f}')
+                init_losses.append(loss.cpu().detach().numpy())
+                avg_content_loss = sum(init_losses) / len(init_losses)
+                bar.set_description(f'[Init Training G] content loss: {avg_content_loss:2f}')
 
             set_lr(optimizer_g, args.lr_g)
             save_samples(G, data_loader, args, subname='initg')
             continue
 
+        loss_tracker.reset()
         for img, anime, anime_gray, anime_smt_gray in bar:
-
             # To cuda
             img = img.cuda()
             anime = anime.cuda()
@@ -199,6 +206,8 @@ def main(args):
 
             loss_d.backward()
 
+            loss_tracker.update_loss_D(loss_d))
+
             optimizer_d.step()
 
             # ---------------- TRAIN G ---------------- #
@@ -216,10 +225,11 @@ def main(args):
 
             optimizer_g.step()
 
-            # Set bar desc
-            loss_g = loss_g.detach().cpu().numpy()
-            loss_d = loss_d.detach().cpu().numpy()
-            bar.set_description(f'loss G: adv {adv_loss:2f} con {con_loss:2f} gram {gra_loss:2f} color {col_loss:2f} / loss D: {loss_d:2f}')
+            loss_tracker.update_loss_G(adv_loss, gra_loss, col_loss, con_loss)
+
+            avg_adv , avg_gram, avg_content, avg_color = loss_tracker.avg_loss_G()
+            avg_adv_d = loss_tracker.avg_loss_D()
+            bar.set_description(f'loss G: adv {avg_adv:2f} con {avg_content:2f} gram {avg_gram:2f} color {avg_color:2f} / loss D: {avg_adv_d:2f}')
 
         if e % args.save_interval == 0:
             save_checkpoint(G, optimizer_g, e, args)

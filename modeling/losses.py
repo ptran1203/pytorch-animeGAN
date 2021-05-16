@@ -71,3 +71,37 @@ class AnimeGanLoss:
         re_feat = self.vgg19(recontruction)
 
         return self.content_loss(feat, re_feat)
+
+
+class LossSummary:
+    def __init__(self):
+        self.loss_g_adv = []
+        self.loss_content = []
+        self.loss_gram = []
+        self.loss_color = []
+        self.loss_d_adv = []
+
+    def update_loss_G(self, adv, gram, color, content):
+        self.loss_g_adv.append(adv.cpu().detach().numpy())
+        self.loss_gram.append(gram.cpu().detach().numpy())
+        self.loss_color.append(color.cpu().detach().numpy())
+        self.loss_content.append(content.cpu().detach().numpy())
+
+    def update_loss_D(self, loss):
+        self.loss_d_adv.append(loss.cpu().detach().numpy())
+
+    def avg_loss_G(self):
+        return (
+            self._avg(self.loss_g_adv),
+            self._avg(self.loss_gram),
+            self._avg(self.loss_color),
+            self._avg(self.loss_content),
+        )
+
+    def avg_loss_D(self):
+        return self._avg(self.loss_d_adv),
+
+
+    @staticmethod
+    def _avg(losses):
+        return sum(losses) / len(losses)
