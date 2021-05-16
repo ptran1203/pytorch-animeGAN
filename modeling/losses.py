@@ -4,25 +4,6 @@ import torch.nn as nn
 from modeling.vgg import Vgg19
 from util import gram, rgb_to_yuv_batch
 
-
-class ContentLoss(nn.Module):
-    def __init__(self):
-        super(ContentLoss, self).__init__()
-        self.l1 = nn.L1Loss()
-
-    def forward(self, feature, feature_g):
-        return self.l1(feature, feature_g)
-
-
-class GramLoss(nn.Module):
-    def __init__(self):
-        super(GramLoss, self).__init__()
-        self.l1 = nn.L1Loss()
-
-    def forward(self, feature, feature_g):
-        return self.l1(gram(feature), gram(feature_g))
-
-
 class ColorLoss(nn.Module):
     def __init__(self):
         super(ColorLoss, self).__init__()
@@ -42,8 +23,8 @@ class ColorLoss(nn.Module):
 
 class AnimeGanLoss:
     def __init__(self, args):
-        self.content_loss = ContentLoss().cuda()
-        self.gram_loss = GramLoss().cuda()
+        self.content_loss = nn.L1Loss().cuda()
+        self.gram_loss = nn.L1Loss().cuda()
         self.color_loss = ColorLoss().cuda()
         self.wadvg = args.wadvg
         self.wadvd = args.wadvd
@@ -65,24 +46,23 @@ class AnimeGanLoss:
         @Returns:
             loss
         '''
-        with torch.no_grad():
-            fake_feat = self.vgg19(fake_img)
-            anime_feat = self.vgg19(anime_gray)
-            img_feat = self.vgg19(img)
+        fake_feat = self.vgg19(fake_img)
+        anime_feat = self.vgg19(anime_gray)
+        img_feat = self.vgg19(img)
 
         return [
             self.wadvg * torch.mean(torch.square(fake_logit - 1.0)),
             self.wcon * self.content_loss(img_feat, fake_feat),
-            self.wgra * self.gram_loss(anime_feat, fake_feat),
+            self.wgra * self.gram_loss(gram(anime_feat), gram(fake_feat)),
             self.wcol * self.color_loss(img, fake_img),
         ]
 
     def compute_loss_D(self, fake_img_d, real_anime_d, real_anime_gray_d, real_anime_smooth_gray_d):
         return self.wadvd * (
-            2.0 * torch.mean(torch.square(real_anime_d - 1.0)) +
+            torch.mean(torch.square(real_anime_d - 1.0)) +
             torch.mean(torch.square(fake_img_d)) +
-            torch.mean(torch.square(real_anime_gray_d)) +
-            0.8 * torch.mean(torch.square(real_anime_smooth_gray_d))
+            0.1 * torch.mean(torch.square(real_anime_gray_d)) +
+            0.1 * torch.mean(torch.square(real_anime_smooth_gray_d))
         )
 
 

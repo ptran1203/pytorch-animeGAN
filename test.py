@@ -40,7 +40,7 @@ D = Discriminator()
 G = Generator()
 
 img = img.transpose(0, 3, 1, 2)
-
+print(G)
 fake = G(torch.from_numpy(img))
 pred = D(torch.from_numpy(img))
 

@@ -1,6 +1,14 @@
+from numpy.lib.arraysetops import isin
 import torchvision.models as models
 import torch.nn as nn
-from util import vgg_mean, vgg_std
+import torch
+
+vgg_mean = torch.tensor([0.485, 0.456, 0.406]).float()
+vgg_std = torch.tensor([0.229, 0.224, 0.225]).float()
+
+if torch.cuda.is_available():
+    vgg_std = vgg_std.cuda()
+    vgg_mean = vgg_mean.cuda()
 
 class Vgg19(nn.Module):
     def __init__(self):
@@ -15,7 +23,7 @@ class Vgg19(nn.Module):
 
     @staticmethod
     def get_vgg19(last_layer='conv4_4'):
-        vgg = models.vgg19(pretrained=True).features.eval()
+        vgg = models.vgg19(pretrained=torch.cuda.is_available()).features
         model_list = []
 
         i = 0
@@ -47,3 +55,23 @@ class Vgg19(nn.Module):
         '''
         image = (image + 1.0) / 2.0
         return (image - self.mean) / self.std
+
+
+if __name__ == '__main__':
+    from PIL import Image
+    import numpy as np
+
+    image = Image.open("example/10.jpg")
+    image = image.resize((224, 224))
+    np_img = np.array(image).astype('float32')
+    np_img = (np_img / 127.5) - 1
+
+    img = torch.from_numpy(np_img)
+    img = img.permute(2, 0, 1)
+    img = img.unsqueeze(0)
+
+    vgg = Vgg19()
+
+    feat = vgg(img)
+
+    print(feat.shape)
