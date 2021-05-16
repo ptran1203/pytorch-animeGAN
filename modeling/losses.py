@@ -75,6 +75,9 @@ class AnimeGanLoss:
 
 class LossSummary:
     def __init__(self):
+        self.reset()
+
+    def reset(self):
         self.loss_g_adv = []
         self.loss_content = []
         self.loss_gram = []
