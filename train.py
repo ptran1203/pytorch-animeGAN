@@ -206,7 +206,7 @@ def main(args):
 
             loss_d.backward()
 
-            loss_tracker.update_loss_D(loss_d))
+            loss_tracker.update_loss_D(loss_d)
 
             optimizer_d.step()
 
