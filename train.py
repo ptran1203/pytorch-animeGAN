@@ -242,5 +242,6 @@ if __name__ == '__main__':
     print("# ==== Train Config ==== #")
     for arg in vars(args):
         print(arg, getattr(args, arg))
+    print("==========================")
 
     main(args)

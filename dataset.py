@@ -60,17 +60,14 @@ class AnimeDataSet(Dataset):
 
     def __getitem__(self, index):
         image, _ = self.load_images(index, self.photo)
+        anm_idx = index
+        if anm_idx > self.len_anime - 1:
+            anm_idx -= self.len_anime * (index // self.len_anime)
 
         anime, anime_gray = self.load_images(self.anm_idx, self.style)
         _, smooth_gray = self.load_images(self.anm_idx, self.smooth)
 
-        self.next_anm()
         return image, anime, anime_gray, smooth_gray
-
-    def next_anm(self):
-        self.anm_idx += 1
-        if self.anm_idx > self.len_anime - 1:
-            self.anm_idx = 0
 
     def load_images(self, index, opt):
         is_style = opt in {self.style, self.smooth}
