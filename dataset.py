@@ -45,7 +45,7 @@ class AnimeDataSet(Dataset):
         self.transform = transform
         self.anm_idx = 0
 
-        print(f'Dataset: real {len(self.image_files["photo"])} style {self.len_anime}, smooth {self.len_smooth}')
+        print(f'Dataset: real {len(self.image_files[self.photo])} style {self.len_anime}, smooth {self.len_smooth}')
 
     def __len__(self):
         return self.debug_samples or len(self.image_files[self.photo])
