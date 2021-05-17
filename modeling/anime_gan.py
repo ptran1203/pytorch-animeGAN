@@ -111,7 +111,7 @@ class Discriminator(nn.Module):
         self.discriminate = nn.Sequential(*layers)
 
         feat_size = image_size // 4
-        print(f'{batch_size} * {feat_size} * {feat_size}',batch_size * feat_size * feat_size)
+        # print(f'{batch_size} * {feat_size} * {feat_size}',batch_size * feat_size * feat_size)
         self.linear = nn.Linear(batch_size * feat_size * feat_size, 1)
 
     def conv_blocks(self, in_channels, level):
@@ -130,7 +130,6 @@ class Discriminator(nn.Module):
         batch_size = img.shape[0]
 
         features = self.discriminate(img)
-        print(features.shape)
         logit = features.view(batch_size, - 1)
 
         return self.linear(logit)
