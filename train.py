@@ -191,9 +191,7 @@ def main(args):
 
             # ---------------- TRAIN D ---------------- #
             optimizer_d.zero_grad()
-
-            with torch.no_grad():
-                fake_image_for_d = G(img)
+            fake_image_for_d = G(img)
 
             fake_d = D(fake_image_for_d)
             real_anime_d = D(anime)
@@ -213,8 +211,7 @@ def main(args):
             optimizer_g.zero_grad()
 
             fake_img = G(img)
-            with torch.no_grad():
-                fake_d = D(fake_img)
+            fake_d = D(fake_img)
 
             adv_loss, con_loss, gra_loss, col_loss = loss_fn.compute_loss_G(
                 fake_img, img, fake_d, anime_gray)
