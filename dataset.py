@@ -35,7 +35,6 @@ class AnimeDataSet(Dataset):
         self.photo = 'train_photo'
         self.style = f'{anime_dir}/style'
         self.smooth =  f'{anime_dir}/smooth'
-        self.cache = {self.style: [], self.smooth: [], self.photo: []}
 
         for opt in [self.photo, self.style, self.smooth]:
             folder = os.path.join(data_dir, opt)
@@ -44,7 +43,9 @@ class AnimeDataSet(Dataset):
             self.image_files[opt] = [os.path.join(folder, fi) for fi in files]
 
         self.transform = transform
-        # self.cache_images()
+        self.anm_idx = 0
+
+        print(f'Dataset: real {len(self.image_files["photo"])} style {self.len_anime}, smooth {self.len_smooth}')
 
     def __len__(self):
         return self.debug_samples or len(self.image_files[self.photo])
@@ -58,22 +59,18 @@ class AnimeDataSet(Dataset):
         return len(self.image_files[self.smooth])
 
     def __getitem__(self, index):
-        index_anm = np.random.randint(0, self.len_anime - 1)
         image, _ = self.load_images(index, self.photo)
 
-        anime, anime_gray = self.load_images(index_anm, self.style)
-        _, smooth_gray = self.load_images(index_anm, self.smooth)
+        anime, anime_gray = self.load_images(self.anm_idx, self.style)
+        _, smooth_gray = self.load_images(self.anm_idx, self.smooth)
 
+        self.next_anm()
         return image, anime, anime_gray, smooth_gray
 
-    def cache_images(self):
-        print('Caching images ...')
-        for opt in [self.photo, self.style, self.smooth]:
-            for i, path in enumerate(self.image_files[opt]):
-                image = cv2.imread(path)[:,:,::-1]
-                self.cache[opt].append(image)
-
-            print(f'{opt} - {len(self.cache[opt])} images')
+    def next_anm(self):
+        self.anm_idx += 1
+        if self.anm_idx > self.len_anime - 1:
+            self.anm_idx = 0
 
     def load_images(self, index, opt):
         is_style = opt in {self.style, self.smooth}
