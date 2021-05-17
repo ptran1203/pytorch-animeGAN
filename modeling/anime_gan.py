@@ -84,10 +84,13 @@ class Generator(nn.Module):
 
 
 class Discriminator(nn.Module):
-    def __init__(self,  use_sn=False):
+    def __init__(self,  args):
         super(Discriminator, self).__init__()
         self.name = 'discriminator'
         self.bias = True
+        use_sn = args.use_sn
+        image_size = args.image_size
+        batch_size = args.batch_size
 
         if use_sn:
             self.discriminate = nn.Sequential(
@@ -112,6 +115,8 @@ class Discriminator(nn.Module):
                 nn.Conv2d(256, 1, kernel_size=3, stride=1, padding=1, bias=self.bias),
             )
 
+        self.linear = nn.Linear(batch_size * image_size * image_size, 1)
+
     def conv_blocks(self, in_channels, level, use_sn=False):
         ins =  level * 64
         outs =  level * 128
@@ -132,5 +137,9 @@ class Discriminator(nn.Module):
         ]
 
     def forward(self, img):
-        x = self.discriminate(img)
-        return x
+        batch_size = img.shape[0]
+
+        features = self.discriminate(img)
+        logit = features.view(batch_size, - 1)
+
+        return self.linear(logit)
