@@ -43,7 +43,6 @@ class AnimeDataSet(Dataset):
             self.image_files[opt] = [os.path.join(folder, fi) for fi in files]
 
         self.transform = transform
-        self.anm_idx = 0
 
         print(f'Dataset: real {len(self.image_files[self.photo])} style {self.len_anime}, smooth {self.len_smooth}')
 
@@ -64,9 +63,8 @@ class AnimeDataSet(Dataset):
         if anm_idx > self.len_anime - 1:
             anm_idx -= self.len_anime * (index // self.len_anime)
 
-        print(index, anm_idx)
-        anime, anime_gray = self.load_images(self.anm_idx, self.style)
-        _, smooth_gray = self.load_images(self.anm_idx, self.smooth)
+        anime, anime_gray = self.load_images(anm_idx, self.style)
+        _, smooth_gray = self.load_images(anm_idx, self.smooth)
 
         return image, anime, anime_gray, smooth_gray
 
