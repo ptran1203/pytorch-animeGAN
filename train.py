@@ -193,10 +193,10 @@ def main(args):
             optimizer_d.zero_grad()
             fake_image_for_d = G(img)
 
-            fake_d = D(fake_image_for_d)
-            real_anime_d = D(anime)
-            real_anime_gray_d = D(anime_gray)
-            real_anime_smt_gray_d = D(anime_smt_gray)
+            fake_d = D(fake_image_for_d + torch.normal(mean=0.0, std=0.1))
+            real_anime_d = D(anime + torch.normal(mean=0.0, std=0.1))
+            real_anime_gray_d = D(anime_gray + torch.normal(mean=0.0, std=0.1))
+            real_anime_smt_gray_d = D(anime_smt_gray + torch.normal(mean=0.0, std=0.1))
 
             loss_d = loss_fn.compute_loss_D(
                 fake_d, real_anime_d, real_anime_gray_d, real_anime_smt_gray_d)
