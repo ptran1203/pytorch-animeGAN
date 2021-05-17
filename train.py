@@ -126,10 +126,6 @@ def main(args):
 
     loss_tracker = LossSummary()
 
-    # Init weight
-    # G.apply(weights_init_normal)
-    # D.apply(weights_init_normal)
-    
     loss_fn = AnimeGanLoss(args)
 
     # Create DataLoader
@@ -149,9 +145,9 @@ def main(args):
     start_e = 0
     if args.continu:
         try:
-            load_checkpoint(G, args.checkpoint_dir)
+            start_e = load_checkpoint(G, args.checkpoint_dir)
             print("G weight loaded")
-            start_e = load_checkpoint(D, args.checkpoint_dir)
+            load_checkpoint(D, args.checkpoint_dir)
             print("D weight loaded")
         except Exception as e:
             print('Could not load checkpoint, train from scratch', e)
