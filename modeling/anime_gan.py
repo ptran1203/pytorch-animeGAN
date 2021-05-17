@@ -89,7 +89,7 @@ class Discriminator(nn.Module):
         self.name = 'discriminator'
         self.bias = True
         use_sn = args.use_sn
-        image_size = args.image_size
+        image_size = 256
         batch_size = args.batch_size
 
         if use_sn:
