@@ -117,7 +117,7 @@ def main(args):
     print("Init models...")
 
     G = Generator().cuda()
-    D = Discriminator(use_sn=args.use_sn).cuda()
+    D = Discriminator(args).cuda()
 
     os.makedirs('/content/generated', exist_ok=True)
 
