@@ -142,6 +142,9 @@ def main(args):
     optimizer_g = optim.Adam(G.parameters(), lr=args.lr_g, betas=(0.5, 0.999))
     optimizer_d = optim.Adam(D.parameters(), lr=args.lr_d, betas=(0.5, 0.999))
 
+    norm_mean = torch.tensor(0.0)
+    norm_std = torch.tensor(0.1)
+
     start_e = 0
     if args.continu:
         try:
@@ -193,10 +196,10 @@ def main(args):
             optimizer_d.zero_grad()
             fake_image_for_d = G(img)
 
-            fake_d = D(fake_image_for_d + torch.normal(mean=0.0, std=0.1))
-            real_anime_d = D(anime + torch.normal(mean=0.0, std=0.1))
-            real_anime_gray_d = D(anime_gray + torch.normal(mean=0.0, std=0.1))
-            real_anime_smt_gray_d = D(anime_smt_gray + torch.normal(mean=0.0, std=0.1))
+            fake_d = D(fake_image_for_d + torch.normal(norm_mean, norm_std))
+            real_anime_d = D(anime + torch.normal(norm_mean, norm_std))
+            real_anime_gray_d = D(anime_gray + torch.normal(norm_mean, norm_std))
+            real_anime_smt_gray_d = D(anime_smt_gray + torch.normal(norm_mean, norm_std))
 
             loss_d = loss_fn.compute_loss_D(
                 fake_d, real_anime_d, real_anime_gray_d, real_anime_smt_gray_d)
