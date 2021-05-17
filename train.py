@@ -240,5 +240,9 @@ def main(args):
 
 if __name__ == '__main__':
     args = parse_args()
-    print(args)
+
+    print("# ==== Train Config ==== #")
+    for arg in vars(args):
+        print(arg, getattr(args, arg))
+
     main(args)
