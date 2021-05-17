@@ -38,8 +38,8 @@ class AnimeGanLoss:
             'normal': nn.BCELoss(),
         }[args.gan_loss]
 
-        self.real = 1.0
-        self.fake = -1.0 if args.gan_loss == 'hinge' else 0.0
+        self.fake = 1.0
+        self.real = -1.0 if args.gan_loss == 'hinge' else 0.0
 
     def compute_loss_G(self, fake_img, img, fake_logit, anime_gray):
         '''

@@ -202,10 +202,9 @@ def main(args):
                 fake_d, real_anime_d, real_anime_gray_d, real_anime_smt_gray_d)
 
             loss_d.backward()
+            optimizer_d.step()
 
             loss_tracker.update_loss_D(loss_d)
-
-            optimizer_d.step()
 
             # ---------------- TRAIN G ---------------- #
             optimizer_g.zero_grad()
@@ -217,8 +216,8 @@ def main(args):
                 fake_img, img, fake_d, anime_gray)
 
             loss_g = adv_loss + con_loss + gra_loss + col_loss
-            loss_g.backward()
 
+            loss_g.backward()
             optimizer_g.step()
 
             loss_tracker.update_loss_G(adv_loss, gra_loss, col_loss, con_loss)
