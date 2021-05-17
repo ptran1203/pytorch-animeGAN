@@ -3,7 +3,7 @@ from PIL import Image
 from util import rgb_to_yuv, rgb_to_yuv_batch
 import numpy as np
 import torch
-from util import gram
+from util import gram, DefaultArgs
 
 
 image = Image.open("example/10.jpg")
@@ -36,11 +36,10 @@ print(yuv_img.shape)
 
 from modeling.anime_gan import Generator, Discriminator
 
-D = Discriminator()
+D = Discriminator(DefaultArgs())
 G = Generator()
 
 img = img.transpose(0, 3, 1, 2)
-print(G)
 fake = G(torch.from_numpy(img))
 pred = D(torch.from_numpy(img))
 

@@ -92,46 +92,36 @@ class Discriminator(nn.Module):
         image_size = 256
         batch_size = args.batch_size
 
+        layers = [
+            nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1, bias=self.bias),
+            nn.LeakyReLU(0.2, True),
+            *self.conv_blocks(32, level=1),
+            *self.conv_blocks(128, level=2),
+            nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1, bias=self.bias),
+            nn.InstanceNorm2d(256),
+            nn.LeakyReLU(0.2, True),
+            nn.Conv2d(256, 1, kernel_size=3, stride=1, padding=1, bias=self.bias),
+        ]
+
         if use_sn:
-            self.discriminate = nn.Sequential(
-                spectral_norm(nn.Conv2d(3, 32, kernel_size=3, stride=1, bias=self.bias)),
-                nn.LeakyReLU(0.2, True),
-                *self.conv_blocks(32, level=1, use_sn=use_sn),
-                *self.conv_blocks(128, level=2, use_sn=use_sn),
-                spectral_norm(nn.Conv2d(256, 256, kernel_size=3, stride=1)),
-                nn.InstanceNorm2d(256),
-                nn.LeakyReLU(0.2, True),
-                spectral_norm(nn.Conv2d(256, 1, kernel_size=3, stride=1, padding=1, bias=self.bias)),
-            )
-        else:
-            self.discriminate = nn.Sequential(
-                nn.Conv2d(3, 32, kernel_size=3, stride=1, bias=self.bias),
-                nn.LeakyReLU(0.2, True),
-                *self.conv_blocks(32, level=1),
-                *self.conv_blocks(128, level=2),
-                nn.Conv2d(256, 256, kernel_size=3, stride=1),
-                nn.InstanceNorm2d(256),
-                nn.LeakyReLU(0.2, True),
-                nn.Conv2d(256, 1, kernel_size=3, stride=1, padding=1, bias=self.bias),
-            )
+            for i in range(len(layers)):
+                if isinstance(layers[i], nn.Conv2d):
+                    layers[i] = spectral_norm(layers[i])
 
-        self.linear = nn.Linear(batch_size * image_size * image_size, 1)
+        self.discriminate = nn.Sequential(*layers)
 
-    def conv_blocks(self, in_channels, level, use_sn=False):
+        feat_size = image_size // 4
+        print(f'{batch_size} * {feat_size} * {feat_size}',batch_size * feat_size * feat_size)
+        self.linear = nn.Linear(batch_size * feat_size * feat_size, 1)
+
+    def conv_blocks(self, in_channels, level):
         ins =  level * 64
         outs =  level * 128
 
-        conv1 = nn.Conv2d(in_channels, ins, kernel_size=3, stride=2, bias=self.bias)
-        conv2 = nn.Conv2d(ins, outs, kernel_size=3, stride=1, bias=self.bias)
-
-        if use_sn:
-            conv1 = spectral_norm(conv1)
-            conv2 = spectral_norm(conv2)
-
         return [
-            conv1,
+            nn.Conv2d(in_channels, ins, kernel_size=3, stride=2, padding=1, bias=self.bias),
             nn.LeakyReLU(0.2, True),
-            conv2,
+            nn.Conv2d(ins, outs, kernel_size=3, stride=1, padding=1, bias=self.bias),
             nn.InstanceNorm2d(outs),
             nn.LeakyReLU(0.2, True),
         ]
@@ -140,6 +130,7 @@ class Discriminator(nn.Module):
         batch_size = img.shape[0]
 
         features = self.discriminate(img)
+        print(features.shape)
         logit = features.view(batch_size, - 1)
 
         return self.linear(logit)
