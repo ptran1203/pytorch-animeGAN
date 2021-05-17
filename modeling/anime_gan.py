@@ -112,7 +112,7 @@ class Discriminator(nn.Module):
 
         feat_size = image_size // 4
         # print(f'{batch_size} * {feat_size} * {feat_size}',batch_size * feat_size * feat_size)
-        self.linear = nn.Linear(batch_size * feat_size * feat_size, 1)
+        self.linear = nn.Linear(feat_size * feat_size, 1)
 
     def conv_blocks(self, in_channels, level):
         ins =  level * 64
