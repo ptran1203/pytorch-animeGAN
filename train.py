@@ -27,6 +27,7 @@ def parse_args():
     parser.add_argument('--batch-size', type=int, default=4)
     parser.add_argument('--checkpoint-dir', type=str, default='/content/checkpoints')
     parser.add_argument('--save-image-dir', type=str, default='/content/images')
+    parser.add_argument('--gan-loss', type=str, default='lsgan', help='lsgan / wgan / hinge / normal')
     parser.add_argument('--continu', action='store_true')
     parser.add_argument('--use_sn', action='store_true')
     parser.add_argument('--display-image', type=bool, default=True)
