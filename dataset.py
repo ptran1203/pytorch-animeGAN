@@ -85,6 +85,8 @@ class AnimeDataSet(Dataset):
 
         # if image is None:
         fpath = self.image_files[opt][index]
+        if is_style:
+            print(fpath)
         image = cv2.imread(fpath)[:,:,::-1]
 
         if is_style:
