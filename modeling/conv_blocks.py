@@ -134,7 +134,7 @@ class ResnetBlock(nn.Module):
         util.initialize_weights(self)
 
     def forward(self, x):
-        out = F.relu(self.norm1(self.conv1(input)), True)
+        out = F.relu(self.norm1(self.conv1(x)), True)
         out = self.norm2(self.conv2(out))
 
         return out + x
