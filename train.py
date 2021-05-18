@@ -156,7 +156,7 @@ def main(args):
             print('Could not load checkpoint, train from scratch', e)
     else:
         try:
-            start_e = load_checkpoint(Gm args.checkpoint_dir, posfix='_init')
+            start_e = load_checkpoint(G, args.checkpoint_dir, posfix='_init')
         except Exception as e:
             print('Could not load G init checkpoint, train from scratch', e)
 
