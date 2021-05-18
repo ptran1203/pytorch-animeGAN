@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+import util
 
 class DownConv(nn.Module):
 
@@ -64,6 +64,8 @@ class SeparableConv2D(nn.Module):
         self.ins_norm2 = nn.InstanceNorm2d(out_channels)
         self.activation2 = nn.LeakyReLU(0.2, True)
 
+        util.initialize_weights(self)
+
     def forward(self, x):
         out = self.depthwise(x)
         out = self.ins_norm1(out)
@@ -83,6 +85,8 @@ class ConvBlock(nn.Module):
             kernel_size=kernel_size, stride=stride, padding=padding, bias=bias)
         self.ins_norm = nn.InstanceNorm2d(out_channels)
         self.activation = nn.LeakyReLU(0.2, True)
+
+        util.initialize_weights(self)
 
     def forward(self, x):
         out = self.conv(x)
@@ -106,6 +110,8 @@ class InvertedResBlock(nn.Module):
         self.ins_norm2 = nn.InstanceNorm2d(out_channels)
         self.activation = nn.LeakyReLU(0.2, True)
 
+        util.initialize_weights(self)
+
     def forward(self, x):
         out = self.conv_block(x)
         out = self.depthwise_conv(out)
@@ -113,5 +119,22 @@ class InvertedResBlock(nn.Module):
         out = self.activation(out)
         out = self.conv(out)
         out = self.ins_norm2(out)
+
+        return out + x
+
+
+class ResnetBlock(nn.Module):
+    def __init__(self, channel, kernel, stride, padding):
+        super(resnet_block, self).__init__()
+        self.conv1 = nn.Conv2d(channel, channel, kernel, stride, padding)
+        self.norm1 = nn.InstanceNorm2d(channel)
+        self.conv2 = nn.Conv2d(channel, channel, kernel, stride, padding)
+        self.norm2 = nn.InstanceNorm2d(channel)
+
+        util.initialize_weights(self)
+
+    def forward(self, x):
+        out = F.relu(self.norm1(self.conv1(input)), True)
+        out = self.norm2(self.conv2(out))
 
         return out + x

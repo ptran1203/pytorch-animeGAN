@@ -8,13 +8,14 @@ from multiprocessing import cpu_count
 from torch.utils.data import DataLoader
 from modeling.anime_gan import Generator
 from modeling.anime_gan import Discriminator
-from modeling.anime_gan import initialize_weights
+from modeling.anime_gan import 
 from modeling.losses import AnimeGanLoss
 from modeling.losses import LossSummary
 from dataset import AnimeDataSet
 from util import show_images
 from util import save_checkpoint
 from util import load_checkpoint
+from util import initialize_weights
 from tqdm import tqdm
 
 
