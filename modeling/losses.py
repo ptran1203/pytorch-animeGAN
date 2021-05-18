@@ -32,14 +32,21 @@ class AnimeGanLoss:
         self.wgra = args.wgra
         self.wcol = args.wcol
         self.vgg19 = Vgg19().cuda().eval()
-        self.gan_loss = {
-            'lsgan': self._least_square,
-            'hinge': self._hinge,
-            'normal': nn.BCELoss(),
-        }[args.gan_loss]
 
-        self.fake = 1.0
-        self.real = -1.0 if args.gan_loss == 'hinge' else 0.0
+        adv_loss = {
+            'lsgan': self._least_square,
+            'hinge_d': self._hinge_d,
+            'hinge_g': self._hinge_g,
+            'normal': nn.BCELoss(),
+        }
+
+        is_hinge = args.gan_loss == 'hinge'
+
+        self.gan_loss_d = adv_loss_d[args.gan_loss + '_d' if is_hinge else args.gan_loss]
+        self.gan_loss_g = adv_loss_g[args.gan_loss + '_g' if is_hinge else args.gan_loss]
+
+        self.real = 1.0
+        self.fake = -1.0 if is_hinge else 0.0
 
     def compute_loss_G(self, fake_img, img, fake_logit, anime_gray):
         '''
@@ -85,8 +92,12 @@ class AnimeGanLoss:
         return torch.mean(torch.square(logit - label))
 
     @staticmethod
-    def _hinge(logit, label):
+    def _hinge_d(logit, label):
         return torch.mean(F.relu(1.0 + label * logit, inplace=True))
+
+    @staticmethod
+    def _hinge_g(logit, label):
+        return -torch.mean(logit)
 
 
 class LossSummary:
