@@ -32,21 +32,8 @@ class AnimeGanLoss:
         self.wgra = args.wgra
         self.wcol = args.wcol
         self.vgg19 = Vgg19().cuda().eval()
-
-        adv_loss = {
-            'lsgan': self._least_square,
-            'hinge_d': self._hinge_d,
-            'hinge_g': self._hinge_g,
-            'normal': nn.BCELoss(),
-        }
-
-        is_hinge = args.gan_loss == 'hinge'
-
-        self.gan_loss_d = adv_loss[args.gan_loss + '_d' if is_hinge else args.gan_loss]
-        self.gan_loss_g = adv_loss[args.gan_loss + '_g' if is_hinge else args.gan_loss]
-
-        self.real = 1.0
-        self.fake = -1.0 if is_hinge else 0.0
+        self.adv_type = args.gan_loss
+        self.bce_loss = nn.BCELoss()
 
     def compute_loss_G(self, fake_img, img, fake_logit, anime_gray):
         '''
@@ -66,18 +53,18 @@ class AnimeGanLoss:
         img_feat = self.vgg19(img)
 
         return [
-            self.wadvg * self.gan_loss_g(fake_logit, self.real),
-            self.wcon * self.content_loss(img_feat.detach(), fake_feat),
-            self.wgra * self.gram_loss(gram(anime_feat.detach()), gram(fake_feat)),
-            self.wcol * self.color_loss(img.detach(), fake_img),
+            self.wadvg * self.adv_loss_g(fake_logit),
+            self.wcon * self.content_loss(img_feat, fake_feat),
+            self.wgra * self.gram_loss(gram(anime_feat), gram(fake_feat)),
+            self.wcol * self.color_loss(img, fake_img),
         ]
 
     def compute_loss_D(self, fake_img_d, real_anime_d, real_anime_gray_d, real_anime_smooth_gray_d):
         return self.wadvd * (
-            self.gan_loss_d(real_anime_d, self.real) +
-            self.gan_loss_d(fake_img_d, self.fake) +
-            self.gan_loss_d(real_anime_gray_d, self.fake) +
-            0.1 * self.gan_loss_d(real_anime_smooth_gray_d, self.fake)
+            self.adv_loss_d_real(real_anime_d) +
+            self.adv_loss_d_fake(fake_img_d) +
+            self.adv_loss_d_fake(real_anime_gray_d) +
+            0.1 * self.adv_loss_d_fake(real_anime_smooth_gray_d)
         )
 
 
@@ -87,17 +74,42 @@ class AnimeGanLoss:
 
         return self.content_loss(feat, re_feat)
 
-    @staticmethod
-    def _least_square(logit, label):
-        return torch.mean(torch.square(logit - label))
+    def adv_loss_d_real(self, pred):
+        if self.adv_type == 'hinge':
+            return torch.mean(F.relu(1.0 - pred))
 
-    @staticmethod
-    def _hinge_d(logit, label):
-        return torch.mean(F.relu(1.0 + label * logit, inplace=True))
+        elif self.adv_type == 'lsgan':
+            return torch.mean(torch.square(pred - 1.0))
 
-    @staticmethod
-    def _hinge_g(logit, label):
-        return -torch.mean(logit)
+        elif self.adv_type == 'normal':
+            return bce_loss(pred, torch.ones_like(pred))
+
+        raise ValueError(f'Do not support loss type {self.adv_type}')
+
+    def adv_loss_d_fake(self, pred):
+        if self.adv_type == 'hinge':
+            return torch.mean(F.relu(1.0 + pred))
+
+        elif self.adv_type == 'lsgan':
+            return torch.mean(torch.square(pred))
+
+        elif self.adv_type == 'normal':
+            return bce_loss(pred, torch.zeros_like(pred))
+
+        raise ValueError(f'Do not support loss type {self.adv_type}')
+
+
+    def adv_loss_g(self, pred):
+        if self.adv_type == 'hinge':
+            return -torch.mean(pred)
+
+        elif self.adv_type == 'lsgan':
+            return torch.mean(torch.square(pred - 1.0))
+
+        elif self.adv_type == 'normal':
+            return bce_loss(pred, torch.zeros_like(pred))
+
+        raise ValueError(f'Do not support loss type {self.adv_type}')
 
 
 class LossSummary:
