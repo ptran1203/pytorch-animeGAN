@@ -8,7 +8,6 @@ from multiprocessing import cpu_count
 from torch.utils.data import DataLoader
 from modeling.anime_gan import Generator
 from modeling.anime_gan import Discriminator
-from modeling.anime_gan import 
 from modeling.losses import AnimeGanLoss
 from modeling.losses import LossSummary
 from dataset import AnimeDataSet
