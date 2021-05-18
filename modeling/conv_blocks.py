@@ -125,7 +125,7 @@ class InvertedResBlock(nn.Module):
 
 class ResnetBlock(nn.Module):
     def __init__(self, in_channels, out_channels, kernel=3, stride=1, padding=1):
-        super(resnet_block, self).__init__()
+        super(ResnetBlock, self).__init__()
         self.conv1 = nn.Conv2d(in_channels, in_channels, kernel, stride, padding)
         self.norm1 = nn.InstanceNorm2d(in_channels)
         self.conv2 = nn.Conv2d(in_channels, out_channels, kernel, stride, padding)
