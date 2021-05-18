@@ -82,18 +82,18 @@ def show_images(images, rows=2, height=10, save=True):
         plt.show()
 
 
-def save_checkpoint(model, optimizer, epoch, args):
+def save_checkpoint(model, optimizer, epoch, args, posfix=''):
     checkpoint = {
         'model_state_dict': model.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
         'epoch': epoch,
     }
-    path = os.path.join(args.checkpoint_dir, f'{model.name}.pth')
+    path = os.path.join(args.checkpoint_dir, f'{model.name}{posfix}.pth')
     torch.save(checkpoint, path)
 
 
-def load_checkpoint(model, checkpoint_dir):
-    path = os.path.join(checkpoint_dir, f'{model.name}.pth')
+def load_checkpoint(model, checkpoint_dir, posfix=''):
+    path = os.path.join(checkpoint_dir, f'{model.name}{posfix}.pth')
     checkpoint = torch.load(path,  map_location='cuda:0')
     model.load_state_dict(checkpoint['model_state_dict'], strict=True)
     epoch = checkpoint['epoch']

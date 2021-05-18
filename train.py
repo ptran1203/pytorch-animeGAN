@@ -154,6 +154,11 @@ def main(args):
             print("D weight loaded")
         except Exception as e:
             print('Could not load checkpoint, train from scratch', e)
+    else:
+        try:
+            start_e = load_checkpoint(Gm args.checkpoint_dir, posfix='_init')
+        except Exception as e:
+            print('Could not load G init checkpoint, train from scratch', e)
 
 
     for e in range(start_e, args.epochs):
@@ -181,6 +186,7 @@ def main(args):
                 bar.set_description(f'[Init Training G] content loss: {avg_content_loss:2f}')
 
             set_lr(optimizer_g, args.lr_g)
+            save_checkpoint(G, optimizer_g, e, args, posfix='_init')
             save_samples(G, data_loader, args, subname='initg')
             continue
 
