@@ -43,4 +43,6 @@ img = img.transpose(0, 3, 1, 2)
 fake = G(torch.from_numpy(img))
 pred = D(torch.from_numpy(img))
 
+print(D)
+
 print(f'G: {fake.shape}, D: {pred.shape}')

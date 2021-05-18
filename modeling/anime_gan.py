@@ -69,16 +69,28 @@ class Discriminator(nn.Module):
         use_sn = args.use_sn
         image_size = 256
         batch_size = args.batch_size
+        channels = 32
 
         layers = [
-            nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1, bias=self.bias),
+            nn.Conv2d(3, channels, kernel_size=3, stride=1, padding=1, bias=self.bias),
+            nn.LeakyReLU(0.2, True)
+        ]
+
+        for i in range(2):
+            layers += [
+                nn.Conv2d(channels, channels * 2, kernel_size=3, stride=2, padding=1, bias=self.bias),
+                nn.LeakyReLU(0.2, True),
+                nn.Conv2d(channels * 2, channels * 4, kernel_size=3, stride=1, padding=1, bias=self.bias),
+                nn.InstanceNorm2d(channels * 4),
+                nn.LeakyReLU(0.2, True),
+            ]
+            channels *= 4
+
+        layers += [
+            nn.Conv2d(channels, channels, kernel_size=3, stride=1, padding=1, bias=self.bias),
+            nn.InstanceNorm2d(channels),
             nn.LeakyReLU(0.2, True),
-            *self.conv_blocks(32, level=1),
-            *self.conv_blocks(128, level=2),
-            nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1, bias=self.bias),
-            nn.InstanceNorm2d(256),
-            nn.LeakyReLU(0.2, True),
-            nn.Conv2d(256, 1, kernel_size=3, stride=1, padding=1, bias=self.bias),
+            nn.Conv2d(channels, 1, kernel_size=3, stride=1, padding=1, bias=self.bias),
         ]
 
         if use_sn:
@@ -92,22 +104,13 @@ class Discriminator(nn.Module):
         # print(f'{batch_size} * {feat_size} * {feat_size}',batch_size * feat_size * feat_size)
         self.linear = nn.Linear(feat_size * feat_size, 1)
 
-    def conv_blocks(self, in_channels, level):
-        ins =  level * 64
-        outs =  level * 128
-
-        return [
-            nn.Conv2d(in_channels, ins, kernel_size=3, stride=2, padding=1, bias=self.bias),
-            nn.LeakyReLU(0.2, True),
-            nn.Conv2d(ins, outs, kernel_size=3, stride=1, padding=1, bias=self.bias),
-            nn.InstanceNorm2d(outs),
-            nn.LeakyReLU(0.2, True),
-        ]
-
     def forward(self, img):
         batch_size = img.shape[0]
 
         features = self.discriminate(img)
+
+        return features
+        
         logit = features.view(batch_size, - 1)
 
         return self.linear(logit)
