@@ -231,7 +231,7 @@ def main(args):
 
             loss_tracker.update_loss_G(adv_loss, gra_loss, col_loss, con_loss)
 
-            avg_adv , avg_gram, avg_content, avg_color = loss_tracker.avg_loss_G()
+            avg_adv, avg_gram, avg_color, avg_content = loss_tracker.avg_loss_G()
             avg_adv_d = loss_tracker.avg_loss_D()
             bar.set_description(f'loss G: adv {avg_adv:2f} con {avg_content:2f} gram {avg_gram:2f} color {avg_color:2f} / loss D: {avg_adv_d:2f}')
 
