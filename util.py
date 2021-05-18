@@ -124,10 +124,7 @@ def resize_image(img, size):
 
 
 def initialize_weights(net):
-    total = 0
-    init = 0
     for m in net.modules():
-        total += 1
         try:
             if isinstance(m, nn.Conv2d):
                 m.weight.data.normal_(0, 0.02)
@@ -141,11 +138,8 @@ def initialize_weights(net):
             elif isinstance(m, nn.BatchNorm2d):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
-            init += 1
         except Exception as e:
             print(f'SKip layer {m}, {e}')
-
-    print(f'Init {init}/{total}')
 
 
 class DefaultArgs():

@@ -9,6 +9,7 @@ from modeling.conv_blocks import DownConv
 from modeling.conv_blocks import UpConv
 from modeling.conv_blocks import SeparableConv2D
 from modeling.conv_blocks import InvertedResBlock
+from modeling.conv_blocks import ResnetBlock
 from modeling.conv_blocks import ConvBlock
 
 
@@ -26,15 +27,18 @@ class Generator(nn.Module):
             ConvBlock(256, 256),
         )
 
+        Resblock = ResnetBlock
+        # Resblock = InvertedResBlock
+
         self.res_blocks = nn.Sequential(
-            InvertedResBlock(256, 256),
-            InvertedResBlock(256, 256),
-            InvertedResBlock(256, 256),
-            InvertedResBlock(256, 256),
-            InvertedResBlock(256, 256),
-            InvertedResBlock(256, 256),
-            InvertedResBlock(256, 256),
-            InvertedResBlock(256, 256),
+            Resblock(256, 256),
+            Resblock(256, 256),
+            Resblock(256, 256),
+            Resblock(256, 256),
+            Resblock(256, 256),
+            Resblock(256, 256),
+            Resblock(256, 256),
+            Resblock(256, 256),
         )
 
         self.decode_blocks = nn.Sequential(
