@@ -7,9 +7,12 @@ Pytorch implementation of AnimeGAN for fast photo animation
 
 ## Stylization results
 
-![](./example/in1.png)
-![](./example/in2.png)
-![](./example/in3.png)
+| Input | Output |
+|--|--|
+|![c1](./example/result/1_36.jpg)|![g1](./example/result/1_36_anime.jpg)|
+|![c1](./example/result/1_46.jpg)|![g1](./example/result/1_46_anime.jpg)| 
+|![c1](./example/result/1_50.jpg)|![g1](./example/result/1_50_anime.jpg)| 
+|![c1](./example/result/1_55.jpg)|![g1](./example/result/1_55_anime.jpg)| 
 
 <!-- ### Objective:
 
