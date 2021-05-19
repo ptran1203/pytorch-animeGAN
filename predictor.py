@@ -14,7 +14,7 @@ VALID_FORMATS = {
 }
 
 class Predictor:
-    def __init__(self, checkpoint_dir, add_mean):
+    def __init__(self, checkpoint_dir, add_mean=False):
         print("Init Generator...")
 
         self.G = Generator()
