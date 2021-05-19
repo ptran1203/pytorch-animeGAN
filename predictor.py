@@ -14,10 +14,11 @@ VALID_FORMATS = {
 }
 
 class Predictor:
-    def __init__(self, checkpoint_dir):
+    def __init__(self, checkpoint_dir, add_mean):
         print("Init Generator...")
 
         self.G = Generator()
+        self.add_mean = add_mean
 
         if cuda_available:
             self.G = self.G.cuda()
@@ -68,8 +69,7 @@ class Predictor:
             anime_img = self.toint16(anime_img)
             cv2.imwrite(os.path.join(dest_dir, f'{fname}_anime.jpg'), anime_img[..., ::-1])
 
-    @staticmethod
-    def preprocess_images(images):
+    def preprocess_images(self, images):
         '''
         Preprocess image for inference
 
@@ -80,9 +80,10 @@ class Predictor:
             - images: torch.tensor
         '''
         images = images.astype(np.float32)
-        # images[:,:, 0] += -4.4661
-        # images[:,:, 1] += -8.6698
-        # images[:,:, 2] += 13.1360
+        if self.add_mean:
+            images[:,:, 0] += -4.4661
+            images[:,:, 1] += -8.6698
+            images[:,:, 2] += 13.1360
 
         # Normalize to [-1, 1]
         images = (images / 127.5) - 1.0
