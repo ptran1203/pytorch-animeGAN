@@ -27,8 +27,8 @@ class Generator(nn.Module):
             ConvBlock(256, 256),
         )
 
-        Resblock = ResnetBlock
-        # Resblock = InvertedResBlock
+        # Resblock = ResnetBlock
+        Resblock = InvertedResBlock
 
         self.res_blocks = nn.Sequential(
             Resblock(256, 256),
