@@ -89,7 +89,7 @@ class AnimeDataSet(Dataset):
         return torch.tensor(image), image_gray
 
 
-    def _transform(self, img, addmean=False):
+    def _transform(self, img, addmean=True):
         if self.transform is not None:
             img =  self.transform(image=img)['image']
 
