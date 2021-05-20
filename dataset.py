@@ -70,13 +70,6 @@ class AnimeDataSet(Dataset):
 
     def load_images(self, index, opt):
         is_style = opt in {self.style, self.smooth}
-
-        image = None
-        # Try to get cache_image
-        # if opt in self.cache and len(self.cache[opt]) > index:
-        #     image = self.cache[opt][index]
-
-        # if image is None:
         fpath = self.image_files[opt][index]
         image = cv2.imread(fpath)[:,:,::-1]
 
