@@ -28,7 +28,7 @@ def gram(input):
     return G.div(b * c * w * h)
 
 
-def rgb_to_yuv(image, channel_last=False):
+def rgb_to_yuv(image):
     '''
     https://en.wikipedia.org/wiki/YUV
 
@@ -37,26 +37,10 @@ def rgb_to_yuv(image, channel_last=False):
     # -1 1 -> 0 1
     image = (image + 1.0) / 2.0
 
-    # Conver to channel first
-    if channel_last:
-        image = image.permute(2, 0, 1).type(torch.float32)
-
-    yuv_img = torch.tensordot(image.float(), _rgb_to_yuv_kernel, dims=([0], [0]))
-
-    return yuv_img
-
-
-def rgb_to_yuv_batch(images, channel_last=False):
-    '''
-    Extend of rgb_to_yuv to run on batch
-
-    output: Image of shape (B, H, W, C) (channel last)
-    '''
-    images = (images + 1.0)  / 2.0
-    if channel_last:
-        images = images.permute(0, 3, 1, 2).type(torch.float32)
-
-    yuv_img = torch.tensordot(images.float(), _rgb_to_yuv_kernel, dims=([1], [0]))
+    yuv_img = torch.tensordot(
+        image,
+        _rgb_to_yuv_kernel,
+        dims=([image.ndim - 3], [0]))
 
     return yuv_img
 

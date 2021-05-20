@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 import torch.nn as nn
 from modeling.vgg import Vgg19
-from util import gram, rgb_to_yuv_batch
+from util import gram, rgb_to_yuv
 
 class ColorLoss(nn.Module):
     def __init__(self):
@@ -11,8 +11,8 @@ class ColorLoss(nn.Module):
         self.huber = nn.SmoothL1Loss()
 
     def forward(self, image, image_g):
-        image = rgb_to_yuv_batch(image)
-        image_g = rgb_to_yuv_batch(image_g)
+        image = rgb_to_yuv(image)
+        image_g = rgb_to_yuv(image_g)
 
         # After convert to yuv, both images have channel last
 
