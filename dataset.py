@@ -81,7 +81,7 @@ class AnimeDataSet(Dataset):
             image_gray = torch.tensor(image_gray)
         else:
             h, w, c = image.shape
-            image_gray = torch.tensor(np.zeros((c, h, w)))
+            image_gray = torch.zeros(c, h, w)
 
         image = self._transform(image, addmean=is_style)
         image = image.transpose(2, 0, 1)

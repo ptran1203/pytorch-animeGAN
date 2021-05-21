@@ -65,7 +65,7 @@ class Discriminator(nn.Module):
     def __init__(self,  args):
         super(Discriminator, self).__init__()
         self.name = 'discriminator'
-        self.bias = True
+        self.bias = False
         use_sn = args.use_sn
         image_size = 256
         batch_size = args.batch_size
@@ -76,7 +76,7 @@ class Discriminator(nn.Module):
             nn.LeakyReLU(0.2, True)
         ]
 
-        for i in range(2):
+        for i in range(3):
             layers += [
                 nn.Conv2d(channels, channels * 2, kernel_size=3, stride=2, padding=1, bias=self.bias),
                 nn.LeakyReLU(0.2, True),
