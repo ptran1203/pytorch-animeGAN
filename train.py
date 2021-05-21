@@ -168,7 +168,7 @@ def main(args):
 
         init_losses = []
 
-        if e < args.init_epochs + 1:
+        if e < args.init_epochs:
             # Train with content loss only
             set_lr(optimizer_g, args.init_lr)
             for img, *_ in bar:
