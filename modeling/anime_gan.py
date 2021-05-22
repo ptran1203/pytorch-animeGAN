@@ -1,9 +1,6 @@
 
-import numpy as np
-import math
 import torch.nn as nn
 import torch.nn.functional as F
-import torch
 from torch.nn.utils import spectral_norm
 from modeling.conv_blocks import DownConv
 from modeling.conv_blocks import UpConv
@@ -17,39 +14,41 @@ class Generator(nn.Module):
     def __init__(self):
         super(Generator, self).__init__()
         self.name = 'generator'
+        bias = False
+
         self.encode_blocks = nn.Sequential(
-            ConvBlock(3, 64),
-            ConvBlock(64, 128),
-            DownConv(128),
-            ConvBlock(128, 128),
-            SeparableConv2D(128, 256),
-            DownConv(256),
-            ConvBlock(256, 256),
+            ConvBlock(3, 64, bias=bias),
+            ConvBlock(64, 128, bias=bias),
+            DownConv(128, bias=bias),
+            ConvBlock(128, 128, bias=bias),
+            SeparableConv2D(128, 256, bias=bias),
+            DownConv(256, bias=bias),
+            ConvBlock(256, 256, bias=bias),
         )
 
-        Resblock = ResnetBlock
-        # Resblock = InvertedResBlock
+        # Resblock = ResnetBlock
+        Resblock = InvertedResBlock
 
         self.res_blocks = nn.Sequential(
-            Resblock(256, 256),
-            Resblock(256, 256),
-            Resblock(256, 256),
-            Resblock(256, 256),
-            Resblock(256, 256),
-            Resblock(256, 256),
-            Resblock(256, 256),
-            Resblock(256, 256),
+            Resblock(256, 256, bias=bias),
+            Resblock(256, 256, bias=bias),
+            Resblock(256, 256, bias=bias),
+            Resblock(256, 256, bias=bias),
+            Resblock(256, 256, bias=bias),
+            Resblock(256, 256, bias=bias),
+            Resblock(256, 256, bias=bias),
+            Resblock(256, 256, bias=bias),
         )
 
         self.decode_blocks = nn.Sequential(
-            ConvBlock(256, 128),
-            UpConv(128),
-            SeparableConv2D(128, 128),
-            ConvBlock(128, 128),
-            UpConv(128),
-            ConvBlock(128, 64),
-            ConvBlock(64, 64),
-            nn.Conv2d(64, 3, kernel_size=3, stride=1, padding=1),
+            ConvBlock(256, 128, bias=bias),
+            UpConv(128, bias=bias),
+            SeparableConv2D(128, 128, bias=bias),
+            ConvBlock(128, 128, bias=bias),
+            UpConv(128, bias=bias),
+            ConvBlock(128, 64, bias=bias),
+            ConvBlock(64, 64, bias=bias),
+            nn.Conv2d(64, 3, kernel_size=3, stride=1, padding=1, bias=bias),
             nn.Tanh(),
         )
 
@@ -65,10 +64,9 @@ class Discriminator(nn.Module):
     def __init__(self,  args):
         super(Discriminator, self).__init__()
         self.name = 'discriminator'
-        self.bias = True
+        self.bias = False
         use_sn = args.use_sn
         image_size = 256
-        batch_size = args.batch_size
         channels = 32
 
         layers = [
@@ -101,7 +99,6 @@ class Discriminator(nn.Module):
         self.discriminate = nn.Sequential(*layers)
 
         feat_size = image_size // 4
-        # print(f'{batch_size} * {feat_size} * {feat_size}',batch_size * feat_size * feat_size)
         self.linear = nn.Linear(feat_size * feat_size, 1)
 
     def forward(self, img):
