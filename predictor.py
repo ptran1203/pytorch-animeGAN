@@ -2,9 +2,11 @@ import torch
 import cv2
 import os
 import numpy as np
+import moviepy.video.io.ffmpeg_writer as ffmpeg_write
 from modeling.anime_gan import Generator
 from util import load_checkpoint, resize_image
 from tqdm import tqdm
+from moviepy.video.io.VideoFileClip import VideoFileClip
 
 
 cuda_available = torch.cuda.is_available()
@@ -68,6 +70,9 @@ class Predictor:
             fname = fname.replace(f'.{ext}', '')
             anime_img = self.toint16(anime_img)
             cv2.imwrite(os.path.join(dest_dir, f'{fname}_anime.jpg'), anime_img[..., ::-1])
+
+    def transfrom_video(self, input_path, output_path):
+        pass
 
     def preprocess_images(self, images):
         '''
