@@ -82,7 +82,7 @@ class AnimeGanLoss:
             return torch.mean(torch.square(pred - 1.0))
 
         elif self.adv_type == 'normal':
-            return bce_loss(pred, torch.ones_like(pred))
+            return self.bce_loss(pred, torch.ones_like(pred))
 
         raise ValueError(f'Do not support loss type {self.adv_type}')
 
@@ -94,7 +94,7 @@ class AnimeGanLoss:
             return torch.mean(torch.square(pred))
 
         elif self.adv_type == 'normal':
-            return bce_loss(pred, torch.zeros_like(pred))
+            return self.bce_loss(pred, torch.zeros_like(pred))
 
         raise ValueError(f'Do not support loss type {self.adv_type}')
 
@@ -107,7 +107,7 @@ class AnimeGanLoss:
             return torch.mean(torch.square(pred - 1.0))
 
         elif self.adv_type == 'normal':
-            return bce_loss(pred, torch.zeros_like(pred))
+            return self.bce_loss(pred, torch.zeros_like(pred))
 
         raise ValueError(f'Do not support loss type {self.adv_type}')
 
