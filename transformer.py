@@ -65,7 +65,7 @@ class Transformer:
         for fname in tqdm(files):
             image = cv2.imread(os.path.join(img_dir, fname))[:,:,::-1]
             image = resize_image(image, img_size)
-            anime_img = self.transform(image)
+            anime_img = self.transform(image)[0]
             ext = fname.split('.')[-1]
             fname = fname.replace(f'.{ext}', '')
             anime_img = self.toint16(anime_img)
@@ -95,11 +95,10 @@ class Transformer:
                                                         preset="medium", bitrate="2000k",
                                                         audiofile=input_path, threads=None,
                                                         ffmpeg_params=None)
-
+        batch_shape = (batch_size, video_clip.size[1], video_clip.size[0], 3)
         frame_count = 0
-        frames = np.zeros(batch_size, dtype=np.float32)
-
-        for frame in video_clip.iter_frames():
+        frames = np.zeros(batch_shape, dtype=np.float32)
+        for frame in tqdm(video_clip.iter_frames()):
             frames[frame_count] = frame
             frame_count += 1
             if frame_count == batch_size:
