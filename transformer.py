@@ -81,6 +81,12 @@ class Transformer:
 
         output_dir = "/".join(output_path.split("/")[:-1])
         os.makedirs(output_dir, exist_ok=True)
+        is_gg_drive = '/drive/' in output_path
+        temp_file = ''
+
+        if is_gg_drive:
+            # Writing directly into google drive can be inefficient
+            temp_file = f'tmp_anime.{output_path.split(".")[-1]}'
 
         print(f'Transfroming video {input_path}')
 
@@ -91,10 +97,13 @@ class Transformer:
                 writer.write_frame(img)
 
         video_clip = VideoFileClip(input_path, audio=False)
-        video_writer = ffmpeg_writer.FFMPEG_VideoWriter(output_path, video_clip.size, video_clip.fps, codec="libx264",
-                                                        preset="medium", bitrate="2000k",
-                                                        audiofile=input_path, threads=None,
-                                                        ffmpeg_params=None)
+        video_writer = ffmpeg_writer.FFMPEG_VideoWriter(
+            temp_file or output_path,
+            video_clip.size, video_clip.fps, codec="libx264",
+            preset="medium", bitrate="2000k",
+            audiofile=input_path, threads=None,
+            ffmpeg_params=None)
+
         batch_shape = (batch_size, video_clip.size[1], video_clip.size[0], 3)
         frame_count = 0
         frames = np.zeros(batch_shape, dtype=np.float32)
@@ -108,6 +117,10 @@ class Transformer:
         # The last frames
         if frame_count != 0:
             transform_and_write(frames, frame_count, video_writer)
+
+        if temp_file:
+            # move to output path
+            os.rename(temp_file, output_path)
 
         print(f'Animation video saved to {output_path}')
         video_writer.close()
