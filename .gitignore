@@ -1,7 +1,6 @@
-__pycache__
-*/__pycache__
-modeling/__pycache__
+ __pycache__/
+*.pyc
 *.zip
 dataset
 spirit.away
-*.pyc
+.DS_Store

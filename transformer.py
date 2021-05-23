@@ -71,8 +71,7 @@ class Transformer:
             anime_img = self.toint16(anime_img)
             cv2.imwrite(os.path.join(dest_dir, f'{fname}_anime.jpg'), anime_img[..., ::-1])
 
-
-    def transfrom_video(self, input_path, output_path, batch_size=4):
+    def transform_video(self, input_path, output_path, batch_size=4):
         '''
         Transform a video to animation version
         https://github.com/lengstrom/fast-style-transfer/blob/master/evaluate.py#L21
