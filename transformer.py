@@ -108,11 +108,15 @@ class Transformer:
         frame_count = 0
         frames = np.zeros(batch_shape, dtype=np.float32)
         for frame in tqdm(video_clip.iter_frames()):
-            frames[frame_count] = frame
-            frame_count += 1
-            if frame_count == batch_size:
-                transform_and_write(frames, frame_count, video_writer)
-                frame_count = 0
+            try:
+                frames[frame_count] = frame
+                frame_count += 1
+                if frame_count == batch_size:
+                    transform_and_write(frames, frame_count, video_writer)
+                    frame_count = 0
+            except Exception as e:
+                print(e)
+                break
 
         # The last frames
         if frame_count != 0:
