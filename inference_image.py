@@ -1,5 +1,5 @@
 import argparse
-from predictor import Predictor
+from transformer import Transformer
 
 
 def parse_args():
@@ -13,8 +13,8 @@ def parse_args():
 
 
 def main(args):
-    predictor = Predictor(args.checkpoint, args.add_mean)
-    predictor.predict_dir(args.src, args.dest)
+    transformer = Transformer(args.checkpoint, args.add_mean)
+    transformer.transform_in_dir(args.src, args.dest)
 
 if __name__ == '__main__':
     args = parse_args()
