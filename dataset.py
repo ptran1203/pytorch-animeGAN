@@ -99,7 +99,7 @@ class AnimeDataSet(Dataset):
             img[:,:, 1] += -8.6698
             img[:,:, 2] += 13.1360
     
-        return normalize_input()mg
+        return normalize_input(img)
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
