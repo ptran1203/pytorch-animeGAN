@@ -5,7 +5,12 @@ Pytorch implementation of AnimeGAN for fast photo animation
 * Paper: AnimeGAN: a novel lightweight GAN for photo animation - [semanticscholar](https://www.semanticscholar.org/paper/AnimeGAN%3A-A-Novel-Lightweight-GAN-for-Photo-Chen-Liu/10a9c5d183e7e7df51db8bfa366bc862262b37d7#citing-papers) or [here](https://github.com/TachibanaYoshino/AnimeGAN/blob/master/doc/Chen2020_Chapter_AnimeGAN.pdf)
 * Offical implementation in [Tensorflow](https://github.com/TachibanaYoshino/AnimeGAN) by [Yoshino](https://github.com/TachibanaYoshino)
 
+| Input | Animation |
+|--|--|
+|![c1](./example/video.gif)|![g1](./example/animation.gif)|
+
 ## Stylization results
+
 
 Optimizing code for good results...
 
