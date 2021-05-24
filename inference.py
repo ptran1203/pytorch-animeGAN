@@ -22,7 +22,6 @@ class Transformer:
         print("Init Generator...")
 
         self.G = Generator()
-        self.add_mean = add_mean
 
         if cuda_available:
             self.G = self.G.cuda()
@@ -143,10 +142,6 @@ class Transformer:
             - images: torch.tensor
         '''
         images = images.astype(np.float32)
-        if self.add_mean:
-            images[:,:, 0] += -4.4661
-            images[:,:, 1] += -8.6698
-            images[:,:, 2] += 13.1360
 
         # Normalize to [-1, 1]
         images = normalize_input(images)
