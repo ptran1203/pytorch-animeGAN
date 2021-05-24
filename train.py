@@ -34,7 +34,6 @@ def parse_args():
     parser.add_argument('--gan-loss', type=str, default='lsgan', help='lsgan / wgan / hinge / normal')
     parser.add_argument('--continu', type=str, default='False')
     parser.add_argument('--use_sn', action='store_true')
-    parser.add_argument('--display-image', type=bool, default=True)
     parser.add_argument('--save-interval', type=int, default=2)
     parser.add_argument('--debug-samples', type=int, default=0)
     parser.add_argument('--lr-g', type=float, default=0.001)

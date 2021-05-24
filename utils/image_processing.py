@@ -67,10 +67,10 @@ def denormalize_input(images, dtype=None):
     images = images * 127.5 + 127.5
 
     if dtype is not None:
-        if isinstance(images, np.ndarray):
-            images = images.astype(dtype)
-        else:
-            # Torch
+        if isinstance(images, torch.Tensor):
             images = images.type(dtype)
+        else:
+            # numpy.ndarray
+            images = images.astype(dtype)
 
     return images
