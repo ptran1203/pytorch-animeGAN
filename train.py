@@ -10,11 +10,12 @@ from modeling.anime_gan import Generator
 from modeling.anime_gan import Discriminator
 from modeling.losses import AnimeGanLoss
 from modeling.losses import LossSummary
+from utils.training import load_checkpoint
+from utils.training import save_checkpoint
+from utils.training import set_lr
+from utils.training import initialize_weights
+from utils.image_processing import denormalize_input
 from dataset import AnimeDataSet
-from util import show_images
-from util import save_checkpoint
-from util import load_checkpoint
-from util import initialize_weights
 from tqdm import tqdm
 
 
@@ -74,14 +75,9 @@ def save_samples(generator, loader, args, max_imgs=2, subname='gen'):
     Generate and save images
     '''
     generator.eval()
-    def toint(img):
-        img = img * 127.5 + 127.5
-        img = img.astype(np.int16)
-        return img
 
     max_iter = (max_imgs // args.batch_size) + 1
     fake_imgs = []
-    real_imgs = []
 
     for i, (img, *_) in enumerate(loader):
         with torch.no_grad():
@@ -89,27 +85,17 @@ def save_samples(generator, loader, args, max_imgs=2, subname='gen'):
             fake_img = fake_img.detach().cpu().numpy()
             # Channel first -> channel last
             fake_img  = fake_img.transpose(0, 2, 3, 1)
-            fake_imgs.append(toint(fake_img))
-            # real_imgs.append(
-            #     toint(img.permute(0, 2, 3 ,1).detach().cpu().numpy()))
+            fake_imgs.append(denormalize_input(fake_img, dtype=np.int16))
 
         if i + 1 == max_iter:
             break
 
     fake_imgs = np.concatenate(fake_imgs, axis=0)
-    # real_imgs = np.concatenate(real_imgs, axis=0)
-
-    # if args.display_image:
-    #     show_images(np.concatenate(fake_imgs), save=True)
 
     for i, img in enumerate(fake_imgs):
         save_path = os.path.join(args.save_image_dir, f'{subname}_{i}.jpg')
         cv2.imwrite(save_path, img[..., ::-1])
 
-
-def set_lr(optimizer, lr):
-    for param_group in optimizer.param_groups:
-        param_group['lr'] = lr
 
 def main(args):
     check_params(args)

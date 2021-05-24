@@ -2,7 +2,8 @@ import torch
 import torch.nn.functional as F
 import torch.nn as nn
 from modeling.vgg import Vgg19
-from util import gram, rgb_to_yuv
+from utils.image_processing import gram, rgb_to_yuv
+
 
 class ColorLoss(nn.Module):
     def __init__(self):

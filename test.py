@@ -1,9 +1,10 @@
 import matplotlib.pyplot as plt
-from PIL import Image
-from util import rgb_to_yuv
 import numpy as np
 import torch
-from util import gram, DefaultArgs
+from PIL import Image
+from utils.image_processing import rgb_to_yuv
+from utils.image_processing import gram, normalize_input
+from utils import DefaultArgs
 
 def rgb_to_yuv_test(image):
     import tensorflow as tf
@@ -15,7 +16,7 @@ def rgb_to_yuv_test(image):
 image = Image.open("example/10.jpg")
 image = image.resize((256, 256))
 np_img = np.array(image).astype('float32')
-np_img = np_img / 127.5 - 1
+np_img = normalize_input(np_img)
 
 img = torch.from_numpy(np_img)
 

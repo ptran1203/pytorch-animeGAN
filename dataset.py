@@ -3,8 +3,8 @@ import cv2
 import numpy as np
 import pandas as pd
 import torch
-# import albumentations as A
 from torch.utils.data import Dataset
+from utils.image_processing import normalize_input
 
 class AnimeDataSet(Dataset):
     def __init__(self, args, transform=None):
@@ -99,8 +99,7 @@ class AnimeDataSet(Dataset):
             img[:,:, 1] += -8.6698
             img[:,:, 2] += 13.1360
     
-        img = img / 127.5 - 1.0
-        return img
+        return normalize_input()mg
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt

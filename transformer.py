@@ -4,7 +4,8 @@ import os
 import numpy as np
 import moviepy.video.io.ffmpeg_writer as ffmpeg_writer
 from modeling.anime_gan import Generator
-from util import load_checkpoint, resize_image
+from utils.training import load_checkpoint
+from utils.image_processing import resize_image, normalize_input, denormalize_input
 from tqdm import tqdm
 from moviepy.video.io.VideoFileClip import VideoFileClip
 
@@ -68,7 +69,7 @@ class Transformer:
             anime_img = self.transform(image)[0]
             ext = fname.split('.')[-1]
             fname = fname.replace(f'.{ext}', '')
-            anime_img = self.toint16(anime_img)
+            anime_img = denormalize_input(anime_img, dtype=np.int16)
             cv2.imwrite(os.path.join(dest_dir, f'{fname}_anime.jpg'), anime_img[..., ::-1])
 
     def transform_video(self, input_path, output_path, batch_size=4):
@@ -91,7 +92,7 @@ class Transformer:
         print(f'Transfroming video {input_path}')
 
         def transform_and_write(frames, count, writer):
-            anime_images = self.toint8(self.transform(frames))
+            anime_images = denormalize_input(self.transform(frames), dtype=np.uint8)
             for i in range(0, count):
                 img = np.clip(anime_images[i], 0, 255)
                 writer.write_frame(img)
@@ -146,7 +147,7 @@ class Transformer:
             images[:,:, 2] += 13.1360
 
         # Normalize to [-1, 1]
-        images = (images / 127.5) - 1.0
+        images = normalize_input(images)
         images = torch.from_numpy(images)
 
         if cuda_available:
@@ -166,15 +167,3 @@ class Transformer:
     def is_valid_file(fname):
         ext = fname.split('.')[-1]
         return ext in VALID_FORMATS
-
-    @staticmethod
-    def toint16(img):
-        img = img * 127.5 + 127.5
-        img = img.astype(np.int16)
-        return img
-
-    @staticmethod
-    def toint8(img):
-        img = img * 127.5 + 127.5
-        img = img.astype(np.uint8)
-        return img
