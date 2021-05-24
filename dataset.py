@@ -7,7 +7,7 @@ from torch.utils.data import Dataset
 from utils.image_processing import normalize_input
 
 class AnimeDataSet(Dataset):
-    def __init__(self, args, transform=None):
+    def __init__(self, args,  data_mean=[-4.4661, -8.6698, 13.1360], transform=None):
         """   
         folder structure:
             - {data_dir}
@@ -29,6 +29,7 @@ class AnimeDataSet(Dataset):
         if not os.path.exists(anime_dir):
             raise FileNotFoundError(f'Folder {anime_dir} does not exist')
 
+        self.mean = np.array(data_mean)
         self.debug_samples = args.debug_samples or 0
         self.data_dir = data_dir
         self.image_files =  {}
@@ -95,9 +96,7 @@ class AnimeDataSet(Dataset):
 
         img = img.astype(np.float32)
         if addmean:
-            img[:,:, 0] += -4.4661
-            img[:,:, 1] += -8.6698
-            img[:,:, 2] += 13.1360
+            img += self.mean
     
         return normalize_input(img)
 
