@@ -8,6 +8,7 @@ from modeling.conv_blocks import SeparableConv2D
 from modeling.conv_blocks import InvertedResBlock
 from modeling.conv_blocks import ResnetBlock
 from modeling.conv_blocks import ConvBlock
+from utils.training import initialize_weights
 
 
 class Generator(nn.Module):
@@ -51,6 +52,8 @@ class Generator(nn.Module):
             nn.Conv2d(64, 3, kernel_size=1, stride=1, padding=0, bias=bias),
             nn.Tanh(),
         )
+
+        initialize_weights(self)
 
     def forward(self, x):
         out = self.encode_blocks(x)
@@ -100,6 +103,8 @@ class Discriminator(nn.Module):
 
         feat_size = image_size // 4
         self.linear = nn.Linear(feat_size * feat_size, 1)
+
+        initialize_weights(self)
 
     def forward(self, img):
         batch_size = img.shape[0]

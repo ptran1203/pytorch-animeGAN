@@ -18,6 +18,9 @@ from utils.image_processing import denormalize_input
 from dataset import AnimeDataSet
 from tqdm import tqdm
 
+gaussian_mean = torch.tensor(0.0)
+gaussian_std = torch.tensor(0.1)
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -97,6 +100,10 @@ def save_samples(generator, loader, args, max_imgs=2, subname='gen'):
         cv2.imwrite(save_path, img[..., ::-1])
 
 
+def gaussian_noise():
+    return torch.normal(gaussian_mean, gaussian_std)
+
+
 def main(args):
     check_params(args)
 
@@ -105,21 +112,15 @@ def main(args):
     G = Generator().cuda()
     D = Discriminator(args).cuda()
 
-    os.makedirs('/content/generated', exist_ok=True)
-
-    initialize_weights(G)
-    initialize_weights(D)
-
     loss_tracker = LossSummary()
 
     loss_fn = AnimeGanLoss(args)
 
     # Create DataLoader
-    num_workers = cpu_count()
     data_loader = DataLoader(
         AnimeDataSet(args),
         batch_size=args.batch_size,
-        num_workers=num_workers,
+        num_workers=cpu_count(),
         pin_memory=True,
         shuffle=True,
         collate_fn=collate_fn,
@@ -128,11 +129,9 @@ def main(args):
     optimizer_g = optim.Adam(G.parameters(), lr=args.lr_g, betas=(0.5, 0.999))
     optimizer_d = optim.Adam(D.parameters(), lr=args.lr_d, betas=(0.5, 0.999))
 
-    norm_mean = torch.tensor(0.0)
-    norm_std = torch.tensor(0.1)
-
     start_e = 0
     if args.continu == 'GD':
+        # Load G and D
         try:
             start_e = load_checkpoint(G, args.checkpoint_dir)
             print("G weight loaded")
@@ -141,6 +140,7 @@ def main(args):
         except Exception as e:
             print('Could not load checkpoint, train from scratch', e)
     elif args.continu == 'G':
+        # Load G only
         try:
             start_e = load_checkpoint(G, args.checkpoint_dir, posfix='_init')
         except Exception as e:
@@ -187,10 +187,11 @@ def main(args):
             optimizer_d.zero_grad()
             fake_image_for_d = G(img)
 
-            fake_d = D(fake_image_for_d + torch.normal(norm_mean, norm_std))
-            real_anime_d = D(anime + torch.normal(norm_mean, norm_std))
-            real_anime_gray_d = D(anime_gray + torch.normal(norm_mean, norm_std))
-            real_anime_smt_gray_d = D(anime_smt_gray + torch.normal(norm_mean, norm_std))
+            # Add some Gaussian noise to images before feeding to D
+            fake_d = D(fake_image_for_d + gaussian_noise())
+            real_anime_d = D(anime + gaussian_noise())
+            real_anime_gray_d = D(anime_gray + gaussian_noise())
+            real_anime_smt_gray_d = D(anime_smt_gray + gaussian_noise())
 
             loss_d = loss_fn.compute_loss_D(
                 fake_d, real_anime_d, real_anime_gray_d, real_anime_smt_gray_d)
