@@ -48,7 +48,7 @@ class Generator(nn.Module):
             UpConv(128, bias=bias),
             ConvBlock(128, 64, bias=bias),
             ConvBlock(64, 64, bias=bias),
-            nn.Conv2d(64, 3, kernel_size=3, stride=1, padding=1, bias=bias),
+            nn.Conv2d(64, 3, kernel_size=1, stride=1, padding=0, bias=bias),
             nn.Tanh(),
         )
 

@@ -54,17 +54,17 @@ class AnimeGanLoss:
 
         return [
             self.wadvg * self.adv_loss_g(fake_logit),
-            self.wcon * self.content_loss(img_feat, fake_feat),
+            self.wcon * self.content_loss(img_feat.detach(), fake_feat),
             self.wgra * self.gram_loss(gram(anime_feat), gram(fake_feat)),
             self.wcol * self.color_loss(img, fake_img),
         ]
 
     def compute_loss_D(self, fake_img_d, real_anime_d, real_anime_gray_d, real_anime_smooth_gray_d):
         return self.wadvd * (
-            1.7 * self.adv_loss_d_real(real_anime_d) +
-            1.7 * self.adv_loss_d_fake(fake_img_d) +
-            1.7 * self.adv_loss_d_fake(real_anime_gray_d) +
-            0.8 * self.adv_loss_d_fake(real_anime_smooth_gray_d)
+            self.adv_loss_d_real(real_anime_d) +
+            self.adv_loss_d_fake(fake_img_d) +
+            self.adv_loss_d_fake(real_anime_gray_d) +
+            0.2 * self.adv_loss_d_fake(real_anime_smooth_gray_d)
         )
 
 
@@ -82,7 +82,7 @@ class AnimeGanLoss:
             return torch.mean(torch.square(pred - 1.0))
 
         elif self.adv_type == 'normal':
-            return bce_loss(pred, torch.ones_like(pred))
+            return self.bce_loss(pred, torch.ones_like(pred))
 
         raise ValueError(f'Do not support loss type {self.adv_type}')
 
@@ -94,7 +94,7 @@ class AnimeGanLoss:
             return torch.mean(torch.square(pred))
 
         elif self.adv_type == 'normal':
-            return bce_loss(pred, torch.zeros_like(pred))
+            return self.bce_loss(pred, torch.zeros_like(pred))
 
         raise ValueError(f'Do not support loss type {self.adv_type}')
 
@@ -107,7 +107,7 @@ class AnimeGanLoss:
             return torch.mean(torch.square(pred - 1.0))
 
         elif self.adv_type == 'normal':
-            return bce_loss(pred, torch.zeros_like(pred))
+            return self.bce_loss(pred, torch.zeros_like(pred))
 
         raise ValueError(f'Do not support loss type {self.adv_type}')
 
