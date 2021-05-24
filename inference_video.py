@@ -1,5 +1,5 @@
 import argparse
-from transformer import Transformer
+from inference import Transformer
 
 
 def parse_args():
