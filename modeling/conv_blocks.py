@@ -5,11 +5,11 @@ import util
 
 class DownConv(nn.Module):
 
-    def __init__(self, channels, kernel_size=3):
+    def __init__(self, channels, bias=False):
         super(DownConv, self).__init__()
 
-        self.conv1 = SeparableConv2D(channels, channels, stride=2)
-        self.conv2 = SeparableConv2D(channels, channels, stride=1)
+        self.conv1 = SeparableConv2D(channels, channels, stride=2, bias=bias)
+        self.conv2 = SeparableConv2D(channels, channels, stride=1, bias=bias)
 
     def forward(self, x):
         out1 = self.conv1(x)
@@ -20,10 +20,10 @@ class DownConv(nn.Module):
 
 
 class UpConv(nn.Module):
-    def __init__(self, channels):
+    def __init__(self, channels, bias=False):
         super(UpConv, self).__init__()
 
-        self.conv = SeparableConv2D(channels, channels, stride=1)
+        self.conv = SeparableConv2D(channels, channels, stride=1, bias=bias)
 
     def forward(self, x):
         out = F.interpolate(x, scale_factor=2.0, mode='bilinear')
@@ -34,15 +34,16 @@ class UpConv(nn.Module):
 
 class DsConv(nn.Module):
 
-    def __init__(self, channels, out_channels, kernel_size=3, stride=1):
+    def __init__(self, channels, out_channels, kernel_size=3, stride=1, bias=False):
         super(DsConv, self).__init__()
 
         self.depthwise_conv = nn.Conv2d(channels, channels,
-            kernel_size=kernel_size, groups=channels, stride=1, padding=1)
+            kernel_size=kernel_size, groups=channels, stride=1, padding=1,
+            bias=bias)
 
         self.ins_norm = nn.InstanceNorm2d(channels)
         self.activation = nn.LeakyReLU(0.2, True)
-        self.conv_block = ConvBlock(channels, out_channels, kernel_size=3, stride=stride)
+        self.conv_block = ConvBlock(channels, out_channels, kernel_size=3, stride=stride, bias=bias)
 
     def forward(self, x):
         out = self.depthwise_conv(x)
@@ -58,7 +59,8 @@ class SeparableConv2D(nn.Module):
         super(SeparableConv2D, self).__init__()
         self.depthwise = nn.Conv2d(in_channels, in_channels, kernel_size=3,
             stride=stride, padding=1, groups=in_channels, bias=bias)
-        self.pointwise = nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, bias=bias)
+        self.pointwise = nn.Conv2d(in_channels, out_channels,
+            kernel_size=1, stride=1, bias=bias)
         # self.pad = 
         self.ins_norm1 = nn.InstanceNorm2d(in_channels)
         self.activation1 = nn.LeakyReLU(0.2, True)
@@ -125,11 +127,11 @@ class InvertedResBlock(nn.Module):
 
 
 class ResnetBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel=3, stride=1, padding=1):
+    def __init__(self, in_channels, out_channels, kernel=3, stride=1, padding=1,  bias=False):
         super(ResnetBlock, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels, in_channels, kernel, stride, padding)
+        self.conv1 = nn.Conv2d(in_channels, in_channels, kernel, stride, padding,  bias=bias)
         self.norm1 = nn.InstanceNorm2d(in_channels)
-        self.conv2 = nn.Conv2d(in_channels, out_channels, kernel, stride, padding)
+        self.conv2 = nn.Conv2d(in_channels, out_channels, kernel, stride, padding, bias=bias)
         self.norm2 = nn.InstanceNorm2d(out_channels)
 
         util.initialize_weights(self)

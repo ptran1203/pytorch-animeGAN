@@ -9,10 +9,12 @@ Pytorch implementation of AnimeGAN for fast photo animation
 
 | Input | Output |
 |--|--|
-|![c1](./example/result/1_36.jpg)|![g1](./example/result/1_36_anime.jpg)|
-|![c1](./example/result/1_46.jpg)|![g1](./example/result/1_46_anime.jpg)| 
-|![c1](./example/result/1_50.jpg)|![g1](./example/result/1_50_anime.jpg)| 
-|![c1](./example/result/1_55.jpg)|![g1](./example/result/1_55_anime.jpg)| 
+|![c1](./example/result/129.jpg)|![g1](./example/result/129_anime.jpeg)|
+|![c1](./example/result/136.jpg)|![g1](./example/result/136_anime.jpeg)|
+|![c1](./example/result/137.jpg)|![g1](./example/result/137_anime.jpeg)|
+|![c1](./example/result/150.jpg)|![g1](./example/result/150_anime.jpeg)|
+|![c1](./example/result/153.jpg)|![g1](./example/result/153_anime.jpeg)|
+
 
 <!-- ### Objective:
 

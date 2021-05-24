@@ -28,7 +28,7 @@ def parse_args():
     parser.add_argument('--checkpoint-dir', type=str, default='/content/checkpoints')
     parser.add_argument('--save-image-dir', type=str, default='/content/images')
     parser.add_argument('--gan-loss', type=str, default='lsgan', help='lsgan / wgan / hinge / normal')
-    parser.add_argument('--continu', action='store_true')
+    parser.add_argument('--continu', type=str, default='False')
     parser.add_argument('--use_sn', action='store_true')
     parser.add_argument('--display-image', type=bool, default=True)
     parser.add_argument('--save-interval', type=int, default=2)
@@ -146,7 +146,7 @@ def main(args):
     norm_std = torch.tensor(0.1)
 
     start_e = 0
-    if args.continu:
+    if args.continu == 'GD':
         try:
             start_e = load_checkpoint(G, args.checkpoint_dir)
             print("G weight loaded")
@@ -154,12 +154,11 @@ def main(args):
             print("D weight loaded")
         except Exception as e:
             print('Could not load checkpoint, train from scratch', e)
-    else:
+    elif args.continu == 'G':
         try:
             start_e = load_checkpoint(G, args.checkpoint_dir, posfix='_init')
         except Exception as e:
             print('Could not load G init checkpoint, train from scratch', e)
-
 
     for e in range(start_e, args.epochs):
         print(f"Epoch {e}/{args.epochs}")

@@ -22,8 +22,12 @@ def read_img(image_path):
 
 
 def get_mean(dataset_name):
-    file_list = glob(os.path.dirname(os.path.dirname(__file__))+'/dataset/{}/{}/*.*'.format(dataset_name, 'style'))
+    file_list = glob(f'./dataset/{dataset_name}/style/*.*')
     image_num = len(file_list)
+
+    if not image_num:
+        raise ValueError("No images found")
+
     print('image_num:', image_num)
 
     B_total = 0
@@ -46,6 +50,7 @@ def main():
     if args is None:
         exit()
 
+    print(f"Calculate mean for {args.dataset}")
     return get_mean(args.dataset)
 
 

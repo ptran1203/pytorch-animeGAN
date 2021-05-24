@@ -64,7 +64,7 @@ if __name__ == '__main__':
     image = Image.open("example/10.jpg")
     image = image.resize((224, 224))
     np_img = np.array(image).astype('float32')
-    np_img = (np_img / 127.5) - 1
+    np_img = np_img / 127.5 - 1
 
     img = torch.from_numpy(np_img)
     img = img.permute(2, 0, 1)

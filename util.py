@@ -123,7 +123,8 @@ def initialize_weights(net):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
         except Exception as e:
-            print(f'SKip layer {m}, {e}')
+            # print(f'SKip layer {m}, {e}')
+            pass
 
 
 class DefaultArgs():

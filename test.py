@@ -15,7 +15,7 @@ def rgb_to_yuv_test(image):
 image = Image.open("example/10.jpg")
 image = image.resize((256, 256))
 np_img = np.array(image).astype('float32')
-np_img = (np_img / 127.5) - 1
+np_img = np_img / 127.5 - 1
 
 img = torch.from_numpy(np_img)
 
