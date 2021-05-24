@@ -60,10 +60,16 @@ def resize_image(img, size):
 
 
 def normalize_input(images):
+    '''
+    [0, 255] -> [-1, 1]
+    '''
     return images / 127.5 - 1.0
 
 
 def denormalize_input(images, dtype=None):
+    '''
+    [-1, 1] -> [0, 255]
+    '''
     images = images * 127.5 + 127.5
 
     if dtype is not None:
