@@ -2,6 +2,7 @@ import torch
 import cv2
 import os
 import numpy as np
+import shutil
 import moviepy.video.io.ffmpeg_writer as ffmpeg_writer
 from modeling.anime_gan import Generator
 from utils.training import load_checkpoint
@@ -126,7 +127,7 @@ class Transformer:
 
         if temp_file:
             # move to output path
-            os.rename(temp_file, output_path)
+            shutil.move(temp_file, output_path)
 
         print(f'Animation video saved to {output_path}')
         video_writer.close()
