@@ -23,6 +23,8 @@ Pytorch implementation of AnimeGAN for fast photo animation
 |![c1](./example/result/150.jpg)|![g1](./example/result/150_anime.jpg)|
 
 
+## 
+
 <!-- ### Objective:
 
 - Learn to map photo domain **P** to animation domain **A**.

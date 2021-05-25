@@ -109,7 +109,7 @@ class Transformer:
         batch_shape = (batch_size, video_clip.size[1], video_clip.size[0], 3)
         frame_count = 0
         frames = np.zeros(batch_shape, dtype=np.float32)
-        for frame in tqdm(video_clip.iter_frames(), total=total_frames):
+        for frame in tqdm(video_clip.iter_frames()):
             try:
                 frames[frame_count] = frame
                 frame_count += 1
