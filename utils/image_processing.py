@@ -40,23 +40,32 @@ def rgb_to_yuv(image):
     return yuv_img
 
 
-def resize_image(img, size):
-    h, w = img.shape[:2]
+def make_size_divisible(dim):
+    '''
+    Make width and height divisible by 32
+    '''
+    width, height = dim
+    return width - (width % 32), height - (height % 32)
 
-    if h <= size[0]:
-        h = size[0]
+def resize_image(image, width=None, height=None, inter=cv2.INTER_AREA):
+    dim = None
+    h, w = image.shape[:2]
+
+    if width and height:
+        return cv2.resize(image, make_size_divisible((width, height)),  interpolation=inter)
+
+    if width is None and height is None:
+        return image
+
+    if width is None:
+        r = height / float(h)
+        dim = (int(w * r), height)
+
     else:
-        x = h % 32
-        h = h - x
+        r = width / float(w)
+        dim = (width, int(h * r))
 
-    if w < size[1]:
-        w = size[1]
-    else:
-        y = w % 32
-        w = w - y
-
-    img = cv2.resize(img, (w, h))
-    return img
+    return cv2.resize(image, make_size_divisible(dim), interpolation=inter)
 
 
 def normalize_input(images):
