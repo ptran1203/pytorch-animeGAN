@@ -8,7 +8,7 @@ Pytorch implementation of AnimeGAN for fast photo animation
 
 | Input | Animation |
 |--|--|
-|![c1](./example/video_city.gif)|![g1](./example/video_city_anime.gif)|
+|![c1](./example/video_city_small.gif)|![g1](./example/video_city_anime.gif)|
 
 ## Stylization results
 
