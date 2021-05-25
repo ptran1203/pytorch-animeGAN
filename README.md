@@ -13,15 +13,14 @@ Pytorch implementation of AnimeGAN for fast photo animation
 ## Stylization results
 
 
-Optimizing code for good results...
-
-<!-- | Input | Output |
+| Input | Output |
 |--|--|
-|![c1](./example/result/129.jpg)|![g1](./example/result/129_anime.jpeg)|
-|![c1](./example/result/136.jpg)|![g1](./example/result/136_anime.jpeg)|
-|![c1](./example/result/137.jpg)|![g1](./example/result/137_anime.jpeg)|
-|![c1](./example/result/150.jpg)|![g1](./example/result/150_anime.jpeg)|
-|![c1](./example/result/153.jpg)|![g1](./example/result/153_anime.jpeg)| -->
+|![c1](./example/result/132.jpg)|![g1](./example/result/132_anime.jpg)|
+|![c1](./example/result/136.jpg)|![g1](./example/result/136_anime.jpg)|
+|![c1](./example/result/146.jpg)|![g1](./example/result/146_anime.jpg)|
+|![c1](./example/result/148.jpg)|![g1](./example/result/148_anime.jpg)|
+|![c1](./example/result/149.jpg)|![g1](./example/result/149_anime.jpg)|
+|![c1](./example/result/150.jpg)|![g1](./example/result/150_anime.jpg)|
 
 
 <!-- ### Objective:

@@ -1,8 +1,10 @@
 import os
 
 dir_ = './example/result'
-files = os.listdir(dir_)
+readme = './README.md'
 
+files = os.listdir(dir_)
+new_files = []
 for f in files:
     new_name = f.replace(" ", "").replace("(", "").replace(")", "")
     os.rename(
