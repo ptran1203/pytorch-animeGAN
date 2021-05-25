@@ -89,8 +89,6 @@ class Transformer:
             # Writing directly into google drive can be inefficient
             temp_file = f'tmp_anime.{output_path.split(".")[-1]}'
 
-        print(f'Transfroming video {input_path}')
-
         def transform_and_write(frames, count, writer):
             anime_images = denormalize_input(self.transform(frames), dtype=np.uint8)
             for i in range(0, count):
@@ -106,6 +104,8 @@ class Transformer:
             ffmpeg_params=None)
 
         total_frames = round(video_clip.fps * video_clip.duration)
+        print(f'Transfroming video {input_path}, {total_frames} frames, size: {video_clip.size}')
+
         batch_shape = (batch_size, video_clip.size[1], video_clip.size[0], 3)
         frame_count = 0
         frames = np.zeros(batch_shape, dtype=np.float32)
