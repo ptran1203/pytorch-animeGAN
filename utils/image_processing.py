@@ -47,6 +47,7 @@ def make_size_divisible(dim):
     width, height = dim
     return width - (width % 32), height - (height % 32)
 
+
 def resize_image(image, width=None, height=None, inter=cv2.INTER_AREA):
     dim = None
     h, w = image.shape[:2]
