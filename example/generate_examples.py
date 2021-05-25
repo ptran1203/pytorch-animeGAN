@@ -19,7 +19,7 @@ def rename_back(f):
         nums = nums.group()
         return f.replace(nums, f"{nums[0]} ({nums[1:]})")
 
-    return f
+    return f.replace('jpeg', 'jpg')
 
 def copyfile(src, dest):
     # copy and resize

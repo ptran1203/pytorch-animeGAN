@@ -65,12 +65,12 @@ python3 inference_video.py --checkpoint {ckp_dir}\
 
 | Input | Output |
 |--|--|
-|![c1](./example/result/136.jpg)|![g1](./example/result/136_anime.jpg)|
-|![c1](./example/result/137.jpg)|![g1](./example/result/137_anime.jpg)|
-|![c1](./example/result/139.jpg)|![g1](./example/result/139_anime.jpg)|
-|![c1](./example/result/142.jpg)|![g1](./example/result/142_anime.jpg)|
-|![c1](./example/result/146.jpg)|![g1](./example/result/146_anime.jpg)|
-|![c1](./example/result/148.jpg)|![g1](./example/result/148_anime.jpg)|
+|![c1](./example/result/11.jpeg)|![g1](./example/result/11_anime.jpeg)|
+|![c1](./example/result/132.jpeg)|![g1](./example/result/132_anime.jpeg)|
+|![c1](./example/result/136.jpeg)|![g1](./example/result/136_anime.jpeg)|
+|![c1](./example/result/146.jpeg)|![g1](./example/result/146_anime.jpeg)|
+|![c1](./example/result/155.jpeg)|![g1](./example/result/155_anime.jpeg)|
+|![c1](./example/result/142.jpeg)|![g1](./example/result/142_anime.jpeg)|
 
 
 ## Check list
