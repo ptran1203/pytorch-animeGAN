@@ -1,3 +1,10 @@
+import cv2
+
+def read_img(path):
+    img = cv2.imread(path)[:, :, ::-1]
+
+    return img
+
 class DefaultArgs:
     dataset ='Hayao'
     data_dir ='/content'
