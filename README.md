@@ -2,15 +2,65 @@
 
 Pytorch implementation of AnimeGAN for fast photo animation
 
-* Paper: AnimeGAN: a novel lightweight GAN for photo animation - [semanticscholar](https://www.semanticscholar.org/paper/AnimeGAN%3A-A-Novel-Lightweight-GAN-for-Photo-Chen-Liu/10a9c5d183e7e7df51db8bfa366bc862262b37d7#citing-papers) or from [Yoshino repo](https://github.com/TachibanaYoshino/AnimeGAN/blob/master/doc/Chen2020_Chapter_AnimeGAN.pdf)
-* Original implementation in [Tensorflow](https://github.com/TachibanaYoshino/AnimeGAN) by [Yoshino](https://github.com/TachibanaYoshino)
+* Paper: *AnimeGAN: a novel lightweight GAN for photo animation* - [Semantic scholar](https://www.semanticscholar.org/paper/AnimeGAN%3A-A-Novel-Lightweight-GAN-for-Photo-Chen-Liu/10a9c5d183e7e7df51db8bfa366bc862262b37d7#citing-papers) or from [Yoshino repo](https://github.com/TachibanaYoshino/AnimeGAN/blob/master/doc/Chen2020_Chapter_AnimeGAN.pdf)
+* Original implementation in [Tensorflow](https://github.com/TachibanaYoshino/AnimeGAN) by [Tachibana Yoshino](https://github.com/TachibanaYoshino)
 
 
 | Input | Animation |
 |--|--|
 |![c1](./example/video_city_small.gif)|![g1](./example/video_city_anime.gif)|
 
-## Stylization results
+## Documentation
+
+### 1. Train animeGAN
+
+To train the animeGAN from command line, you can run `train.py` as the following:
+
+```bash
+python3 train.py --batch 6\
+                --init-epochs 4\
+                --checkpoint-dir {ckp_dir}\
+                --save-image-dir {save_img_dir}\
+                --save-interval 1\
+                --gan-loss lsgan\           # one of [lsgan, hinge, bce]
+                --init-lr 0.0001\
+                --lr-g 0.00002\
+                --lr-d 0.00004\
+                --wadvd 10.0\               # Aversarial loss weight for D
+                --wadvg 10.0\               # Aversarial loss weight for G
+                --wcon 1.5\                 # Content loss weight
+                --wgra 3.0\                 # Gram loss weight
+                --wcol 30.0\                # Color loss weight
+                --continu GD\               # if set, G to start from pre-trained G, GD to continue training GAN
+                --use_sn\                   # If set, use spectral normalization, default is False
+```
+
+### 2. Transform images
+
+To convert images in a folder or single image, run `inference_image.py`, for example:
+
+> --src and --dest can be a directory or a file
+
+```bash
+python3 inference_image.py --checkpoint {ckp_dir}\
+                        --src /content/test/HR_photo\
+                        --dest {working_dir}/inference_image_v2\
+```
+
+### 3. Transform video
+
+To convert a video to anime version, run `inference_video.py`, for example:
+
+> Be careful when choosing --batch-size, it might lead to CUDA memory error if the resolution of the video is too large
+
+```bash
+python3 inference_video.py --checkpoint {ckp_dir}\
+                        --src /content/test_vid_3.mp4\
+                        --dest /content/test_vid_3_anime.mp4\
+                        --batch-size 2
+```
+
+## Anime transformation results
 
 
 | Input | Output |
@@ -23,7 +73,12 @@ Pytorch implementation of AnimeGAN for fast photo animation
 |![c1](./example/result/148.jpg)|![g1](./example/result/148_anime.jpg)|
 
 
-## 
+## Check list
+
+- [ ] Add Google Colab
+- [ ] Add implementation details
+- [ ] Add and train on other data
+- [ ] ...
 
 <!-- ### Objective:
 
