@@ -4,6 +4,7 @@ import os
 import torch.nn as nn
 import urllib.request
 import cv2
+from tqdm import tqdm
 
 HTTP_PREFIXES = [
     'http',
@@ -83,6 +84,16 @@ def set_lr(optimizer, lr):
         param_group['lr'] = lr
 
 
+class DownloadProgressBar(tqdm):
+    '''
+    https://stackoverflow.com/questions/15644964/python-progress-bar-and-downloads
+    '''
+    def update_to(self, b=1, bsize=1, tsize=None):
+        if tsize is not None:
+            self.total = tsize
+        self.update(b * bsize - self.n)
+
+
 def _download_weight(weight):
     '''
     Download weight and save to local file
@@ -91,7 +102,10 @@ def _download_weight(weight):
     os.makedirs('.cache', exist_ok=True)
     url = f'{ASSET_HOST}/{filename}'
     save_path = f'.cache/{filename}'
-    urllib.request.urlretrieve(url, save_path)
+
+    desc = f'Downloading {url} to {save_path}'
+    with DownloadProgressBar(unit='B', unit_scale=True, miniters=1, desc=desc) as t:
+        urllib.request.urlretrieve(url, save_path, reporthook=t.update_to)
 
     return save_path
 
