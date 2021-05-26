@@ -15,10 +15,10 @@ def parse_args():
 def main(args):
     transformer = Transformer(args.checkpoint)
 
-    if os.path.isfile(args.src):
-        transformer.transform_file(args.src, args.dest)
-    else:
+    if os.path.exists(args.src) and not os.path.isfile(args.src):
         transformer.transform_in_dir(args.src, args.dest)
+    else:
+        transformer.transform_file(args.src, args.dest)
 
 if __name__ == '__main__':
     args = parse_args()
