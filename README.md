@@ -77,7 +77,7 @@ python3 inference_video.py --checkpoint {ckp_dir}\
 
 ## Check list
 
-- [ ] Add Google Colab
+- [x] Add Google Colab
 - [ ] Add implementation details
 - [ ] Add and train on other data
 - [ ] ...
