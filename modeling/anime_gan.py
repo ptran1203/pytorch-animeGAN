@@ -68,8 +68,6 @@ class Discriminator(nn.Module):
         super(Discriminator, self).__init__()
         self.name = 'discriminator'
         self.bias = False
-        use_sn = args.use_sn
-        image_size = 256
         channels = 32
 
         layers = [
@@ -94,25 +92,14 @@ class Discriminator(nn.Module):
             nn.Conv2d(channels, 1, kernel_size=3, stride=1, padding=1, bias=self.bias),
         ]
 
-        if use_sn:
+        if args.use_sn:
             for i in range(len(layers)):
                 if isinstance(layers[i], nn.Conv2d):
                     layers[i] = spectral_norm(layers[i])
 
         self.discriminate = nn.Sequential(*layers)
 
-        feat_size = image_size // 4
-        self.linear = nn.Linear(feat_size * feat_size, 1)
-
         initialize_weights(self)
 
     def forward(self, img):
-        batch_size = img.shape[0]
-
-        features = self.discriminate(img)
-
-        return features
-        
-        logit = features.view(batch_size, - 1)
-
-        return self.linear(logit)
+        return self.discriminate(img)

@@ -13,6 +13,11 @@ if torch.cuda.is_available():
 
 
 def gram(input):
+    """
+    Calculate Gram Matrix
+
+    https://pytorch.org/tutorials/advanced/neural_style_tutorial.html#style-loss
+    """
     b, c, w, h = input.size()
 
     x = input.view(b * c, w * h)
@@ -40,7 +45,7 @@ def rgb_to_yuv(image):
     return yuv_img
 
 
-def make_size_divisible(dim):
+def divisible(dim):
     '''
     Make width and height divisible by 32
     '''
@@ -53,7 +58,7 @@ def resize_image(image, width=None, height=None, inter=cv2.INTER_AREA):
     h, w = image.shape[:2]
 
     if width and height:
-        return cv2.resize(image, make_size_divisible((width, height)),  interpolation=inter)
+        return cv2.resize(image, divisible((width, height)),  interpolation=inter)
 
     if width is None and height is None:
         return image
@@ -66,7 +71,7 @@ def resize_image(image, width=None, height=None, inter=cv2.INTER_AREA):
         r = width / float(w)
         dim = (width, int(h * r))
 
-    return cv2.resize(image, make_size_divisible(dim), interpolation=inter)
+    return cv2.resize(image, divisible(dim), interpolation=inter)
 
 
 def normalize_input(images):
