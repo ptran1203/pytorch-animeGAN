@@ -61,7 +61,7 @@ def resize_image(image, width=None, height=None, inter=cv2.INTER_AREA):
         return cv2.resize(image, divisible((width, height)),  interpolation=inter)
 
     if width is None and height is None:
-        return image
+        return cv2.resize(image, divisible((w, h)),  interpolation=inter)
 
     if width is None:
         r = height / float(h)

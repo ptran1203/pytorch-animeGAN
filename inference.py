@@ -58,7 +58,7 @@ class Transformer:
         if image is None:
             raise ValueError(f"Could not get image from {file_path}")
 
-        anime_img = self.transform(image)[0]
+        anime_img = self.transform(resize_image(image))[0]
         ext = fname.split('.')[-1]
         fname = fname.replace(f'.{ext}', '')
         anime_img = denormalize_input(anime_img, dtype=np.int16)

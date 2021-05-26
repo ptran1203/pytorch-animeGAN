@@ -2,6 +2,7 @@ import requests
 import urllib.request
 import cv2
 
+
 HTTP_PREFIXES = [
     'http',
     'data:image/jpeg',
