@@ -1,9 +1,20 @@
-import cv2
+import requests
+from PIL import Image
 
-def read_img(path):
-    img = cv2.imread(path)[:, :, ::-1]
+HTTP_PREFIXES = [
+    'http',
+    'data:image/jpeg',
+]
 
-    return img
+def read_image(path):
+    """
+    Read image from given path
+    """
+
+    if any(path.startswith(p) for p in HTTP_PREFIXES):
+        path = requests.get(path, stream=True).raw
+
+    return Image.open(path)
 
 class DefaultArgs:
     dataset ='Hayao'

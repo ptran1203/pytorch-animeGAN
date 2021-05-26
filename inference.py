@@ -7,6 +7,7 @@ import moviepy.video.io.ffmpeg_writer as ffmpeg_writer
 from modeling.anime_gan import Generator
 from utils.training import load_checkpoint
 from utils.image_processing import resize_image, normalize_input, denormalize_input
+from utils import read_image
 from tqdm import tqdm
 from moviepy.video.io.VideoFileClip import VideoFileClip
 
@@ -47,6 +48,21 @@ class Transformer:
             # Channel last
             fake = fake.transpose(0, 2, 3, 1)
             return fake
+
+    def transform_file(file_path, save_path):
+        if save_path.split(".")[-1] not in VALID_FORMATS:
+            raise ValueError(f"{file_path} should be one of {VALID_FORMATS} format")
+
+        image = read_image(file_path)
+
+        if image is None:
+            raise ValueError(f"Could not get image from {file_path}")
+
+        anime_img = self.transform(image)[0]
+        ext = fname.split('.')[-1]
+        fname = fname.replace(f'.{ext}', '')
+        anime_img = denormalize_input(anime_img, dtype=np.int16)
+        cv2.imwrite(save_path, anime_img[..., ::-1])
 
     def transform_in_dir(self, img_dir, dest_dir, max_images=0, img_size=(512, 512)):
         '''

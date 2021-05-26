@@ -1,3 +1,4 @@
+import os
 import argparse
 from inference import Transformer
 
@@ -13,7 +14,11 @@ def parse_args():
 
 def main(args):
     transformer = Transformer(args.checkpoint)
-    transformer.transform_in_dir(args.src, args.dest)
+
+    if os.path.isfile(args.src):
+        transformer.transform_file(args.src, args.dest)
+    else:
+        transformer.transform_in_dir(args.src, args.dest)
 
 if __name__ == '__main__':
     args = parse_args()
