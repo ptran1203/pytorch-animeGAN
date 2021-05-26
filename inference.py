@@ -20,8 +20,6 @@ VALID_FORMATS = {
 
 class Transformer:
     def __init__(self, weight='hayao', add_mean=False):
-        print("Init Generator...")
-
         self.G = Generator()
 
         if cuda_available:
