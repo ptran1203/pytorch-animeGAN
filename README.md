@@ -12,7 +12,7 @@ Pytorch implementation of AnimeGAN for fast photo animation
 
 ## Documentation
 
-Example on [Goolge colab](!https://colab.research.google.com/github/ptran1203/pytorch-animeGAN/blob/master/notebooks/animeGAN.ipynb)
+Example on [Goolge colab](https://colab.research.google.com/github/ptran1203/pytorch-animeGAN/blob/master/notebooks/animeGAN.ipynb)
 
 ### 1. Train animeGAN
 
