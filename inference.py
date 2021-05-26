@@ -49,7 +49,7 @@ class Transformer:
             fake = fake.transpose(0, 2, 3, 1)
             return fake
 
-    def transform_file(file_path, save_path):
+    def transform_file(self, file_path, save_path):
         if save_path.split(".")[-1] not in VALID_FORMATS:
             raise ValueError(f"{file_path} should be one of {VALID_FORMATS} format")
 
