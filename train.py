@@ -10,10 +10,10 @@ from modeling.anime_gan import Generator
 from modeling.anime_gan import Discriminator
 from modeling.losses import AnimeGanLoss
 from modeling.losses import LossSummary
-from utils.training import load_checkpoint
-from utils.training import save_checkpoint
-from utils.training import set_lr
-from utils.training import initialize_weights
+from utils.common import load_checkpoint
+from utils.common import save_checkpoint
+from utils.common import set_lr
+from utils.common import initialize_weights
 from utils.image_processing import denormalize_input
 from dataset import AnimeDataSet
 from tqdm import tqdm

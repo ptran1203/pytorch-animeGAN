@@ -1,23 +1,3 @@
-import requests
-import urllib.request
-import cv2
-
-
-HTTP_PREFIXES = [
-    'http',
-    'data:image/jpeg',
-]
-
-def read_image(path):
-    """
-    Read image from given path
-    """
-
-    if any(path.startswith(p) for p in HTTP_PREFIXES):
-        urllib.request.urlretrieve(path, "temp.jpg")
-        path = "temp.jpg"
-
-    return cv2.imread(path)[: ,: ,::-1]
 
 class DefaultArgs:
     dataset ='Hayao'

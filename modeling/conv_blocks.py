@@ -1,7 +1,6 @@
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from utils.training import initialize_weights
+from utils.common import initialize_weights
 
 class DownConv(nn.Module):
 

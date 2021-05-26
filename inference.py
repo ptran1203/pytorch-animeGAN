@@ -5,21 +5,21 @@ import numpy as np
 import shutil
 import moviepy.video.io.ffmpeg_writer as ffmpeg_writer
 from modeling.anime_gan import Generator
-from utils.training import load_checkpoint
+from utils.common import load_weight
 from utils.image_processing import resize_image, normalize_input, denormalize_input
 from utils import read_image
 from tqdm import tqdm
 from moviepy.video.io.VideoFileClip import VideoFileClip
 
-
 cuda_available = torch.cuda.is_available()
+
 VALID_FORMATS = {
     'jpeg', 'jpg', 'jpe',
     'png', 'bmp',
 }
 
 class Transformer:
-    def __init__(self, checkpoint_dir, add_mean=False):
+    def __init__(self, weight='hayao', add_mean=False):
         print("Init Generator...")
 
         self.G = Generator()
@@ -27,7 +27,7 @@ class Transformer:
         if cuda_available:
             self.G = self.G.cuda()
 
-        load_checkpoint(self.G, checkpoint_dir)
+        load_weight(self.G, weight)
         self.G.eval()
 
         print("Weight loaded, ready to predict")
@@ -179,3 +179,5 @@ class Transformer:
     def is_valid_file(fname):
         ext = fname.split('.')[-1]
         return ext in VALID_FORMATS
+
+        

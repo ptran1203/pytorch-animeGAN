@@ -7,7 +7,7 @@ from modeling.conv_blocks import UpConv
 from modeling.conv_blocks import SeparableConv2D
 from modeling.conv_blocks import InvertedResBlock
 from modeling.conv_blocks import ConvBlock
-from utils.training import initialize_weights
+from utils.common import initialize_weights
 
 
 class Generator(nn.Module):
