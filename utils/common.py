@@ -103,6 +103,9 @@ def _download_weight(weight):
     url = f'{ASSET_HOST}/{filename}'
     save_path = f'.cache/{filename}'
 
+    if os.path.isfile(save_path):
+        return save_path
+
     desc = f'Downloading {url} to {save_path}'
     with DownloadProgressBar(unit='B', unit_scale=True, miniters=1, desc=desc) as t:
         urllib.request.urlretrieve(url, save_path, reporthook=t.update_to)
