@@ -50,8 +50,8 @@ class Transformer:
             return fake
 
     def transform_file(self, file_path, save_path):
-        if save_path.split(".")[-1] not in VALID_FORMATS:
-            raise ValueError(f"{file_path} should be one of {VALID_FORMATS} format")
+        if not save_path.endswith('png'):
+            raise ValueError(f"{save_path} should be png format")
 
         image = read_image(file_path)
 
@@ -61,6 +61,7 @@ class Transformer:
         anime_img = self.transform(resize_image(image))[0]
         anime_img = denormalize_input(anime_img, dtype=np.int16)
         cv2.imwrite(save_path, anime_img[..., ::-1])
+        print(f"Anime image saved to {save_path}")
 
     def transform_in_dir(self, img_dir, dest_dir, max_images=0, img_size=(512, 512)):
         '''
