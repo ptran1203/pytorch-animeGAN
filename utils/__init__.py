@@ -1,5 +1,5 @@
 import requests
-from PIL import Image
+import urllib.request
 
 HTTP_PREFIXES = [
     'http',
@@ -12,9 +12,10 @@ def read_image(path):
     """
 
     if any(path.startswith(p) for p in HTTP_PREFIXES):
-        path = requests.get(path, stream=True).raw
+        urllib.request.urlretrieve(path, "temp.jpg")
+        path = "temp.jpg"
 
-    return Image.open(path)
+    return cv2.imread(path)[: ,: ,::-1]
 
 class DefaultArgs:
     dataset ='Hayao'
