@@ -6,7 +6,6 @@ from modeling.conv_blocks import DownConv
 from modeling.conv_blocks import UpConv
 from modeling.conv_blocks import SeparableConv2D
 from modeling.conv_blocks import InvertedResBlock
-from modeling.conv_blocks import ResnetBlock
 from modeling.conv_blocks import ConvBlock
 from utils.training import initialize_weights
 
@@ -27,18 +26,15 @@ class Generator(nn.Module):
             ConvBlock(256, 256, bias=bias),
         )
 
-        # Resblock = ResnetBlock
-        Resblock = InvertedResBlock
-
         self.res_blocks = nn.Sequential(
-            Resblock(256, 256, bias=bias),
-            Resblock(256, 256, bias=bias),
-            Resblock(256, 256, bias=bias),
-            Resblock(256, 256, bias=bias),
-            Resblock(256, 256, bias=bias),
-            Resblock(256, 256, bias=bias),
-            Resblock(256, 256, bias=bias),
-            Resblock(256, 256, bias=bias),
+            InvertedResBlock(256, 256, bias=bias),
+            InvertedResBlock(256, 256, bias=bias),
+            InvertedResBlock(256, 256, bias=bias),
+            InvertedResBlock(256, 256, bias=bias),
+            InvertedResBlock(256, 256, bias=bias),
+            InvertedResBlock(256, 256, bias=bias),
+            InvertedResBlock(256, 256, bias=bias),
+            InvertedResBlock(256, 256, bias=bias),
         )
 
         self.decode_blocks = nn.Sequential(
