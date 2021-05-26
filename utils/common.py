@@ -11,7 +11,7 @@ HTTP_PREFIXES = [
 ]
 
 SUPPORT_WEIGHTS = {
-    'Hayao'
+    'hayao'
 }
 
 ASSET_HOST = 'https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0'
@@ -45,7 +45,7 @@ def load_checkpoint(model, checkpoint_dir, posfix=''):
 
 
 def load_weight(model, weight):
-    if weight in SUPPORT_WEIGHTS:
+    if weight.lower() in SUPPORT_WEIGHTS:
         weight = _download_weight(weight)
 
     checkpoint = torch.load(weight,  map_location='cuda:0')
