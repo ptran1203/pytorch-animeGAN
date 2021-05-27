@@ -14,12 +14,44 @@ Pytorch implementation of AnimeGAN for fast photo animation
 
 Example on [Goolge colab](https://colab.research.google.com/github/ptran1203/pytorch-animeGAN/blob/master/notebooks/animeGAN.ipynb)
 
-### 1. Train animeGAN
+
+### 1. Prepare dataset
+
+#### 1.1 To download dataset from paper, run below command
+
+```bash
+wget -O anime-gan.zip https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/dataset_v1.zip
+unzip anime-gan.zip -d /content
+```
+
+=>  The dataset folder can be found in your current folder with name `dataset`
+
+#### 1.2 Create custom data from anime video
+
+You need to have a video file located in your machine, for example: `/home/ubuntu/Downloads/kimetsu_yaiba.mp4`
+
+**Step 1.** Create anime images from the video
+
+```bash
+python3 script/video_to_images.py --video-path /home/ubuntu/Downloads/kimetsu_yaiba.mp4\
+                                --save-path dataset/Kimetsu/style\
+                                --max-image 1800\
+                                --image-size 256\
+```
+
+**Step 2.** Create edge-smooth version of dataset from **Step 1.**
+
+```bash
+python3 script/edge_smooth.py --dataset Kimetsu --image-size 256
+```
+
+### 2. Train animeGAN
 
 To train the animeGAN from command line, you can run `train.py` as the following:
 
 ```bash
-python3 train.py --batch 6\
+python3 train.py --dataset Hayao\           # Can be Hayao, Shinkai, Kimetsu, Paprika, SummerWar or {your custom data in step 1.2}
+                --batch 6\
                 --init-epochs 4\
                 --checkpoint-dir {ckp_dir}\
                 --save-image-dir {save_img_dir}\
@@ -37,7 +69,7 @@ python3 train.py --batch 6\
                 --use_sn\                   # If set, use spectral normalization, default is False
 ```
 
-### 2. Transform images
+### 3. Transform images
 
 To convert images in a folder or single image, run `inference_image.py`, for example:
 
@@ -49,7 +81,7 @@ python3 inference_image.py --checkpoint {ckp_dir}\
                         --dest {working_dir}/inference_image_v2\
 ```
 
-### 3. Transform video
+### 4. Transform video
 
 To convert a video to anime version, run `inference_video.py`, for example:
 

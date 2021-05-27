@@ -75,7 +75,7 @@ class VideoConverter:
         if self.start or self.end:
             video_clip = video_clip.subclip(self.start, self.end)
 
-        video_clip = video_clip.set_fps(video_clip.fps // 30)
+        video_clip = video_clip.set_fps(video_clip.fps // 10)
 
         total_frames = round(video_clip.fps * video_clip.duration)
         print(f'Processing video {self.video_path}, {total_frames} frames, size: {video_clip.size}')
@@ -101,7 +101,7 @@ if __name__ == '__main__':
     args = parse_args()
     converter = VideoConverter(
         args.video_path,
-        args.save_path
+        args.save_path,
         max_image=args.max_image,
         start=args.start,
         end=args.end,
