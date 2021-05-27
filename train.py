@@ -110,7 +110,7 @@ def main(args):
 
     print("Init models...")
 
-    G = Generator().cuda()
+    G = Generator(args.dataset).cuda()
     D = Discriminator(args).cuda()
 
     loss_tracker = LossSummary()
