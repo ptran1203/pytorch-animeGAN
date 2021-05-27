@@ -38,6 +38,7 @@ class AnimeDataSet(Dataset):
         self.photo = 'train_photo'
         self.style = f'{anime_dir}/style'
         self.smooth =  f'{anime_dir}/smooth'
+        self.gray_zeros = torch.zeros(3, 256, 256)
 
         for opt in [self.photo, self.style, self.smooth]:
             folder = os.path.join(data_dir, opt)
@@ -83,8 +84,7 @@ class AnimeDataSet(Dataset):
             image_gray = image_gray.transpose(2, 0, 1)
             image_gray = torch.tensor(image_gray)
         else:
-            h, w, c = image.shape
-            image_gray = torch.zeros(c, h, w)
+            image_gray = self.gray_zeros
 
         image = self._transform(image, addmean=is_style)
         image = image.transpose(2, 0, 1)
