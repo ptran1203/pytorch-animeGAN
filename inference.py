@@ -78,7 +78,7 @@ class Transformer:
 
         for fname in tqdm(files):
             image = cv2.imread(os.path.join(img_dir, fname))[:,:,::-1]
-            image = resize_image(image, img_size)
+            image = resize_image(image)
             anime_img = self.transform(image)[0]
             ext = fname.split('.')[-1]
             fname = fname.replace(f'.{ext}', '')
