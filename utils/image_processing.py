@@ -1,6 +1,8 @@
 import torch
 import cv2
-
+import os
+import numpy as np
+from tqdm import tqdm
 
 _rgb_to_yuv_kernel = torch.tensor([
     [0.299, -0.14714119, 0.61497538],
@@ -95,3 +97,23 @@ def denormalize_input(images, dtype=None):
             images = images.astype(dtype)
 
     return images
+
+
+def compute_data_mean(data_folder):
+    if not os.path.exists(data_folder):
+        raise FileNotFoundError(f'Folder {data_folder} does not exits')
+
+    image_files = os.listdir(data_folder)
+    total = np.zeros(3)
+
+    print(f"Compute mean (R, G, B) from {len(image_files)} images")
+
+    for img_file in tqdm(image_files):
+        path = os.path.join(data_folder, img_file)
+        image = cv2.imread(path)
+        total += image.mean(axis=(0, 1))
+
+    channel_mean = total / len(image_files)
+    mean = np.mean(channel_mean)
+
+    return mean - channel_mean[...,::-1]  # Convert to BGR for training

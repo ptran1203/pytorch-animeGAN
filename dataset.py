@@ -4,10 +4,10 @@ import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
-from utils.image_processing import normalize_input
+from utils import normalize_input, compute_data_mean
 
 class AnimeDataSet(Dataset):
-    def __init__(self, args,  data_mean=[-4.4661, -8.6698, 13.1360], transform=None):
+    def __init__(self, args, transform=None):
         """   
         folder structure:
             - {data_dir}
@@ -29,7 +29,9 @@ class AnimeDataSet(Dataset):
         if not os.path.exists(anime_dir):
             raise FileNotFoundError(f'Folder {anime_dir} does not exist')
 
-        self.mean = np.array(data_mean)
+        self.mean = compute_data_mean(os.path.join(anime_dir, 'style'))
+        print(f'Mean(B, G, R) of {dataset} are {self.mean}')
+
         self.debug_samples = args.debug_samples or 0
         self.data_dir = data_dir
         self.image_files =  {}
