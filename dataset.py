@@ -38,6 +38,7 @@ class AnimeDataSet(Dataset):
         self.photo = 'train_photo'
         self.style = f'{anime_dir}/style'
         self.smooth =  f'{anime_dir}/smooth'
+        self.dummy = torch.zeros(3, 256, 256)
 
         for opt in [self.photo, self.style, self.smooth]:
             folder = os.path.join(data_dir, opt)
@@ -71,7 +72,7 @@ class AnimeDataSet(Dataset):
         self.__getitem__ = self.getitem
 
     def gettiem_init(self, index):
-        return self.load_photo(index)
+        return self.load_photo(index), self.dummy, self.dummy, self.dummy
 
     def getitem(self, index):
         image = self.load_photo(index)
