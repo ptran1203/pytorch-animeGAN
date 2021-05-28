@@ -174,6 +174,11 @@ def main(args):
             set_lr(optimizer_g, args.lr_g)
             save_checkpoint(G, optimizer_g, e, args, posfix='_init')
             save_samples(G, data_loader, args, subname='initg')
+
+            # Last init G epoch
+            if args.init_epochs - e == 1:
+                data_loader.train_GD_state()
+
             continue
 
         loss_tracker.reset()

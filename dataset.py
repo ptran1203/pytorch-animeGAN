@@ -38,7 +38,6 @@ class AnimeDataSet(Dataset):
         self.photo = 'train_photo'
         self.style = f'{anime_dir}/style'
         self.smooth =  f'{anime_dir}/smooth'
-        self.gray_zeros = torch.zeros(3, 256, 256)
 
         for opt in [self.photo, self.style, self.smooth]:
             folder = os.path.join(data_dir, opt)
@@ -47,6 +46,7 @@ class AnimeDataSet(Dataset):
             self.image_files[opt] = [os.path.join(folder, fi) for fi in files]
 
         self.transform = transform
+        self.init_G_state()
 
         print(f'Dataset: real {len(self.image_files[self.photo])} style {self.len_anime}, smooth {self.len_smooth}')
 
@@ -61,36 +61,54 @@ class AnimeDataSet(Dataset):
     def len_smooth(self):
         return len(self.image_files[self.smooth])
 
-    def __getitem__(self, index):
-        image, _ = self.load_images(index, self.photo)
+    def init_G_state(self):
+        self.__getitem__ = self.gettiem_init
+
+    def train_GD_state(self):
+        self.__getitem__ = self.getitem
+
+    def gettiem_init(self, index):
+        return self.load_photo(index)
+
+    def getitem(self, index):
+        image = self.load_photo(index)
         anm_idx = index
         if anm_idx > self.len_anime - 1:
             anm_idx -= self.len_anime * (index // self.len_anime)
 
-        anime, anime_gray = self.load_images(anm_idx, self.style)
-        _, smooth_gray = self.load_images(anm_idx, self.smooth)
+        anime, anime_gray = self.load_anime(anm_idx)
+        smooth_gray = self.load_anime_smooth(anm_idx)
 
         return image, anime, anime_gray, smooth_gray
 
-    def load_images(self, index, opt):
-        is_style = opt in {self.style, self.smooth}
-        fpath = self.image_files[opt][index]
+    def load_photo(self, index):
+        fpath = self.image_files[self.photo][index]
+        image = cv2.imread(fpath)[:,:,::-1]
+        image = self._transform(image, addmean=is_style)
+        image = image.transpose(2, 0, 1)
+        return torch.tensor(image)
+
+    def load_anime(self, index):
+        fpath = self.image_files[self.style][index]
         image = cv2.imread(fpath)[:,:,::-1]
 
-        if is_style:
-            image_gray = cv2.cvtColor(image.copy(), cv2.COLOR_BGR2GRAY)
-            image_gray = np.stack([image_gray, image_gray, image_gray], axis=-1)
-            image_gray = self._transform(image_gray, addmean=False)
-            image_gray = image_gray.transpose(2, 0, 1)
-            image_gray = torch.tensor(image_gray)
-        else:
-            image_gray = self.gray_zeros
+        image_gray = cv2.cvtColor(image.copy(), cv2.COLOR_BGR2GRAY)
+        image_gray = np.stack([image_gray, image_gray, image_gray], axis=-1)
+        image_gray = self._transform(image_gray, addmean=False)
+        image_gray = image_gray.transpose(2, 0, 1)
 
         image = self._transform(image, addmean=is_style)
         image = image.transpose(2, 0, 1)
 
-        return torch.tensor(image), image_gray
+        return torch.tensor(image), torch.tensor(image_gray)
 
+    def load_anime_smooth(self, index):
+        fpath = self.image_files[self.smooth][index]
+        image = cv2.imread(fpath, cv2.IMREAD_GRAYSCALE)
+        image = np.stack([image, image, image], axis=-1)
+        image = self._transform(image, addmean=False)
+        image = image.transpose(2, 0, 1)
+        return torch.tensor(image)
 
     def _transform(self, img, addmean=True):
         if self.transform is not None:
