@@ -63,18 +63,6 @@ class AnimeDataSet(Dataset):
         return len(self.image_files[self.smooth])
 
     def __getitem__(self, index):
-        pass
-
-    def init_G_state(self):
-        self.__getitem__ = self.gettiem_init
-
-    def train_GD_state(self):
-        self.__getitem__ = self.getitem
-
-    def gettiem_init(self, index):
-        return self.load_photo(index), self.dummy, self.dummy, self.dummy
-
-    def getitem(self, index):
         image = self.load_photo(index)
         anm_idx = index
         if anm_idx > self.len_anime - 1:
