@@ -75,7 +75,7 @@ class AnimeDataSet(Dataset):
     def load_photo(self, index):
         fpath = self.image_files[self.photo][index]
         image = cv2.imread(fpath)[:,:,::-1]
-        image = self._transform(image, addmean=is_style)
+        image = self._transform(image, addmean=False)
         image = image.transpose(2, 0, 1)
         return torch.tensor(image)
 
@@ -88,7 +88,7 @@ class AnimeDataSet(Dataset):
         image_gray = self._transform(image_gray, addmean=False)
         image_gray = image_gray.transpose(2, 0, 1)
 
-        image = self._transform(image, addmean=is_style)
+        image = self._transform(image, addmean=True)
         image = image.transpose(2, 0, 1)
 
         return torch.tensor(image), torch.tensor(image_gray)
