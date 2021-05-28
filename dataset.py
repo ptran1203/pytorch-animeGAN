@@ -61,6 +61,9 @@ class AnimeDataSet(Dataset):
     def len_smooth(self):
         return len(self.image_files[self.smooth])
 
+    def __getitem__(self, index):
+        pass
+
     def init_G_state(self):
         self.__getitem__ = self.gettiem_init
 
