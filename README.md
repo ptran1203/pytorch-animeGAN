@@ -28,7 +28,7 @@ unzip anime-gan.zip -d /content
 
 #### 1.2 Create custom data from anime video
 
-You need to have a video file located in your machine, for example: `/home/ubuntu/Downloads/kimetsu_yaiba.mp4`
+You need to have a video file located in your machine, for example: [`/home/ubuntu/Downloads/kimetsu_yaiba.mp4`](https://www.youtube.com/watch?v=ZMeGdt8QJfY)
 
 **Step 1.** Create anime images from the video
 
