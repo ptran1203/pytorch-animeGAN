@@ -4,10 +4,10 @@ import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
-from utils.image_processing import normalize_input
+from utils import normalize_input, compute_data_mean
 
 class AnimeDataSet(Dataset):
-    def __init__(self, args,  data_mean=[-4.4661, -8.6698, 13.1360], transform=None):
+    def __init__(self, args, transform=None):
         """   
         folder structure:
             - {data_dir}
@@ -29,13 +29,16 @@ class AnimeDataSet(Dataset):
         if not os.path.exists(anime_dir):
             raise FileNotFoundError(f'Folder {anime_dir} does not exist')
 
-        self.mean = np.array(data_mean)
+        self.mean = compute_data_mean(os.path.join(anime_dir, 'style'))
+        print(f'Mean(B, G, R) of {dataset} are {self.mean}')
+
         self.debug_samples = args.debug_samples or 0
         self.data_dir = data_dir
         self.image_files =  {}
         self.photo = 'train_photo'
         self.style = f'{anime_dir}/style'
         self.smooth =  f'{anime_dir}/smooth'
+        self.dummy = torch.zeros(3, 256, 256)
 
         for opt in [self.photo, self.style, self.smooth]:
             folder = os.path.join(data_dir, opt)
@@ -59,36 +62,44 @@ class AnimeDataSet(Dataset):
         return len(self.image_files[self.smooth])
 
     def __getitem__(self, index):
-        image, _ = self.load_images(index, self.photo)
+        image = self.load_photo(index)
         anm_idx = index
         if anm_idx > self.len_anime - 1:
             anm_idx -= self.len_anime * (index // self.len_anime)
 
-        anime, anime_gray = self.load_images(anm_idx, self.style)
-        _, smooth_gray = self.load_images(anm_idx, self.smooth)
+        anime, anime_gray = self.load_anime(anm_idx)
+        smooth_gray = self.load_anime_smooth(anm_idx)
 
         return image, anime, anime_gray, smooth_gray
 
-    def load_images(self, index, opt):
-        is_style = opt in {self.style, self.smooth}
-        fpath = self.image_files[opt][index]
+    def load_photo(self, index):
+        fpath = self.image_files[self.photo][index]
+        image = cv2.imread(fpath)[:,:,::-1]
+        image = self._transform(image, addmean=False)
+        image = image.transpose(2, 0, 1)
+        return torch.tensor(image)
+
+    def load_anime(self, index):
+        fpath = self.image_files[self.style][index]
         image = cv2.imread(fpath)[:,:,::-1]
 
-        if is_style:
-            image_gray = cv2.cvtColor(image.copy(), cv2.COLOR_BGR2GRAY)
-            image_gray = np.stack([image_gray, image_gray, image_gray], axis=-1)
-            image_gray = self._transform(image_gray, addmean=False)
-            image_gray = image_gray.transpose(2, 0, 1)
-            image_gray = torch.tensor(image_gray)
-        else:
-            h, w, c = image.shape
-            image_gray = torch.zeros(c, h, w)
+        image_gray = cv2.cvtColor(image.copy(), cv2.COLOR_BGR2GRAY)
+        image_gray = np.stack([image_gray, image_gray, image_gray], axis=-1)
+        image_gray = self._transform(image_gray, addmean=False)
+        image_gray = image_gray.transpose(2, 0, 1)
 
-        image = self._transform(image, addmean=is_style)
+        image = self._transform(image, addmean=True)
         image = image.transpose(2, 0, 1)
 
-        return torch.tensor(image), image_gray
+        return torch.tensor(image), torch.tensor(image_gray)
 
+    def load_anime_smooth(self, index):
+        fpath = self.image_files[self.smooth][index]
+        image = cv2.imread(fpath, cv2.IMREAD_GRAYSCALE)
+        image = np.stack([image, image, image], axis=-1)
+        image = self._transform(image, addmean=False)
+        image = image.transpose(2, 0, 1)
+        return torch.tensor(image)
 
     def _transform(self, img, addmean=True):
         if self.transform is not None:

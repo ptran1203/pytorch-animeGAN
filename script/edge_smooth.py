@@ -10,14 +10,15 @@ def parse_args():
     desc = "Edge smoothed"
     parser = argparse.ArgumentParser(description=desc)
     parser.add_argument('--dataset', type=str, default='Paprika', help='dataset_name')
-    parser.add_argument('--img_size', type=int, default=256, help='The size of image')
+    parser.add_argument('--image-size', type=int, default=256, help='The size of image')
 
     return parser.parse_args()
 
 
 def make_edge_smooth(dataset_name, img_size) :
-    file_list = glob(os.path.dirname(os.path.dirname(__file__))+'/dataset/{}/{}/*.*'.format(dataset_name, 'style'))
-    save_dir = os.path.dirname(os.path.dirname(__file__))+'/dataset/{}/smooth'.format(dataset_name)
+    file_list = glob('dataset/{}/{}/*.*'.format(dataset_name, 'style'))
+    save_dir = 'dataset/{}/smooth'.format(dataset_name)
+    os.makedirs(save_dir, exist_ok=True)
 
     kernel_size = 5
     kernel = np.ones((kernel_size, kernel_size), np.uint8)
@@ -47,7 +48,7 @@ def make_edge_smooth(dataset_name, img_size) :
             gauss_img[idx[0][i], idx[1][i], 2] = np.sum(
                 np.multiply(pad_img[idx[0][i]:idx[0][i] + kernel_size, idx[1][i]:idx[1][i] + kernel_size, 2], gauss))
 
-        cv2.imwrite(os.path.join(save_dir, file_name), gauss_img)
+        assert cv2.imwrite(os.path.join(save_dir, file_name), gauss_img)
 
 
 def main():
@@ -56,7 +57,7 @@ def main():
     if args is None:
         exit()
 
-    make_edge_smooth(args.dataset, args.img_size)
+    make_edge_smooth(args.dataset, args.image_size)
 
 
 if __name__ == '__main__':

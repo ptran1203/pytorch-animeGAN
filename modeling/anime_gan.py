@@ -11,9 +11,9 @@ from utils.common import initialize_weights
 
 
 class Generator(nn.Module):
-    def __init__(self):
+    def __init__(self, dataset=''):
         super(Generator, self).__init__()
-        self.name = 'generator'
+        self.name = f'generator_{dataset}'
         bias = False
 
         self.encode_blocks = nn.Sequential(
@@ -62,7 +62,7 @@ class Generator(nn.Module):
 class Discriminator(nn.Module):
     def __init__(self,  args):
         super(Discriminator, self).__init__()
-        self.name = 'discriminator'
+        self.name = f'discriminator_{args.dataset}'
         self.bias = False
         channels = 32
 

@@ -4,12 +4,13 @@ import os
 import numpy as np
 import shutil
 import moviepy.video.io.ffmpeg_writer as ffmpeg_writer
+from moviepy.video.io.VideoFileClip import VideoFileClip
 from modeling.anime_gan import Generator
 from utils.common import load_weight
 from utils.image_processing import resize_image, normalize_input, denormalize_input
 from utils import read_image
 from tqdm import tqdm
-from moviepy.video.io.VideoFileClip import VideoFileClip
+
 
 cuda_available = torch.cuda.is_available()
 
@@ -78,18 +79,21 @@ class Transformer:
 
         for fname in tqdm(files):
             image = cv2.imread(os.path.join(img_dir, fname))[:,:,::-1]
-            image = resize_image(image, img_size)
+            image = resize_image(image)
             anime_img = self.transform(image)[0]
             ext = fname.split('.')[-1]
             fname = fname.replace(f'.{ext}', '')
             anime_img = denormalize_input(anime_img, dtype=np.int16)
             cv2.imwrite(os.path.join(dest_dir, f'{fname}_anime.jpg'), anime_img[..., ::-1])
 
-    def transform_video(self, input_path, output_path, batch_size=4):
+    def transform_video(self, input_path, output_path, batch_size=4, start=0, end=0):
         '''
         Transform a video to animation version
         https://github.com/lengstrom/fast-style-transfer/blob/master/evaluate.py#L21
         '''
+        # Force to None
+        end = end or None
+
         if not os.path.isfile(input_path):
             raise FileNotFoundError(f'{input_path} does not exist')
 
@@ -109,6 +113,9 @@ class Transformer:
                 writer.write_frame(img)
 
         video_clip = VideoFileClip(input_path, audio=False)
+        if start or end:
+            video_clip = video_clip.subclip(start, end)
+
         video_writer = ffmpeg_writer.FFMPEG_VideoWriter(
             temp_file or output_path,
             video_clip.size, video_clip.fps, codec="libx264",
