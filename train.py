@@ -44,6 +44,7 @@ def parse_args():
     parser.add_argument('--wcon', type=float, default=1.5, help='Content loss weight')
     parser.add_argument('--wgra', type=float, default=3.0, help='Gram loss weight')
     parser.add_argument('--wcol', type=float, default=30.0, help='Color loss weight')
+    parser.add_argument('--d-layers', type=int, default=3, help='Discriminator conv layers')
 
     return parser.parse_args()
 

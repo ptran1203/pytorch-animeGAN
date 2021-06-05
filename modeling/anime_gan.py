@@ -71,7 +71,7 @@ class Discriminator(nn.Module):
             nn.LeakyReLU(0.2, True)
         ]
 
-        for i in range(3):
+        for i in range(args.d_layers):
             layers += [
                 nn.Conv2d(channels, channels * 2, kernel_size=3, stride=2, padding=1, bias=self.bias),
                 nn.LeakyReLU(0.2, True),
