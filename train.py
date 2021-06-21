@@ -32,7 +32,7 @@ def parse_args():
     parser.add_argument('--checkpoint-dir', type=str, default='/content/checkpoints')
     parser.add_argument('--save-image-dir', type=str, default='/content/images')
     parser.add_argument('--gan-loss', type=str, default='lsgan', help='lsgan / hinge / bce')
-    parser.add_argument('--continu', type=str, default='False')
+    parser.add_argument('--resume', type=str, default='False')
     parser.add_argument('--use_sn', action='store_true')
     parser.add_argument('--save-interval', type=int, default=1)
     parser.add_argument('--debug-samples', type=int, default=0)
@@ -133,7 +133,7 @@ def main(args):
     optimizer_d = optim.Adam(D.parameters(), lr=args.lr_d, betas=(0.5, 0.999))
 
     start_e = 0
-    if args.continu == 'GD':
+    if args.resume == 'GD':
         # Load G and D
         try:
             start_e = load_checkpoint(G, args.checkpoint_dir)
@@ -142,7 +142,7 @@ def main(args):
             print("D weight loaded")
         except Exception as e:
             print('Could not load checkpoint, train from scratch', e)
-    elif args.continu == 'G':
+    elif args.resume == 'G':
         # Load G only
         try:
             start_e = load_checkpoint(G, args.checkpoint_dir, posfix='_init')

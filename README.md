@@ -66,7 +66,7 @@ python3 train.py --dataset Hayao\           # Can be Hayao, Shinkai, Kimetsu, Pa
                 --wcon 1.5\                 # Content loss weight
                 --wgra 3.0\                 # Gram loss weight
                 --wcol 30.0\                # Color loss weight
-                --continu GD\               # if set, G to start from pre-trained G, GD to continue training GAN
+                --resume GD\                # if set, G to start from pre-trained G, GD to continue training GAN
                 --use_sn\                   # If set, use spectral normalization, default is False
 ```
 
