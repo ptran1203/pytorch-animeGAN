@@ -45,7 +45,7 @@ def parse_args():
     parser.add_argument('--wgra', type=float, default=3.0, help='Gram loss weight')
     parser.add_argument('--wcol', type=float, default=30.0, help='Color loss weight')
     parser.add_argument('--d-layers', type=int, default=3, help='Discriminator conv layers')
-    parser.add_argument('--d-noise', type=int, action='store_true')
+    parser.add_argument('--d-noise', action='store_true')
 
     return parser.parse_args()
 
