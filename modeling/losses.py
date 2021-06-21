@@ -51,11 +51,11 @@ class AnimeGanLoss:
         '''
         fake_feat = self.vgg19(fake_img)
         anime_feat = self.vgg19(anime_gray)
-        img_feat = self.vgg19(img)
+        img_feat = self.vgg19(img).detach()
 
         return [
             self.wadvg * self.adv_loss_g(fake_logit),
-            self.wcon * self.content_loss(img_feat.detach(), fake_feat),
+            self.wcon * self.content_loss(img_feat, fake_feat),
             self.wgra * self.gram_loss(gram(anime_feat), gram(fake_feat)),
             self.wcol * self.color_loss(img, fake_img),
         ]

@@ -45,6 +45,7 @@ def parse_args():
     parser.add_argument('--wgra', type=float, default=3.0, help='Gram loss weight')
     parser.add_argument('--wcol', type=float, default=30.0, help='Color loss weight')
     parser.add_argument('--d-layers', type=int, default=3, help='Discriminator conv layers')
+    parser.add_argument('--d-noise', type=int, action='store_true')
 
     return parser.parse_args()
 
@@ -187,13 +188,19 @@ def main(args):
 
             # ---------------- TRAIN D ---------------- #
             optimizer_d.zero_grad()
-            fake_image_for_d = G(img)
+            fake_img = G(img).detach()
 
             # Add some Gaussian noise to images before feeding to D
-            fake_d = D(fake_image_for_d + gaussian_noise())
-            real_anime_d = D(anime + gaussian_noise())
-            real_anime_gray_d = D(anime_gray + gaussian_noise())
-            real_anime_smt_gray_d = D(anime_smt_gray + gaussian_noise())
+            if args.d_noise:
+                fake_img += gaussian_noise()
+                anime += gaussian_noise()
+                anime_gray += gaussian_noise()
+                anime_smt_gray += gaussian_noise()
+
+            fake_d = D(fake_img)
+            real_anime_d = D(anime)
+            real_anime_gray_d = D(anime_gray)
+            real_anime_smt_gray_d = D(anime_smt_gray)
 
             loss_d = loss_fn.compute_loss_D(
                 fake_d, real_anime_d, real_anime_gray_d, real_anime_smt_gray_d)
