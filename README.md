@@ -98,7 +98,7 @@ python3 inference_video.py --checkpoint {ckp_dir}\
 ## Anime transformation results
 
 
-| Input | Output |
+| Input | Output(Hayao style) |
 |--|--|
 |![c1](./example/result/11.jpeg)|![g1](./example/result/11_anime.jpeg)|
 |![c1](./example/result/132.jpeg)|![g1](./example/result/132_anime.jpeg)|
