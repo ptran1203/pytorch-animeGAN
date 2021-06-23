@@ -95,7 +95,7 @@ python3 inference_video.py --checkpoint {ckp_dir}\
                         --batch-size 2
 ```
 
-## Anime transformation results
+## Anime transformation results ([see more](https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/results.zip))
 
 
 | Input | Output(Hayao style) |
@@ -112,8 +112,7 @@ python3 inference_video.py --checkpoint {ckp_dir}\
 
 - [x] Add Google Colab
 - [ ] Add implementation details
-- [ ] Add and train on other data
-- [ ] ...
+- [x] Add and train on other data
 
 <!-- ### Objective:
 
