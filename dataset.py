@@ -3,48 +3,46 @@ import cv2
 import numpy as np
 import pandas as pd
 import torch
+from glob import glob
 from torch.utils.data import Dataset
 from utils import normalize_input, compute_data_mean
 
+CACHE_DIR = 'tmp'
+
 class AnimeDataSet(Dataset):
-    def __init__(self, args, transform=None):
+    def __init__(
+        self,
+        anime_image_dir,
+        real_image_dir,
+        debug_samples=0,
+        cache=False,
+        transform=None
+    ):
         """   
         folder structure:
-            - {data_dir}
-                - photo
-                    1.jpg, ..., n.jpg
-                - {dataset}  # E.g Hayao
-                    smooth
-                        1.jpg, ..., n.jpg
-                    style
-                        1.jpg, ..., n.jpg
+        - {anime_image_dir}  # E.g Hayao
+            smooth
+                1.jpg, ..., n.jpg
+            style
+                1.jpg, ..., n.jpg
         """
-        data_dir = args.data_dir
-        dataset = args.dataset
+        self.cache = cache
+        self.mean = compute_data_mean(os.path.join(anime_image_dir, 'style'))
+        print(f'Mean(B, G, R) of {anime_image_dir} are {self.mean}')
 
-        anime_dir = os.path.join(data_dir, dataset)
-        if not os.path.exists(data_dir):
-            raise FileNotFoundError(f'Folder {data_dir} does not exist')
-
-        if not os.path.exists(anime_dir):
-            raise FileNotFoundError(f'Folder {anime_dir} does not exist')
-
-        self.mean = compute_data_mean(os.path.join(anime_dir, 'style'))
-        print(f'Mean(B, G, R) of {dataset} are {self.mean}')
-
-        self.debug_samples = args.debug_samples or 0
-        self.data_dir = data_dir
+        self.debug_samples = debug_samples
         self.image_files =  {}
         self.photo = 'train_photo'
-        self.style = f'{anime_dir}/style'
-        self.smooth =  f'{anime_dir}/smooth'
+        self.style = 'style'
+        self.smooth =  'smooth'
         self.dummy = torch.zeros(3, 256, 256)
 
-        for opt in [self.photo, self.style, self.smooth]:
-            folder = os.path.join(data_dir, opt)
-            files = os.listdir(folder)
-
-            self.image_files[opt] = [os.path.join(folder, fi) for fi in files]
+        for dir, opt in [
+            (real_image_dir, self.photo),
+            (os.path.join(anime_image_dir, self.style), self.style),
+            (os.path.join(anime_image_dir, self.smooth), self.smooth)
+        ]:
+            self.image_files[opt] = glob(os.path.join(dir, "*.*"))
 
         self.transform = transform
 
@@ -70,7 +68,12 @@ class AnimeDataSet(Dataset):
         anime, anime_gray = self.load_anime(anm_idx)
         smooth_gray = self.load_anime_smooth(anm_idx)
 
-        return image, anime, anime_gray, smooth_gray
+        return {
+            "image": image,
+            "anime": anime,
+            "anime_gray": anime_gray,
+            "smooth_gray": smooth_gray
+        }
 
     def load_photo(self, index):
         fpath = self.image_files[self.photo][index]

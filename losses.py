@@ -23,16 +23,19 @@ class ColorLoss(nn.Module):
 
 
 class AnimeGanLoss:
-    def __init__(self, args):
-        self.content_loss = nn.L1Loss().cuda()
-        self.gram_loss = nn.L1Loss().cuda()
-        self.color_loss = ColorLoss().cuda()
+    def __init__(self, args, device):
+        if isinstance(device, str):
+            device = torch.device(device)
+
+        self.content_loss = nn.L1Loss().to(device)
+        self.gram_loss = nn.L1Loss().to(device)
+        self.color_loss = ColorLoss().to(device)
         self.wadvg = args.wadvg
         self.wadvd = args.wadvd
         self.wcon = args.wcon
         self.wgra = args.wgra
         self.wcol = args.wcol
-        self.vgg19 = Vgg19().cuda().eval()
+        self.vgg19 = Vgg19().to(device).eval()
         self.adv_type = args.gan_loss
         self.bce_loss = nn.BCELoss()
 
@@ -40,7 +43,7 @@ class AnimeGanLoss:
         '''
         Compute loss for Generator
 
-        @Arugments:
+        @Args:
             - fake_img: generated image
             - img: image
             - fake_logit: output of Discriminator given fake image
@@ -144,6 +147,10 @@ class LossSummary:
     def avg_loss_D(self):
         return self._avg(self.loss_d_adv)
 
+    def get_loss_description(self):
+        avg_adv, avg_gram, avg_color, avg_content = self.avg_loss_G()
+        avg_adv_d = self.avg_loss_D()
+        return f'loss G: adv {avg_adv:2f} con {avg_content:2f} gram {avg_gram:2f} color {avg_color:2f} / loss D: {avg_adv_d:2f}'
 
     @staticmethod
     def _avg(losses):

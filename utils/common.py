@@ -115,5 +115,3 @@ def _download_weight(weight):
 
     return save_path
 
-
-
