@@ -58,6 +58,7 @@ class Trainer:
         self.checkpoint_path_G = os.path.join(self.cfg.exp_dir, "generator.pt")
         self.checkpoint_path_D = os.path.join(self.cfg.exp_dir, "discriminator.pt")
         self.save_image_dir = os.path.join(self.cfg.exp_dir, "generated_images")
+        os.makedirs(self.save_image_dir, exist_ok=True)
 
     def init_weight_G(self, weight: str):
         """Init Generator weight"""
