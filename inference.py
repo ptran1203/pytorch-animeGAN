@@ -5,7 +5,7 @@ import numpy as np
 import shutil
 import moviepy.video.io.ffmpeg_writer as ffmpeg_writer
 from moviepy.video.io.VideoFileClip import VideoFileClip
-from modeling.anime_gan import Generator
+from models.anime_gan import Generator
 from utils.common import load_weight
 from utils.image_processing import resize_image, normalize_input, denormalize_input
 from utils import read_image

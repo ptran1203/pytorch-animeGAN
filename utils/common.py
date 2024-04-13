@@ -31,34 +31,35 @@ def read_image(path):
     return cv2.imread(path)[: ,: ,::-1]
 
 
-def save_checkpoint(model, optimizer, epoch, args, posfix=''):
+def save_checkpoint(model, path, optimizer=None, epoch=None):
     checkpoint = {
         'model_state_dict': model.state_dict(),
-        'optimizer_state_dict': optimizer.state_dict(),
         'epoch': epoch,
     }
-    path = os.path.join(args.checkpoint_dir, f'{model.name}{posfix}.pth')
+    if optimizer is  not None:
+        checkpoint['optimizer_state_dict'] = optimizer.state_dict()
+
     torch.save(checkpoint, path)
 
 
-def load_checkpoint(model, checkpoint_dir, posfix=''):
-    path = os.path.join(checkpoint_dir, f'{model.name}{posfix}.pth')
-    return load_weight(model, path)
+def load_checkpoint(model, path, optimizer=None) -> int:
+    state_dict = load_state_dict(path)
+    model.load_state_dict(state_dict['model_state_dict'], strict=True)
+    if optimizer is not None and 'optimizer_state_dict' in state_dict:
+        optimizer.load_state_dict(state_dict['optimizer_state_dict'])
+
+    epoch = state_dict.get('epoch', 0)
+    return epoch
 
 
-def load_weight(model, weight):
+def load_state_dict(weight) -> dict:
     if weight.lower() in SUPPORT_WEIGHTS:
         weight = _download_weight(weight)
 
-    checkpoint = torch.load(weight,  map_location='cuda:0') if torch.cuda.is_available() else \
-        torch.load(weight,  map_location='cpu')
-    model.load_state_dict(checkpoint['model_state_dict'], strict=True)
-    epoch = checkpoint['epoch']
-    del checkpoint
-    torch.cuda.empty_cache()
-    gc.collect()
+    map_location = 'cuda' if torch.cuda.is_available() else 'cpu'
+    state_dict = torch.load(weight, map_location=map_location)
 
-    return epoch
+    return state_dict
 
 
 def initialize_weights(net):

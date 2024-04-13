@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
-from modeling.vgg import Vgg19
+from models.vgg import Vgg19
 from utils.image_processing import gram, rgb_to_yuv
 
 
