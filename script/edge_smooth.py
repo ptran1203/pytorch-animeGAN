@@ -9,15 +9,15 @@ from tqdm import tqdm
 def parse_args():
     desc = "Edge smoothed"
     parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument('--dataset', type=str, default='Paprika', help='dataset_name')
+    parser.add_argument('--data-dir', type=str, default='dataset/Paprika/style', help='Path to dataset style')
+    parser.add_argument('--save-dir', type=str, default='dataset/Paprika/smooth', help='Save path')
     parser.add_argument('--image-size', type=int, default=256, help='The size of image')
 
     return parser.parse_args()
 
 
-def make_edge_smooth(dataset_name, img_size) :
-    file_list = glob('dataset/{}/{}/*.*'.format(dataset_name, 'style'))
-    save_dir = 'dataset/{}/smooth'.format(dataset_name)
+def make_edge_smooth(data_dir, save_dir, img_size) :
+    file_list = glob(f'{data_dir}/*.*')
     os.makedirs(save_dir, exist_ok=True)
 
     kernel_size = 5
@@ -25,7 +25,7 @@ def make_edge_smooth(dataset_name, img_size) :
     gauss = cv2.getGaussianKernel(kernel_size, 0)
     gauss = gauss * gauss.transpose(1, 0)
 
-    for f in tqdm(file_list) :
+    for f in tqdm(file_list, total=len(file_list)):
         file_name = os.path.basename(f)
 
         bgr_img = cv2.imread(f)
