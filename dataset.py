@@ -124,6 +124,7 @@ class AnimeDataSet(Dataset):
             image = cv2.imread(fpath)[:,:,::-1]
             image = self._transform(image, addmean=False)
             image = image.transpose(2, 0, 1)
+            image = np.ascontiguousarray(image)
         return image
 
     def load_anime(self, index) -> np.ndarray:
@@ -143,6 +144,9 @@ class AnimeDataSet(Dataset):
             image = self._transform(image, addmean=True)
             image = image.transpose(2, 0, 1)
 
+            image = np.ascontiguousarray(image)
+            image_gray = np.ascontiguousarray(image_gray)
+
         return image, image_gray
 
     def load_anime_smooth(self, index) -> np.ndarray:
@@ -155,6 +159,7 @@ class AnimeDataSet(Dataset):
             image = np.stack([image, image, image], axis=-1)
             image = self._transform(image, addmean=False)
             image = image.transpose(2, 0, 1)
+            image = np.ascontiguousarray(image)
         return image
 
     def _transform(self, img, addmean=True):
