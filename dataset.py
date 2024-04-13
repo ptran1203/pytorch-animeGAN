@@ -8,7 +8,7 @@ from glob import glob
 from torch.utils.data import Dataset
 from utils import normalize_input, compute_data_mean
 
-CACHE_DIR = '/tmp'
+CACHE_DIR = '/tmp/animegan_cache'
 
 class AnimeDataSet(Dataset):
     def __init__(
