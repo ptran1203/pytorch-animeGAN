@@ -9,15 +9,19 @@ from tqdm import tqdm
 def parse_args():
     desc = "Edge smoothed"
     parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument('--data-dir', type=str, default='dataset/Paprika/style', help='Path to dataset style')
-    parser.add_argument('--save-dir', type=str, default='dataset/Paprika/smooth', help='Save path')
+    parser.add_argument('--data-dir', type=str, default='dataset/Paprika', help='Path to dataset, should have /style inside')
     parser.add_argument('--image-size', type=int, default=256, help='The size of image')
 
     return parser.parse_args()
 
 
-def make_edge_smooth(data_dir, save_dir, img_size) :
-    file_list = glob(f'{data_dir}/*.*')
+def make_edge_smooth(data_dir, img_size) :
+    style_dir = os.path.join(data_dir, "style")
+    if not os.path.exists(style_dir):
+        raise FileNotFoundError(f"style folder not found in {data_dir}")
+
+    file_list = glob(f'{style_dir}/*.*')
+    save_dir = os.path.join(data_dir, "smooth")
     os.makedirs(save_dir, exist_ok=True)
 
     kernel_size = 5
