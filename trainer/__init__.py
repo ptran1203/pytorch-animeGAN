@@ -104,7 +104,7 @@ class Trainer:
             img = data["image"].to(self.device)
             anime = data["anime"].to(self.device)
             anime_gray = data["anime_gray"].to(self.device)
-            anime_smt_gray = data["anime_smt_gray"].to(self.device)
+            anime_smt_gray = data["smooth_gray"].to(self.device)
 
             # ---------------- TRAIN D ---------------- #
             self.optimizer_d.zero_grad()
