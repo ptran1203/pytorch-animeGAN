@@ -93,6 +93,8 @@ class Trainer:
 
             save_checkpoint(self.G, self.checkpoint_path_G_init, self.optimizer_g, epoch)
             self.generate_and_save(train_loader, subname='initg')
+            print(f"Epoch {epoch}/{self.cfg.init_epochs}")
+
         set_lr(self.optimizer_g, self.cfg.lr_g)
 
     def train_epoch(self, epoch, train_loader):
@@ -150,6 +152,7 @@ class Trainer:
             self.loss_tracker.update_loss_G(adv_loss, gra_loss, col_loss, con_loss)
             pbar.set_description(self.loss_tracker.get_loss_description())
 
+
     def train(self, train_dataset: Dataset, start_epoch_g=0, start_epoch=0):
         """
         Train Generator and Discriminator.
@@ -168,6 +171,7 @@ class Trainer:
 
         self.pretrain_generator(data_loader, start_epoch_g)
 
+        print(f"Start training for {self.cfg.epochs} epochs")
         for epoch in range(start_epoch, self.cfg.epochs):
             self.train_epoch(epoch, data_loader)
 
@@ -175,6 +179,8 @@ class Trainer:
                 save_checkpoint(self.G, self.checkpoint_path_G,self.optimizer_g, epoch)
                 save_checkpoint(self.D, self.checkpoint_path_D, self.optimizer_d, epoch)
                 self.generate_and_save(data_loader)
+            
+            print(f"epoch {epoch}/{self.cfg.epochs}")
 
     def generate_and_save(
         self,

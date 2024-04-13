@@ -6,7 +6,7 @@ import torch
 from tqdm.auto import tqdm
 from glob import glob
 from torch.utils.data import Dataset
-from utils import normalize_input, compute_data_mean
+from utils import normalize_input, compute_data_mean, fast_numpyio
 
 CACHE_DIR = '/tmp/animegan_cache'
 
@@ -90,11 +90,14 @@ class AnimeDataSet(Dataset):
             cache_sub_sir = os.path.join(CACHE_DIR, opt)
             os.makedirs(cache_sub_sir, exist_ok=True)
             for index, img_file in enumerate(tqdm(image_files)):
+                if self.cache_files[opt][index]:
+                    continue  # Cache exist.
+
                 save_path = os.path.join(cache_sub_sir, f"{index}.npy")
                 if opt == self.photo:
                     image = self.load_photo(index)
                     cache_nbytes += image.nbytes
-                    np.save(save_path, image)
+                    fast_numpyio.save(save_path, image)
                     self.cache_files[opt][index] = save_path
                 elif opt == self.smooth:
                     cache_nbytes += image.nbytes
@@ -104,9 +107,9 @@ class AnimeDataSet(Dataset):
                 elif opt == self.style:
                     image, image_gray = self.load_anime(index)
                     cache_nbytes = cache_nbytes + image.nbytes + image_gray.nbytes
-                    np.save(save_path, image)
+                    fast_numpyio.save(save_path, image)
                     save_path_gray = os.path.join(cache_sub_sir, f"{index}_gray.npy")
-                    np.save(save_path_gray, image_gray)
+                    fast_numpyio.save(save_path_gray, image_gray)
                     self.cache_files[opt][index] = (save_path, save_path_gray)
                 else:
                     raise ValueError(opt)
@@ -115,7 +118,7 @@ class AnimeDataSet(Dataset):
     def load_photo(self, index) -> np.ndarray:
         if self.cache_files[self.photo][index]:
             fpath = self.cache_files[self.photo][index]
-            image = np.load(fpath)
+            image = fast_numpyio.load(fpath)
         else:
             fpath = self.image_files[self.photo][index]
             image = cv2.imread(fpath)[:,:,::-1]
@@ -126,8 +129,8 @@ class AnimeDataSet(Dataset):
     def load_anime(self, index) -> np.ndarray:
         if self.cache_files[self.style][index]:
             fpath, fpath_gray = self.cache_files[self.style][index]
-            image = np.load(fpath)
-            image_gray = np.load(fpath_gray)
+            image = fast_numpyio.load(fpath)
+            image_gray = fast_numpyio.load(fpath_gray)
         else:
             fpath = self.image_files[self.style][index]
             image = cv2.imread(fpath)[:,:,::-1]
@@ -145,7 +148,7 @@ class AnimeDataSet(Dataset):
     def load_anime_smooth(self, index) -> np.ndarray:
         if self.cache_files[self.smooth][index]:
             fpath = self.cache_files[self.smooth][index]
-            image = np.load(fpath)
+            image = fast_numpyio.load(fpath)
         else:
             fpath = self.image_files[self.smooth][index]
             image = cv2.imread(fpath, cv2.IMREAD_GRAYSCALE)
