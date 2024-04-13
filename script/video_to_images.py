@@ -80,7 +80,7 @@ class VideoConverter:
         total_frames = round(video_clip.fps * video_clip.duration)
         print(f'Processing video {self.video_path}, {total_frames} frames, size: {video_clip.size}')
 
-        for frame in tqdm(video_clip.iter_frames()):
+        for frame in tqdm(video_clip.iter_frames(), total=total_frames):
             # It's better if we resizing before crop to keep the image looks more 'scene'
             h, w, _ = frame.shape
             aspect_ratio = w / h
