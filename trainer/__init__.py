@@ -162,6 +162,8 @@ class Trainer:
             shuffle=True,
             # collate_fn=collate_fn,
         )
+        self.G.to(self.device)
+        self.D.to(self.device)
 
         self.pretrain_generator(data_loader, start_epoch_g)
 
