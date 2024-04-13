@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import pandas as pd
 import torch
+from tqdm.auto import tqdm
 from glob import glob
 from torch.utils.data import Dataset
 from utils import normalize_input, compute_data_mean
@@ -36,13 +37,14 @@ class AnimeDataSet(Dataset):
         self.style = 'style'
         self.smooth =  'smooth'
         self.dummy = torch.zeros(3, 256, 256)
-
+        self.cache_files = {}
         for dir, opt in [
             (real_image_dir, self.photo),
             (os.path.join(anime_image_dir, self.style), self.style),
             (os.path.join(anime_image_dir, self.smooth), self.smooth)
         ]:
             self.image_files[opt] = glob(os.path.join(dir, "*.*"))
+            self.cache_files[opt] = [False] * len(self.image_files[opt])
 
         self.transform = transform
 
@@ -69,40 +71,86 @@ class AnimeDataSet(Dataset):
         smooth_gray = self.load_anime_smooth(anm_idx)
 
         return {
-            "image": image,
-            "anime": anime,
-            "anime_gray": anime_gray,
-            "smooth_gray": smooth_gray
+            "image": torch.tensor(image),
+            "anime": torch.tensor(anime),
+            "anime_gray": torch.tensor(anime_gray),
+            "smooth_gray": torch.tensor(smooth_gray)
         }
 
-    def load_photo(self, index):
-        fpath = self.image_files[self.photo][index]
-        image = cv2.imread(fpath)[:,:,::-1]
-        image = self._transform(image, addmean=False)
-        image = image.transpose(2, 0, 1)
-        return torch.tensor(image)
+    def cache_data(self):
+        if not self.cache:
+            return
+        
+        os.makedirs(CACHE_DIR, exist_ok=True)
+        # Caching image to npy for faster dataloader
+        print("Caching data..")
+        cache_nbytes = 0
+        for opt, image_files in self.image_files.items():
+            self.cache_files[opt] = []
+            for index, img_file in enumerate(tqdm(image_files)):
+                save_path = os.path.join(CACHE_DIR, opt, f"{index}.npy")
+                if opt == self.photo:
+                    image = self.load_photo(index)
+                    cache_nbytes += image.nbytes
+                    np.save(save_path, image)
+                    self.cache_files[opt][index] = save_path
+                elif opt == self.smooth:
+                    cache_nbytes += image.nbytes
+                    image = self.load_anime_smooth(index)
+                    np.save(save_path, image)
+                    self.cache_files[opt][index] = save_path
+                elif opt == self.style:
+                    image, image_gray = self.load_anime(index)
+                    cache_nbytes = cache_nbytes + image.nbytes + image_gray.nbytes
+                    np.save(save_path, image)
+                    save_path_gray = os.path.join(CACHE_DIR, opt, f"{index}_gray.npy")
+                    np.save(save_path_gray, image_gray)
+                    self.cache_files[opt][index] = (save_path, save_path_gray)
+                else:
+                    raise ValueError(opt)
+        print(f"Cache saved to {CACHE_DIR}, size={cache_nbytes/1e9} Gb")
 
-    def load_anime(self, index):
-        fpath = self.image_files[self.style][index]
-        image = cv2.imread(fpath)[:,:,::-1]
+    def load_photo(self, index) -> np.ndarray:
+        if self.cache_files[self.photo][index]:
+            fpath = self.cache_files[self.photo][index]
+            image = np.load(fpath)
+        else:
+            fpath = self.image_files[self.photo][index]
+            image = cv2.imread(fpath)[:,:,::-1]
+            image = self._transform(image, addmean=False)
+            image = image.transpose(2, 0, 1)
+        return image
 
-        image_gray = cv2.cvtColor(image.copy(), cv2.COLOR_BGR2GRAY)
-        image_gray = np.stack([image_gray, image_gray, image_gray], axis=-1)
-        image_gray = self._transform(image_gray, addmean=False)
-        image_gray = image_gray.transpose(2, 0, 1)
+    def load_anime(self, index) -> np.ndarray:
+        if self.cache_files[self.style][index]:
+            fpath, fpath_gray = self.cache_files[self.style][index]
+            image = np.load(fpath)
+            image_gray = np.load(fpath_gray)
+        else:
+            fpath = self.image_files[self.style][index]
+            image = cv2.imread(fpath)[:,:,::-1]
 
-        image = self._transform(image, addmean=True)
-        image = image.transpose(2, 0, 1)
+            image_gray = cv2.cvtColor(image.copy(), cv2.COLOR_BGR2GRAY)
+            image_gray = np.stack([image_gray, image_gray, image_gray], axis=-1)
+            image_gray = self._transform(image_gray, addmean=False)
+            image_gray = image_gray.transpose(2, 0, 1)
 
-        return torch.tensor(image), torch.tensor(image_gray)
+            image = self._transform(image, addmean=True)
+            image = image.transpose(2, 0, 1)
 
-    def load_anime_smooth(self, index):
-        fpath = self.image_files[self.smooth][index]
-        image = cv2.imread(fpath, cv2.IMREAD_GRAYSCALE)
-        image = np.stack([image, image, image], axis=-1)
-        image = self._transform(image, addmean=False)
-        image = image.transpose(2, 0, 1)
-        return torch.tensor(image)
+        return image, image_gray
+
+    def load_anime_smooth(self, index) -> np.ndarray:
+        if self.cache_files[self.smooth][index]:
+            fpath = self.cache_files[self.smooth][index]
+            image = np.load(fpath)
+        else:
+            fpath = self.image_files[self.smooth][index]
+            image = cv2.imread(fpath, cv2.IMREAD_GRAYSCALE)
+            image = np.stack([image, image, image], axis=-1)
+            image = self._transform(image, addmean=False)
+            image = image.transpose(2, 0, 1)
+        return image
 
     def _transform(self, img, addmean=True):
         if self.transform is not None:

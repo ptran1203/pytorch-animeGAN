@@ -69,9 +69,10 @@ class Trainer:
 
     def pretrain_generator(self, train_loader, start_epoch):
         init_losses = []
+        set_lr(self.optimizer_g, self.cfg.init_lr)
         for epoch in range(start_epoch, self.cfg.init_epochs):
             # Train with content loss only
-            set_lr(self.optimizer_g, self.cfg.init_lr)
+            
             pbar = tqdm(train_loader)
             for data in pbar:
                 img = data["image"].to(self.device)
@@ -90,9 +91,9 @@ class Trainer:
                 avg_content_loss = sum(init_losses) / len(init_losses)
                 pbar.set_description(f'[Init Training G] content loss: {avg_content_loss:2f}')
 
-            set_lr(self.optimizer_g, self.cfg.lr_g)
             save_checkpoint(self.G, self.checkpoint_path_G_init, self.optimizer_g, epoch)
             self.generate_and_save(train_loader, subname='initg')
+        set_lr(self.optimizer_g, self.cfg.lr_g)
 
     def train_epoch(self, epoch, train_loader):
         pbar = tqdm(train_loader, total=len(train_loader))
