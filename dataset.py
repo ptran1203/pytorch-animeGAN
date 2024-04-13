@@ -47,6 +47,7 @@ class AnimeDataSet(Dataset):
             self.cache_files[opt] = [False] * len(self.image_files[opt])
 
         self.transform = transform
+        self.cache_data()
 
         print(f'Dataset: real {len(self.image_files[self.photo])} style {self.len_anime}, smooth {self.len_smooth}')
 
