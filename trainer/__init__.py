@@ -189,7 +189,8 @@ class Trainer:
         max_iter = (max_imgs // self.cfg.batch_size) + 1
         fake_imgs = []
 
-        for i, (img, *_) in enumerate(loader):
+        for i, data in enumerate(loader):
+            img = data["image"].to(self.device)
             with torch.no_grad():
                 with torch.autocast(self.cfg.device, enabled=self.cfg.amp):
                     fake_img = self.G(img.cuda())
