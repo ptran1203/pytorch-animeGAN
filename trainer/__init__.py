@@ -43,7 +43,7 @@ class Trainer:
         self.D = discriminator
         self.cfg = config
         self.optimizer_g = optim.Adam(self.G.parameters(), lr=self.cfg.lr_g, betas=(0.5, 0.999))
-        self.optimizer_d = optim.Adam(self.G.parameters(), lr=self.cfg.lr_d, betas=(0.5, 0.999))
+        self.optimizer_d = optim.Adam(self.D.parameters(), lr=self.cfg.lr_d, betas=(0.5, 0.999))
         self.loss_tracker = LossSummary()
         self.device = torch.device(self.cfg.device)
         self.loss_fn = AnimeGanLoss(self.cfg, self.device)
