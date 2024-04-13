@@ -61,7 +61,7 @@ def main():
     if args is None:
         exit()
 
-    make_edge_smooth(args.dataset, args.image_size)
+    make_edge_smooth(args.data_dir, args.image_size)
 
 
 if __name__ == '__main__':
