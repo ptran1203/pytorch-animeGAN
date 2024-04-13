@@ -90,10 +90,9 @@ class AnimeDataSet(Dataset):
             cache_sub_sir = os.path.join(CACHE_DIR, opt)
             os.makedirs(cache_sub_sir, exist_ok=True)
             for index, img_file in enumerate(tqdm(image_files)):
-                if self.cache_files[opt][index]:
-                    continue  # Cache exist.
-
                 save_path = os.path.join(cache_sub_sir, f"{index}.npy")
+                if os.path.exists(save_path):
+                    continue  # Cache exist.
                 if opt == self.photo:
                     image = self.load_photo(index)
                     cache_nbytes += image.nbytes
