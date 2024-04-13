@@ -87,8 +87,10 @@ class AnimeDataSet(Dataset):
         print("Caching data..")
         cache_nbytes = 0
         for opt, image_files in self.image_files.items():
+            cache_sub_sir = os.path.join(CACHE_DIR, opt)
+            os.makedirs(cache_sub_sir, exist_ok=True)
             for index, img_file in enumerate(tqdm(image_files)):
-                save_path = os.path.join(CACHE_DIR, opt, f"{index}.npy")
+                save_path = os.path.join(cache_sub_sir, f"{index}.npy")
                 if opt == self.photo:
                     image = self.load_photo(index)
                     cache_nbytes += image.nbytes
@@ -103,7 +105,7 @@ class AnimeDataSet(Dataset):
                     image, image_gray = self.load_anime(index)
                     cache_nbytes = cache_nbytes + image.nbytes + image_gray.nbytes
                     np.save(save_path, image)
-                    save_path_gray = os.path.join(CACHE_DIR, opt, f"{index}_gray.npy")
+                    save_path_gray = os.path.join(cache_sub_sir, f"{index}_gray.npy")
                     np.save(save_path_gray, image_gray)
                     self.cache_files[opt][index] = (save_path, save_path_gray)
                 else:
