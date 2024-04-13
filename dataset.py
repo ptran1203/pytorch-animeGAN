@@ -87,7 +87,6 @@ class AnimeDataSet(Dataset):
         print("Caching data..")
         cache_nbytes = 0
         for opt, image_files in self.image_files.items():
-            self.cache_files[opt] = []
             for index, img_file in enumerate(tqdm(image_files)):
                 save_path = os.path.join(CACHE_DIR, opt, f"{index}.npy")
                 if opt == self.photo:
