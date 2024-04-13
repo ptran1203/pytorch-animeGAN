@@ -6,7 +6,7 @@ import os
 import numpy as np
 import argparse
 from moviepy.video.io.VideoFileClip import VideoFileClip
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 def parse_args():
     parser = argparse.ArgumentParser()
