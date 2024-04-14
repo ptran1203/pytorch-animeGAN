@@ -23,14 +23,15 @@ def gram(input):
     b, c, w, h = input.size()
 
     x = input.view(b * c, w * h)
-    print(x)
+
+    # Work around, torch.mm would generate some inf values.
+    # https://discuss.pytorch.org/t/gram-matrix-in-mixed-precision/166800/2
+    x = torch.clamp(x, max=1.0e2, min=-1.0e2)
 
     G = torch.mm(x, x.T)
-    print(G)
 
     # normalize by total elements
     result = G.div(b * c * w * h)
-    print(result)
     return result
 
 
