@@ -129,6 +129,8 @@ class Trainer:
                     fake_d, real_anime_d, real_anime_gray_d, real_anime_smt_gray_d)
 
             self.scaler_d.scale(loss_d).backward()
+            self.scaler_d.unscale_(self.optimizer_d)
+            torch.nn.utils.clip_grad_norm_(self.D.parameters(), max_norm=1.0e2)
             self.scaler_d.step(self.optimizer_d)
             self.scaler_d.update()
 
@@ -147,6 +149,8 @@ class Trainer:
             loss_g = adv_loss + con_loss + gra_loss + col_loss
 
             self.scaler_g.scale(loss_g).backward()
+            self.scaler_d.unscale_(self.optimizer_g)
+            torch.nn.utils.clip_grad_norm_(self.G.parameters(), max_norm=1.0e2)
             self.scaler_g.step(self.optimizer_g)
             self.scaler_g.update()
 
