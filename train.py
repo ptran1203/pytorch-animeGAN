@@ -99,7 +99,7 @@ def main(args):
         try:
             start_e = load_checkpoint(G, args.resume_G)
             print(f"G weight loaded from {args.resume_G}")
-            load_checkpoint(D, args.checkpoint_dir)
+            load_checkpoint(D, args.resume_D)
             print(f"D weight loaded from {args.resume_D}")
             # If loaded both weight, turn off init G phrase
             args.init_epochs = 0
