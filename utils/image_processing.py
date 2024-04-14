@@ -23,11 +23,15 @@ def gram(input):
     b, c, w, h = input.size()
 
     x = input.view(b * c, w * h)
+    print(x)
 
     G = torch.mm(x, x.T)
+    print(G)
 
     # normalize by total elements
-    return G.div(b * c * w * h)
+    result = G.div(b * c * w * h)
+    print(result)
+    return result
 
 
 def rgb_to_yuv(image):
