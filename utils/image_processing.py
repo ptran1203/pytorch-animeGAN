@@ -20,10 +20,9 @@ def gram(input):
 
     https://pytorch.org/tutorials/advanced/neural_style_tutorial.html#style-loss
     """
-    
     b, c, w, h = input.size()
 
-    x = input.view(b * c, w * h)
+    x = input.contiguous().view(b * c, w * h)
 
     # x = x / 2
 
