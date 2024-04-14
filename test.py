@@ -8,7 +8,7 @@ from models.anime_gan import Generator, Discriminator
 
 
 G = GeneratorV2()
-D = Discriminator()
+D = Discriminator(num_layers=3, norm_type="layer")
 
 
 image = torch.rand(2, 3, 256, 256)

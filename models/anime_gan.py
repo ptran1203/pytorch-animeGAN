@@ -71,21 +71,23 @@ class Discriminator(nn.Module):
         super(Discriminator, self).__init__()
         self.name = f'discriminator_{dataset}'
         self.bias = False
-        channels = 32
+        channels = 64
 
         layers = [
             nn.Conv2d(3, channels, kernel_size=3, stride=1, padding=1, bias=self.bias),
             nn.LeakyReLU(0.2, True)
         ]
 
+        in_channels = channels
         for i in range(num_layers):
             layers += [
-                nn.Conv2d(channels, channels * 2, kernel_size=3, stride=2, padding=1, bias=self.bias),
+                nn.Conv2d(in_channels, channels * 2, kernel_size=3, stride=2, padding=1, bias=self.bias),
                 nn.LeakyReLU(0.2, True),
                 nn.Conv2d(channels * 2, channels * 4, kernel_size=3, stride=1, padding=1, bias=self.bias),
                 get_norm(norm_type)(channels * 4),
                 nn.LeakyReLU(0.2, True),
             ]
+            in_channels = channels * 4
             channels *= 2
 
         channels *= 2
