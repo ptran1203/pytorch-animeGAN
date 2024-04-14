@@ -23,7 +23,7 @@ class Vgg19(nn.Module):
 
     @staticmethod
     def get_vgg19(last_layer='conv4_4'):
-        vgg = models.vgg19(pretrained=torch.cuda.is_available()).features
+        vgg = models.vgg19(weights=model.VGG19_Weights.IMAGENET1K_V1).features
         model_list = []
 
         i = 0

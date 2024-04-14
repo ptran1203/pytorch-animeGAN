@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import pandas as pd
 import torch
+import random
 from tqdm.auto import tqdm
 from glob import glob
 from torch.utils.data import Dataset
@@ -64,9 +65,7 @@ class AnimeDataSet(Dataset):
 
     def __getitem__(self, index):
         image = self.load_photo(index)
-        anm_idx = index
-        if anm_idx > self.len_anime - 1:
-            anm_idx -= self.len_anime * (index // self.len_anime)
+        anm_idx = random.randint(0, self.len_anime - 1)
 
         anime, anime_gray = self.load_anime(anm_idx)
         smooth_gray = self.load_anime_smooth(anm_idx)
