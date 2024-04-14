@@ -5,7 +5,7 @@ import torch.optim as optim
 import numpy as np
 from torch.cuda.amp import GradScaler
 from torch.utils.data import Dataset, DataLoader
-from tqdm.auto import tqdm
+from tqdm import tqdm
 from utils.image_processing import denormalize_input
 from losses import LossSummary, AnimeGanLoss
 from utils import load_checkpoint, save_checkpoint
@@ -54,9 +54,11 @@ class Trainer:
     def _init_working_dir(self):
         """Init working directory for saving checkpoint, ..."""
         os.makedirs(self.cfg.exp_dir, exist_ok=True)
-        self.checkpoint_path_G_init = os.path.join(self.cfg.exp_dir, "generator_init.pt")
-        self.checkpoint_path_G = os.path.join(self.cfg.exp_dir, "generator.pt")
-        self.checkpoint_path_D = os.path.join(self.cfg.exp_dir, "discriminator.pt")
+        Gname = self.G.name
+        Dname = self.D.name
+        self.checkpoint_path_G_init = os.path.join(self.cfg.exp_dir, f"{Gname}_init.pt")
+        self.checkpoint_path_G = os.path.join(self.cfg.exp_dir, f"{Gname}.pt")
+        self.checkpoint_path_D = os.path.join(self.cfg.exp_dir, f"{Dname}.pt")
         self.save_image_dir = os.path.join(self.cfg.exp_dir, "generated_images")
         os.makedirs(self.save_image_dir, exist_ok=True)
 
@@ -178,14 +180,13 @@ class Trainer:
 
         print(f"Start training for {self.cfg.epochs} epochs")
         for epoch in range(start_epoch, self.cfg.epochs):
+            print(f"epoch {epoch}/{self.cfg.epochs}")
             self.train_epoch(epoch, data_loader)
 
             if epoch % self.cfg.save_interval == 0:
                 save_checkpoint(self.G, self.checkpoint_path_G,self.optimizer_g, epoch)
                 save_checkpoint(self.D, self.checkpoint_path_D, self.optimizer_d, epoch)
                 self.generate_and_save(data_loader)
-            
-            print(f"epoch {epoch}/{self.cfg.epochs}")
 
     def generate_and_save(
         self,

@@ -7,6 +7,8 @@ import torch.optim as optim
 from multiprocessing import cpu_count
 from torch.utils.data import DataLoader
 from models.anime_gan import Generator
+from models.anime_gan_v2 import GeneratorV2
+from models.anime_gan_v3 import GeneratorV3
 from models.anime_gan import Discriminator
 from losses import AnimeGanLoss
 from losses import LossSummary
@@ -19,6 +21,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--real_image_dir', type=str, default='dataset/train_photo')
     parser.add_argument('--anime_image_dir', type=str, default='dataset/Hayao')
+    parser.add_argument('--model', type=str, default='v1', help="AnimeGAN version, can be {'v1', 'v2', 'v3'}")
     parser.add_argument('--epochs', type=int, default=100)
     parser.add_argument('--init_epochs', type=int, default=5)
     parser.add_argument('--batch_size', type=int, default=6)
@@ -69,11 +72,20 @@ def main(args):
         print(f"Use GPU: {torch.cuda.get_device_name(0)}")
     print("Init models...")
 
-    G = Generator(args.dataset)
+    norm_type = "instance"
+    if args.model == 'v1':
+        G = Generator(args.dataset)
+    elif args.model == 'v2':
+        G = GeneratorV2(args.dataset)
+        norm_type = "layer"
+    elif args.model == 'v3':
+        G = GeneratorV3(args.dataset)
+
     D = Discriminator(
         args.dataset,
         num_layers=args.d_layers,
-        use_sn=args.use_sn
+        use_sn=args.use_sn,
+        norm_type=norm_type,
     )
 
     start_e = 0

@@ -2,18 +2,19 @@
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.utils import spectral_norm
-from models.conv_blocks import DownConv
-from models.conv_blocks import UpConv
-from models.conv_blocks import SeparableConv2D
-from models.conv_blocks import InvertedResBlock
-from models.conv_blocks import ConvBlock
+from .conv_blocks import DownConv
+from .conv_blocks import UpConv
+from .conv_blocks import SeparableConv2D
+from .conv_blocks import InvertedResBlock
+from .conv_blocks import ConvBlock
+from .layers import get_norm
 from utils.common import initialize_weights
 
 
 class Generator(nn.Module):
     def __init__(self, dataset=''):
         super(Generator, self).__init__()
-        self.name = f'generator_{dataset}'
+        self.name = f'Generatorv1_{dataset}'
         bias = False
 
         self.encode_blocks = nn.Sequential(
@@ -65,6 +66,7 @@ class Discriminator(nn.Module):
         dataset=None,
         num_layers=1,
         use_sn=False,
+        norm_type="instance",
     ):
         super(Discriminator, self).__init__()
         self.name = f'discriminator_{dataset}'
@@ -81,14 +83,15 @@ class Discriminator(nn.Module):
                 nn.Conv2d(channels, channels * 2, kernel_size=3, stride=2, padding=1, bias=self.bias),
                 nn.LeakyReLU(0.2, True),
                 nn.Conv2d(channels * 2, channels * 4, kernel_size=3, stride=1, padding=1, bias=self.bias),
-                nn.InstanceNorm2d(channels * 4),
+                get_norm(norm_type)(channels * 4),
                 nn.LeakyReLU(0.2, True),
             ]
-            channels *= 4
+            channels *= 2
 
+        channels *= 2
         layers += [
             nn.Conv2d(channels, channels, kernel_size=3, stride=1, padding=1, bias=self.bias),
-            nn.InstanceNorm2d(channels),
+            get_norm(norm_type)(channels),
             nn.LeakyReLU(0.2, True),
             nn.Conv2d(channels, 1, kernel_size=3, stride=1, padding=1, bias=self.bias),
         ]

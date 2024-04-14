@@ -10,9 +10,9 @@ from models.conv_blocks import ConvBlock
 from utils.common import initialize_weights
 
 
-class Generator(nn.Module):
+class GeneratorV3(nn.Module):
     def __init__(self, dataset=''):
-        super(Generator, self).__init__()
+        super(GeneratorV3, self).__init__()
         self.name = f'generator_{dataset}'
         bias = False
 
