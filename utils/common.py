@@ -11,12 +11,29 @@ HTTP_PREFIXES = [
     'data:image/jpeg',
 ]
 
-SUPPORT_WEIGHTS = {
-    'hayao',
-    'shinkai',
-}
 
-ASSET_HOST = 'https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0'
+RELEASED_WEIGHTS = {
+    "hayao:v2": (
+        "v2",
+        "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.1/Generatorv2_Hayao.pt"
+    ),
+    "hayao:v1": (
+        "v1",
+        "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/generator_hayao.pth"
+    ),
+    "hayao": (
+        "v1",
+        "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/generator_hayao.pth"
+    ),
+    "shinkai:v1": (
+        "v1",
+        "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/generator_shinkai.pth"
+    ),
+    "shinkai": (
+        "v1",
+        "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/generator_shinkai.pth"
+    ),
+}
 
 def is_image_file(path):
     _, ext = os.path.splitext(path)
@@ -62,8 +79,8 @@ def load_checkpoint(model, path, optimizer=None, strip_optimizer=False) -> int:
 
 
 def load_state_dict(weight) -> dict:
-    if weight.lower() in SUPPORT_WEIGHTS:
-        weight = _download_weight(weight)
+    if weight.lower() in RELEASED_WEIGHTS:
+        weight = _download_weight(weight.lower())
 
     map_location = 'cuda' if torch.cuda.is_available() else 'cpu'
     state_dict = torch.load(weight, map_location=map_location)
@@ -110,9 +127,9 @@ def _download_weight(weight):
     '''
     Download weight and save to local file
     '''
-    filename = f'generator_{weight.lower()}.pth'
     os.makedirs('.cache', exist_ok=True)
-    url = f'{ASSET_HOST}/{filename}'
+    url = RELEASED_WEIGHTS[weight][1]
+    filename = os.path.basename(url)
     save_path = f'.cache/{filename}'
 
     if os.path.isfile(save_path):

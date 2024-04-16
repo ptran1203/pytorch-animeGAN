@@ -12,6 +12,19 @@ Pytorch implementation of AnimeGAN for fast photo animation
 |![c2](./example/gif/train.gif)|![g2](./example/gif/train_anime.gif)|
 <!-- |![c1](./example/gif/city.gif)|![g1](./example/gif/city_anime.gif)| -->
 
+## Quick start
+
+```bash
+git clone https://github.com/ptran1203/pytorch-animeGAN.git
+cd pytorch-animeGAN
+```
+
+Run Inference on your local machine
+
+```
+python3 inference_image.py --weight hayao:v2 --src /your/path/to/image_dir --out /path/to/output_dir
+```
+
 ## Documentation
 
 - Training notebook on [Google colab](https://colab.research.google.com/github/ptran1203/pytorch-animeGAN/blob/master/notebooks/animeGAN.ipynb)

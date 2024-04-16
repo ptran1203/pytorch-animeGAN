@@ -6,7 +6,7 @@ import shutil
 from models.anime_gan import GeneratorV1
 from models.anime_gan_v2 import GeneratorV2
 from models.anime_gan_v3 import GeneratorV3
-from utils.common import load_checkpoint
+from utils.common import load_checkpoint, RELEASED_WEIGHTS
 from utils.image_processing import resize_image, normalize_input, denormalize_input
 from utils import read_image, is_image_file
 from tqdm import tqdm
@@ -33,7 +33,11 @@ def auto_load_weight(weight, version=None):
         # Try to get class by name of weight file    
         # For convenenice, weight should start with classname
         # e.g: Generatorv2_{anything}.pt
-        if weight_name.startswith("generatorv2"):
+        if weight_name in RELEASED_WEIGHTS:
+            version = RELEASED_WEIGHTS[weight_name][0]
+            return auto_load_weight(weight, version=version)
+
+        elif weight_name.startswith("generatorv2"):
             cls = GeneratorV2
         elif weight_name.startswith("generatorv3"):
             cls = GeneratorV3
@@ -49,11 +53,11 @@ def auto_load_weight(weight, version=None):
         
 
 class Predictor:
-    def __init__(self, weight='hayao', version=None, device='cuda', add_mean=False):
+    def __init__(self, weight='hayao', device='cuda', add_mean=False):
         if not torch.cuda.is_available():
             device = 'cpu'
         self.device = torch.device(device)
-        self.G = auto_load_weight(weight, version=version)
+        self.G = auto_load_weight(weight)
         self.G.to(self.device)
 
     def transform(self, image):
