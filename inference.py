@@ -56,13 +56,15 @@ class Predictor:
     def __init__(self, weight='hayao', device='cuda', amp=True):
         if not torch.cuda.is_available():
             device = 'cpu'
+            amp = False
+            print("Amp currently not supported on CPU")            
         self.amp = amp  # Automatic Mixed Precision
         self.device_type = 'cuda' if device.startswith('cuda') else 'cpu'
         self.device = torch.device(device)
         self.G = auto_load_weight(weight)
         self.G.to(self.device)
 
-    def transform(self, image):
+    def transform(self, image, denorm=True):
         '''
         Transform a image to animation
 
@@ -80,6 +82,9 @@ class Predictor:
             fake = fake.detach().cpu().numpy()
             # Channel last
             fake = fake.transpose(0, 2, 3, 1)
+
+            if denorm:
+                fake = denormalize_input(fake, dtype=np.uint8)
             return fake
 
     def transform_file(self, file_path, save_path):
