@@ -10,6 +10,7 @@ from utils.common import load_checkpoint, RELEASED_WEIGHTS
 from utils.image_processing import resize_image, normalize_input, denormalize_input
 from utils import read_image, is_image_file
 from tqdm import tqdm
+# from torch.cuda.amp import autocast
 
 
 VALID_FORMATS = {
@@ -77,9 +78,9 @@ class Predictor:
         with torch.no_grad():
             image = self.preprocess_images(image)
             # image = image.to(self.device)
-            with torch.autocast(self.device_type, enabled=self.amp):
+            # with autocast(self.device_type, enabled=self.amp):
                 # print(image.dtype, self.G)
-                fake = self.G(image)
+            fake = self.G(image)
             fake = fake.detach().cpu().numpy()
             # Channel last
             fake = fake.transpose(0, 2, 3, 1)

@@ -1,5 +1,5 @@
 from pathlib import Path
-from inference import Predictor
+from inference import Predictor as MyPredictor
 from utils import read_image
 import cv2
 import tempfile
@@ -16,13 +16,17 @@ class Predictor(BasePredictor):
         self,
         image: Path = Input(description="Image"),
         model: str = Input(
-            description="Factor to scale image by",
+            description="Style",
             default='Hayao:v2',
-            choices=['Hayao', 'Shinkai', 'Hayao:v2']
+            choices=[
+                'Hayao',
+                'Shinkai',
+                'Hayao:v2'
+            ]
         )
     ) -> Path:
         version = model.split(":")[-1]
-        predictor = Predictor(model, version)
+        predictor = MyPredictor(model, version)
         img = read_image(str(image))
         anime_img = predictor.transform(resize_image(img))[0]
         # out_path = Path(tempfile.mkdtemp()) / "out.png"
