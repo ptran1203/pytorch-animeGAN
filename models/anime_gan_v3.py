@@ -13,7 +13,7 @@ from utils.common import initialize_weights
 class GeneratorV3(nn.Module):
     def __init__(self, dataset=''):
         super(GeneratorV3, self).__init__()
-        self.name = f'generator_{dataset}'
+        self.name = f'{self.__class__.__name__}_{dataset}'
         bias = False
 
         self.encode_blocks = nn.Sequential(

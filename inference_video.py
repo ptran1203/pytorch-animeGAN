@@ -1,5 +1,5 @@
 import argparse
-from inference import Transformer
+from inference import Predictor
 
 
 def parse_args():
@@ -15,7 +15,7 @@ def parse_args():
 
 
 def main(args):
-    Transformer(args.checkpoint).transform_video(args.src, args.dest,
+    Predictor(args.checkpoint).transform_video(args.src, args.dest,
                                                  args.batch_size,
                                                  start=args.start,
                                                  end=args.end)

@@ -42,6 +42,7 @@ class Trainer:
         self.G = generator
         self.D = discriminator
         self.cfg = config
+        self.device_type = 'cuda' if self.cfg.device.startswith('cuda') else 'cpu'
         self.optimizer_g = optim.Adam(self.G.parameters(), lr=self.cfg.lr_g, betas=(0.5, 0.999))
         self.optimizer_d = optim.Adam(self.D.parameters(), lr=self.cfg.lr_d, betas=(0.5, 0.999))
         self.loss_tracker = LossSummary()
@@ -82,7 +83,7 @@ class Trainer:
 
                 self.optimizer_g.zero_grad()
 
-                with torch.autocast(self.cfg.device, enabled=self.cfg.amp):
+                with torch.autocast(self.device_type, enabled=self.cfg.amp):
                     fake_img = self.G(img)
                     loss = self.loss_fn.content_loss_vgg(img, fake_img)
 
@@ -111,7 +112,7 @@ class Trainer:
             # ---------------- TRAIN D ---------------- #
             self.optimizer_d.zero_grad()
 
-            with torch.autocast(self.cfg.device, enabled=self.cfg.amp):
+            with torch.autocast(self.device_type, enabled=self.cfg.amp):
                 fake_img = self.G(img).detach()
 
             # Add some Gaussian noise to images before feeding to D
@@ -121,7 +122,7 @@ class Trainer:
                 anime_gray += gaussian_noise()
                 anime_smt_gray += gaussian_noise()
 
-            with torch.autocast(self.cfg.device, enabled=self.cfg.amp):
+            with torch.autocast(self.device_type, enabled=self.cfg.amp):
                 fake_d = self.D(fake_img)
                 real_anime_d = self.D(anime)
                 real_anime_gray_d = self.D(anime_gray)
@@ -141,7 +142,7 @@ class Trainer:
             # ---------------- TRAIN G ---------------- #
             self.optimizer_g.zero_grad()
 
-            with torch.autocast(self.cfg.device, enabled=self.cfg.amp):
+            with torch.autocast(self.device_type, enabled=self.cfg.amp):
                 fake_img = self.G(img)
                 fake_d = self.D(fake_img)
 
@@ -160,7 +161,7 @@ class Trainer:
             pbar.set_description(self.loss_tracker.get_loss_description())
 
 
-    def train(self, train_dataset: Dataset, start_epoch_g=0, start_epoch=0):
+    def train(self, train_dataset: Dataset, start_epoch=0, start_epoch_g=0):
         """
         Train Generator and Discriminator.
         """
@@ -205,8 +206,8 @@ class Trainer:
         for i, data in enumerate(loader):
             img = data["image"].to(self.device)
             with torch.no_grad():
-                with torch.autocast(self.cfg.device, enabled=self.cfg.amp):
-                    fake_img = self.G(img.cuda())
+                with torch.autocast(self.device_type, enabled=self.cfg.amp):
+                    fake_img = self.G(img)
                 fake_img = fake_img.detach().cpu().numpy()
                 # Channel first -> channel last
                 fake_img  = fake_img.transpose(0, 2, 3, 1)

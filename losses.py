@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 import torch.nn as nn
 from models.vgg import Vgg19
-from utils.image_processing import gram, rgb_to_yuv
+from utils.image_processing import gram
 
 
 class ColorLoss(nn.Module):
@@ -10,10 +10,36 @@ class ColorLoss(nn.Module):
         super(ColorLoss, self).__init__()
         self.l1 = nn.L1Loss()
         self.huber = nn.SmoothL1Loss()
+        self._rgb_to_yuv_kernel = torch.tensor([
+            [0.299, -0.14714119, 0.61497538],
+            [0.587, -0.28886916, -0.51496512],
+            [0.114, 0.43601035, -0.10001026]
+        ]).float()
+
+    def to(self, device):
+        new_self = super(ColorLoss, self).to(device)
+        new_self._rgb_to_yuv_kernel = new_self._rgb_to_yuv_kernel.to(device)
+        return new_self
+
+    def rgb_to_yuv(self, image):
+        '''
+        https://en.wikipedia.org/wiki/YUV
+
+        output: Image of shape (H, W, C) (channel last)
+        '''
+        # -1 1 -> 0 1
+        image = (image + 1.0) / 2.0
+
+        yuv_img = torch.tensordot(
+            image,
+            self._rgb_to_yuv_kernel,
+            dims=([image.ndim - 3], [0]))
+
+        return yuv_img
 
     def forward(self, image, image_g):
-        image = rgb_to_yuv(image)
-        image_g = rgb_to_yuv(image_g)
+        image = self.rgb_to_yuv(image)
+        image_g = self.rgb_to_yuv(image_g)
 
         # After convert to yuv, both images have channel last
 

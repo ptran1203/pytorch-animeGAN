@@ -5,11 +5,11 @@ Pytorch implementation of AnimeGAN for fast photo animation
 * Paper: *AnimeGAN: a novel lightweight GAN for photo animation* - [Semantic scholar](https://www.semanticscholar.org/paper/AnimeGAN%3A-A-Novel-Lightweight-GAN-for-Photo-Chen-Liu/10a9c5d183e7e7df51db8bfa366bc862262b37d7#citing-papers) or from [Yoshino repo](https://github.com/TachibanaYoshino/AnimeGAN/blob/master/doc/Chen2020_Chapter_AnimeGAN.pdf)
 * Original implementation in [Tensorflow](https://github.com/TachibanaYoshino/AnimeGAN) by [Tachibana Yoshino](https://github.com/TachibanaYoshino)
 * [Demo and Docker image on Replicate](https://replicate.ai/ptran1203/pytorch-animegan)
-
+* New: AnimeGANv2 is released (16/04/2024)
 
 | Input | Animation |
 |--|--|
-|![c1](./example/gif/city.gif)|![g1](./example/gif/city_anime.gif)|
+<!-- |![c1](./example/gif/city.gif)|![g1](./example/gif/city_anime.gif)| -->
 |![c2](./example/gif/train.gif)|![g2](./example/gif/train_anime.gif)|
 
 ## Documentation
@@ -53,22 +53,22 @@ python3 script/edge_smooth.py --dataset Kimetsu --image-size 256
 To train the animeGAN from command line, you can run `train.py` as the following:
 
 ```bash
-python3 train.py --dataset Hayao\           # Can be Hayao, Shinkai, Kimetsu, Paprika, SummerWar or {your custom data in step 1.2}
-                --batch 6\
-                --init-epochs 4\
-                --checkpoint-dir {ckp_dir}\
-                --save-image-dir {save_img_dir}\
-                --save-interval 1\
-                --gan-loss lsgan\           # one of [lsgan, hinge, bce]
-                --init-lr 0.0001\
-                --lr-g 0.00002\
-                --lr-d 0.00004\
-                --wadvd 10.0\               # Aversarial loss weight for D
-                --wadvg 10.0\               # Aversarial loss weight for G
+python3 train.py --anime_image_dir dataset/Hayao \
+                --real_image_dir dataset/photo_train \
+                --model v2 \                 # animeGAN version, can be v1 or v2
+                --batch 8 \
+                --init_epochs 10 \
+                --exp_dir runs \
+                --save-interval 1 \
+                --gan-loss lsgan \           # one of [lsgan, hinge, bce]
+                --init-lr 0.0001 \
+                --lr-g 0.00002 \
+                --lr-d 0.00004 \
+                --wadvd 300.0\               # Aversarial loss weight for D
+                --wadvg 300.0\               # Aversarial loss weight for G
                 --wcon 1.5\                 # Content loss weight
                 --wgra 3.0\                 # Gram loss weight
                 --wcol 30.0\             w   # Color loss weight
-                --resume GD\                # if set, G to start from pre-trained G, GD to continue training GAN
                 --use_sn\                   # If set, use spectral normalization, default is False
 ```
 
@@ -79,9 +79,9 @@ To convert images in a folder or single image, run `inference_image.py`, for exa
 > --src and --dest can be a directory or a file
 
 ```bash
-python3 inference_image.py --checkpoint {ckp_dir}\
-                        --src /content/test/HR_photo\
-                        --dest {working_dir}/inference_image_v2\
+python3 inference_image.py --checkpoint hayao:v2\
+                        --src dataset/test/HR_photo\
+                        --dest inference_images\
 ```
 
 ### 4. Transform video
@@ -91,30 +91,22 @@ To convert a video to anime version, run `inference_video.py`, for example:
 > Be careful when choosing --batch-size, it might lead to CUDA memory error if the resolution of the video is too large
 
 ```bash
-python3 inference_video.py --checkpoint {ckp_dir}\
-                        --src /content/test_vid_3.mp4\
-                        --dest /content/test_vid_3_anime.mp4\
+python3 inference_video.py --checkpoint hayao:v2\
+                        --src test_vid_3.mp4\
+                        --dest test_vid_3_anime.mp4\
                         --batch-size 2
 ```
 
-## Anime transformation results ([see more](https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/results.zip))
 
-
-| Input | Output(Hayao style) |
+| Input | Output(Hayao style v2) |
 |--|--|
-|![c1](./example/result/11.jpeg)|![g1](./example/result/11_anime.jpeg)|
-|![c1](./example/result/132.jpeg)|![g1](./example/result/132_anime.jpeg)|
-|![c1](./example/result/136.jpeg)|![g1](./example/result/136_anime.jpeg)|
-|![c1](./example/result/146.jpeg)|![g1](./example/result/146_anime.jpeg)|
-|![c1](./example/result/155.jpeg)|![g1](./example/result/155_anime.jpeg)|
-|![c1](./example/result/142.jpeg)|![g1](./example/result/142_anime.jpeg)|
+|![c1](./example/result/real/1%20(20).jpg)|![g1](./example/result/anime/1%20(20)_anime.jpg)|
+|![c1](./example/result/real/1%20(21).jpg)|![g1](./example/result/anime/1%20(21)_anime.jpg)|
+|![c1](./example/result/real/1%20(36).jpg)|![g1](./example/result/anime/1%20(36)_anime.jpg)|
+|![c1](./example/result/real/1%20(37).jpg)|![g1](./example/result/anime/1%20(37)_anime.jpg)|
+|![c1](./example/result/real/1%20(40).jpg)|![g1](./example/result/anime/1%20(40)_anime.jpg)|
+|![c1](./example/result/real/1%20(61).jpg)|![g1](./example/result/anime/1%20(61)_anime.jpg)|
 
-
-## Check list
-
-- [x] Add Google Colab
-- [ ] Add implementation details
-- [x] Add and train on other data
 
 <!-- ### Objective:
 

@@ -4,15 +4,6 @@ import os
 import numpy as np
 from tqdm import tqdm
 
-_rgb_to_yuv_kernel = torch.tensor([
-    [0.299, -0.14714119, 0.61497538],
-    [0.587, -0.28886916, -0.51496512],
-    [0.114, 0.43601035, -0.10001026]
-]).float()
-
-if torch.cuda.is_available():
-    _rgb_to_yuv_kernel = _rgb_to_yuv_kernel.cuda()
-
 
 def gram(input):
     """
@@ -33,27 +24,11 @@ def gram(input):
     # x[x < -1.0e2] = -1.0e2
 
     G = torch.mm(x, x.T)
-    G = torch.clamp(G, -60000.0, 60000.0)
+    G = torch.clamp(G, -64990.0, 64990.0)
     # normalize by total elements
     result = G.div(b * c * w * h)
     return result
 
-
-def rgb_to_yuv(image):
-    '''
-    https://en.wikipedia.org/wiki/YUV
-
-    output: Image of shape (H, W, C) (channel last)
-    '''
-    # -1 1 -> 0 1
-    image = (image + 1.0) / 2.0
-
-    yuv_img = torch.tensordot(
-        image,
-        _rgb_to_yuv_kernel,
-        dims=([image.ndim - 3], [0]))
-
-    return yuv_img
 
 
 def divisible(dim):

@@ -1,19 +1,12 @@
 import torch
 import argparse
 import os
-import cv2
-import numpy as np
-import torch.optim as optim
-from multiprocessing import cpu_count
-from torch.utils.data import DataLoader
-from models.anime_gan import Generator
+from models.anime_gan import GeneratorV1
 from models.anime_gan_v2 import GeneratorV2
 from models.anime_gan_v3 import GeneratorV3
 from models.anime_gan import Discriminator
-from losses import AnimeGanLoss
-from losses import LossSummary
+from datasets import AnimeDataSet
 from utils.common import load_checkpoint
-from dataset import AnimeDataSet
 from trainer import Trainer
 
 
@@ -22,7 +15,7 @@ def parse_args():
     parser.add_argument('--real_image_dir', type=str, default='dataset/train_photo')
     parser.add_argument('--anime_image_dir', type=str, default='dataset/Hayao')
     parser.add_argument('--model', type=str, default='v1', help="AnimeGAN version, can be {'v1', 'v2', 'v3'}")
-    parser.add_argument('--epochs', type=int, default=100)
+    parser.add_argument('--epochs', type=int, default=70)
     parser.add_argument('--init_epochs', type=int, default=5)
     parser.add_argument('--batch_size', type=int, default=6)
     parser.add_argument('--exp_dir', type=str, default='runs', help="Experiment directory")
@@ -40,10 +33,10 @@ def parse_args():
     parser.add_argument('--lr_g', type=float, default=2e-4)
     parser.add_argument('--lr_d', type=float, default=4e-4)
     parser.add_argument('--init_lr', type=float, default=1e-3)
-    parser.add_argument('--wadvg', type=float, default=10.0, help='Adversarial loss weight for G')
-    parser.add_argument('--wadvd', type=float, default=10.0, help='Adversarial loss weight for D')
+    parser.add_argument('--wadvg', type=float, default=300.0, help='Adversarial loss weight for G')
+    parser.add_argument('--wadvd', type=float, default=300.0, help='Adversarial loss weight for D')
     parser.add_argument('--wcon', type=float, default=1.5, help='Content loss weight')
-    parser.add_argument('--wgra', type=float, default=3.0, help='Gram loss weight')
+    parser.add_argument('--wgra', type=float, default=10.0, help='Gram loss weight')
     parser.add_argument('--wcol', type=float, default=30.0, help='Color loss weight')
     parser.add_argument('--d_layers', type=int, default=3, help='Discriminator conv layers')
     parser.add_argument('--d_noise', action='store_true')
@@ -53,8 +46,8 @@ def parse_args():
 
 
 def check_params(args):
-    # dataset/Hayao -> Hayao
-    args.dataset = os.path.basename(args.anime_image_dir)
+    # dataset/Hayao + dataset/train_photo -> train_photo_Hayao
+    args.dataset = f"{os.path.basename(args.real_image_dir)}_{os.path.basename(args.anime_image_dir)}"
     assert args.gan_loss in {'lsgan', 'hinge', 'bce'}, f'{args.gan_loss} is not supported'
 
 
@@ -74,7 +67,7 @@ def main(args):
 
     norm_type = "instance"
     if args.model == 'v1':
-        G = Generator(args.dataset)
+        G = GeneratorV1(args.dataset)
     elif args.model == 'v2':
         G = GeneratorV2(args.dataset)
         norm_type = "layer"

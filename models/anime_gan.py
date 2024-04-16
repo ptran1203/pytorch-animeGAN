@@ -11,10 +11,10 @@ from .layers import get_norm
 from utils.common import initialize_weights
 
 
-class Generator(nn.Module):
+class GeneratorV1(nn.Module):
     def __init__(self, dataset=''):
-        super(Generator, self).__init__()
-        self.name = f'Generatorv1_{dataset}'
+        super(GeneratorV1, self).__init__()
+        self.name = f'{self.__class__.__name__}_{dataset}'
         bias = False
 
         self.encode_blocks = nn.Sequential(

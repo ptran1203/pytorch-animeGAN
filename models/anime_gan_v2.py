@@ -9,7 +9,7 @@ from utils.common import initialize_weights
 class GeneratorV2(nn.Module):
     def __init__(self, dataset=''):
         super(GeneratorV2, self).__init__()
-        self.name = f'Generatorv2_{dataset}'
+        self.name = f'{self.__class__.__name__}_{dataset}'
         bias = False
 
         self.conv_block1 = nn.Sequential(

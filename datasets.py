@@ -9,7 +9,7 @@ from glob import glob
 from torch.utils.data import Dataset
 from utils import normalize_input, compute_data_mean, fast_numpyio
 
-CACHE_DIR = '/tmp/animegan_cache'
+CACHE_DIR = '/u02/phatth1/.tmp'
 
 class AnimeDataSet(Dataset):
     def __init__(
@@ -36,9 +36,10 @@ class AnimeDataSet(Dataset):
         self.image_files =  {}
         self.photo = 'train_photo'
         self.style = 'style'
-        self.smooth =  'smooth'
+        self.smooth = 'smooth'
         self.dummy = torch.zeros(3, 256, 256)
         self.cache_files = {}
+        self.anime_dirname = os.path.basename(anime_image_dir)
         for dir, opt in [
             (real_image_dir, self.photo),
             (os.path.join(anime_image_dir, self.style), self.style),
@@ -81,12 +82,13 @@ class AnimeDataSet(Dataset):
         if not self.cache:
             return
         
-        os.makedirs(CACHE_DIR, exist_ok=True)
+        cache_dir = os.path.join(CACHE_DIR, self.anime_dirname)
+        os.makedirs(cache_dir, exist_ok=True)
         # Caching image to npy for faster dataloader
         print("Caching data..")
         cache_nbytes = 0
         for opt, image_files in self.image_files.items():
-            cache_sub_sir = os.path.join(CACHE_DIR, opt)
+            cache_sub_sir = os.path.join(cache_dir, opt)
             os.makedirs(cache_sub_sir, exist_ok=True)
             for index, img_file in enumerate(tqdm(image_files)):
                 save_path = os.path.join(cache_sub_sir, f"{index}.npy")
@@ -111,7 +113,7 @@ class AnimeDataSet(Dataset):
                     self.cache_files[opt][index] = (save_path, save_path_gray)
                 else:
                     raise ValueError(opt)
-        print(f"Cache saved to {CACHE_DIR}, size={cache_nbytes/1e9} Gb")
+        print(f"Cache saved to {cache_dir}, size={cache_nbytes/1e9} Gb")
 
     def load_photo(self, index) -> np.ndarray:
         if self.cache_files[self.photo][index]:

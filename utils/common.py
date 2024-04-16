@@ -18,6 +18,10 @@ SUPPORT_WEIGHTS = {
 
 ASSET_HOST = 'https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0'
 
+def is_image_file(path):
+    _, ext = os.path.splitext(path)
+    return ext.lower() in (".png", ".jpg", ".jpeg")
+
 
 def read_image(path):
     """
@@ -42,11 +46,16 @@ def save_checkpoint(model, path, optimizer=None, epoch=None):
     torch.save(checkpoint, path)
 
 
-def load_checkpoint(model, path, optimizer=None) -> int:
+def load_checkpoint(model, path, optimizer=None, strip_optimizer=False) -> int:
     state_dict = load_state_dict(path)
     model.load_state_dict(state_dict['model_state_dict'], strict=True)
-    if optimizer is not None and 'optimizer_state_dict' in state_dict:
-        optimizer.load_state_dict(state_dict['optimizer_state_dict'])
+    if 'optimizer_state_dict' in state_dict:
+        if optimizer is not None:
+            optimizer.load_state_dict(state_dict['optimizer_state_dict'])
+        if strip_optimizer:
+            del state_dict["optimizer_state_dict"]
+            torch.save(state_dict, path)
+            print(f"Optimizer stripped and saved to {path}")
 
     epoch = state_dict.get('epoch', 0)
     return epoch
