@@ -3,33 +3,58 @@ import cv2
 import os
 import numpy as np
 import shutil
-import moviepy.video.io.ffmpeg_writer as ffmpeg_writer
-from moviepy.video.io.VideoFileClip import VideoFileClip
-from modeling.anime_gan import Generator
-from utils.common import load_weight
+from models.anime_gan import GeneratorV1
+from models.anime_gan_v2 import GeneratorV2
+from models.anime_gan_v3 import GeneratorV3
+from utils.common import load_checkpoint
 from utils.image_processing import resize_image, normalize_input, denormalize_input
-from utils import read_image
+from utils import read_image, is_image_file
 from tqdm import tqdm
 
-
-cuda_available = torch.cuda.is_available()
 
 VALID_FORMATS = {
     'jpeg', 'jpg', 'jpe',
     'png', 'bmp',
 }
 
-class Transformer:
-    def __init__(self, weight='hayao', add_mean=False):
-        self.G = Generator()
+def auto_load_weight(weight, version=None):
+    """Auto load Generator version from weight."""
+    weight_name = os.path.basename(weight).lower()
+    if version is not None:
+        version = version.lower()
+        assert version in {"v1", "v2", "v3"}, f"Version {version} does not exist"
+        # If version is provided, use it.
+        cls = {
+            "v1": GeneratorV1,
+            "v2": GeneratorV2,
+            "v3": GeneratorV3
+        }[version]
+    else:
+        # Try to get class by name of weight file    
+        # For convenenice, weight should start with classname
+        # e.g: Generatorv2_{anything}.pt
+        if weight_name.startswith("generatorv2"):
+            cls = GeneratorV2
+        elif weight_name.startswith("generatorv3"):
+            cls = GeneratorV3
+        elif weight_name.startswith("generator"):
+            cls = GeneratorV1
+        else:
+            raise ValueError((f"Can not get Model from {weight_name}, "
+                               "you might need to explicitly specify version"))
+    model = cls()
+    load_checkpoint(model, weight, strip_optimizer=True)
+    model.eval()
+    return model
+        
 
-        if cuda_available:
-            self.G = self.G.cuda()
-
-        load_weight(self.G, weight)
-        self.G.eval()
-
-        print("Weight loaded, ready to predict")
+class Predictor:
+    def __init__(self, weight='hayao', version=None, device='cuda', add_mean=False):
+        if not torch.cuda.is_available():
+            device = 'cpu'
+        self.device = torch.device(device)
+        self.G = auto_load_weight(weight, version=version)
+        self.G.to(self.device)
 
     def transform(self, image):
         '''
@@ -49,8 +74,8 @@ class Transformer:
             return fake
 
     def transform_file(self, file_path, save_path):
-        if not save_path.endswith('png'):
-            raise ValueError(f"{save_path} should be png format")
+        if not is_image_file(save_path):
+            raise ValueError(f"{save_path} is not valid")
 
         image = read_image(file_path)
 
@@ -91,6 +116,8 @@ class Transformer:
         Transform a video to animation version
         https://github.com/lengstrom/fast-style-transfer/blob/master/evaluate.py#L21
         '''
+        import moviepy.video.io.ffmpeg_writer as ffmpeg_writer
+        from moviepy.video.io.VideoFileClip import VideoFileClip
         # Force to None
         end = end or None
 
@@ -167,8 +194,7 @@ class Transformer:
         images = normalize_input(images)
         images = torch.from_numpy(images)
 
-        if cuda_available:
-            images = images.cuda()
+        images = images.to(self.device)
 
         # Add batch dim
         if len(images.shape) == 3:

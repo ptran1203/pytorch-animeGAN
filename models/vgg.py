@@ -3,27 +3,29 @@ import torchvision.models as models
 import torch.nn as nn
 import torch
 
-vgg_mean = torch.tensor([0.485, 0.456, 0.406]).float()
-vgg_std = torch.tensor([0.229, 0.224, 0.225]).float()
 
-if torch.cuda.is_available():
-    vgg_std = vgg_std.cuda()
-    vgg_mean = vgg_mean.cuda()
 
 class Vgg19(nn.Module):
     def __init__(self):
         super(Vgg19, self).__init__()
         self.vgg19 = self.get_vgg19().eval()
+        vgg_mean = torch.tensor([0.485, 0.456, 0.406]).float()
+        vgg_std = torch.tensor([0.229, 0.224, 0.225]).float()
         self.mean = vgg_mean.view(-1, 1 ,1)
         self.std = vgg_std.view(-1, 1, 1)
+
+    def to(self, device):
+        new_self = super(Vgg19, self).to(device)
+        new_self.mean = new_self.mean.to(device)
+        new_self.std = new_self.std.to(device)
+        return new_self
 
     def forward(self, x):
         return self.vgg19(self.normalize_vgg(x))
 
-
     @staticmethod
     def get_vgg19(last_layer='conv4_4'):
-        vgg = models.vgg19(pretrained=torch.cuda.is_available()).features
+        vgg = models.vgg19(weights=models.VGG19_Weights.IMAGENET1K_V1).features
         model_list = []
 
         i = 0

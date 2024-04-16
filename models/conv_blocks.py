@@ -1,6 +1,8 @@
 import torch.nn as nn
 import torch.nn.functional as F
 from utils.common import initialize_weights
+from .layers import LayerNorm2d
+
 
 class DownConv(nn.Module):
 
@@ -27,9 +29,25 @@ class UpConv(nn.Module):
     def forward(self, x):
         out = F.interpolate(x, scale_factor=2.0, mode='bilinear')
         out = self.conv(out)
-
         return out
 
+
+class UpConvLNormLReLU(nn.Module):
+    """Upsample Conv block with Layer Norm and Leaky ReLU"""
+    def __init__(self, in_channels, out_channels, bias=False):
+        super(UpConvLNormLReLU, self).__init__()
+
+        self.conv_block = ConvBlock(
+            in_channels,
+            out_channels,
+            kernel_size=3,
+            bias=bias,
+        )
+
+    def forward(self, x):
+        out = F.interpolate(x, scale_factor=2.0, mode='bilinear')
+        out = self.conv_block(out)
+        return out
 
 class SeparableConv2D(nn.Module):
     def __init__(self, in_channels, out_channels, stride=1, bias=False):
@@ -58,12 +76,31 @@ class SeparableConv2D(nn.Module):
 
 
 class ConvBlock(nn.Module):
-    def __init__(self, channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False):
+    """Stack of Conv2D + Norm + LeakyReLU"""
+    def __init__(
+        self,
+        channels,
+        out_channels,
+        kernel_size=3,
+        stride=1,
+        padding=1,
+        bias=False,
+        norm_type="instance"
+    ):
         super(ConvBlock, self).__init__()
 
-        self.conv = nn.Conv2d(channels, out_channels,
-            kernel_size=kernel_size, stride=stride, padding=padding, bias=bias)
-        self.ins_norm = nn.InstanceNorm2d(out_channels)
+        self.conv = nn.Conv2d(
+            channels,
+            out_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            bias=bias
+        )
+        if norm_type == "instance":
+            self.ins_norm = nn.InstanceNorm2d(out_channels)
+        elif norm_type == "layer":
+            self.ins_norm = LayerNorm2d(out_channels)
         self.activation = nn.LeakyReLU(0.2, True)
 
         initialize_weights(self)
@@ -76,18 +113,50 @@ class ConvBlock(nn.Module):
         return out
 
 
+
 class InvertedResBlock(nn.Module):
-    def __init__(self, channels=256, out_channels=256, expand_ratio=2, bias=False):
+    def __init__(
+        self,
+        channels=256,
+        out_channels=256,
+        expand_ratio=2,
+        bias=False,
+        norm_type="instance",
+    ):
         super(InvertedResBlock, self).__init__()
         bottleneck_dim = round(expand_ratio * channels)
-        self.conv_block = ConvBlock(channels, bottleneck_dim, kernel_size=1, stride=1, padding=0, bias=bias)
-        self.depthwise_conv = nn.Conv2d(bottleneck_dim, bottleneck_dim,
-            kernel_size=3, groups=bottleneck_dim, stride=1, padding=1, bias=bias)
-        self.conv = nn.Conv2d(bottleneck_dim, out_channels,
-            kernel_size=1, stride=1, bias=bias)
+        self.conv_block = ConvBlock(
+            channels,
+            bottleneck_dim,
+            kernel_size=1,
+            stride=1,
+            padding=0,
+            bias=bias
+        )
+        self.depthwise_conv = nn.Conv2d(
+            bottleneck_dim,
+            bottleneck_dim,
+            kernel_size=3,
+            groups=bottleneck_dim,
+            stride=1,
+            padding=1,
+            bias=bias
+        )
+        self.conv = nn.Conv2d(
+            bottleneck_dim,
+            out_channels,
+            kernel_size=1,
+            stride=1,
+            bias=bias
+        )
 
-        self.ins_norm1 = nn.InstanceNorm2d(out_channels)
-        self.ins_norm2 = nn.InstanceNorm2d(out_channels)
+        if norm_type == "instance":
+            self.ins_norm1 = nn.InstanceNorm2d(out_channels)
+            self.ins_norm2 = nn.InstanceNorm2d(out_channels)
+        elif norm_type == "layer":
+            # Keep var name as is for v1 compatibility.
+            self.ins_norm1 = LayerNorm2d(bottleneck_dim)
+            self.ins_norm2 = LayerNorm2d(out_channels)
         self.activation = nn.LeakyReLU(0.2, True)
 
         initialize_weights(self)
@@ -100,4 +169,7 @@ class InvertedResBlock(nn.Module):
         out = self.conv(out)
         out = self.ins_norm2(out)
 
+        if out.shape[1] != x.shape[1]:
+            # Only concate if same shape
+            return out
         return out + x

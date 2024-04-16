@@ -4,15 +4,6 @@ import os
 import numpy as np
 from tqdm import tqdm
 
-_rgb_to_yuv_kernel = torch.tensor([
-    [0.299, -0.14714119, 0.61497538],
-    [0.587, -0.28886916, -0.51496512],
-    [0.114, 0.43601035, -0.10001026]
-]).float()
-
-if torch.cuda.is_available():
-    _rgb_to_yuv_kernel = _rgb_to_yuv_kernel.cuda()
-
 
 def gram(input):
     """
@@ -22,29 +13,22 @@ def gram(input):
     """
     b, c, w, h = input.size()
 
-    x = input.view(b * c, w * h)
+    x = input.contiguous().view(b * c, w * h)
+
+    # x = x / 2
+
+    # Work around, torch.mm would generate some inf values.
+    # https://discuss.pytorch.org/t/gram-matrix-in-mixed-precision/166800/2
+    # x = torch.clamp(x, max=1.0e2, min=-1.0e2)
+    # x[x > 1.0e2] = 1.0e2
+    # x[x < -1.0e2] = -1.0e2
 
     G = torch.mm(x, x.T)
-
+    G = torch.clamp(G, -64990.0, 64990.0)
     # normalize by total elements
-    return G.div(b * c * w * h)
+    result = G.div(b * c * w * h)
+    return result
 
-
-def rgb_to_yuv(image):
-    '''
-    https://en.wikipedia.org/wiki/YUV
-
-    output: Image of shape (H, W, C) (channel last)
-    '''
-    # -1 1 -> 0 1
-    image = (image + 1.0) / 2.0
-
-    yuv_img = torch.tensordot(
-        image,
-        _rgb_to_yuv_kernel,
-        dims=([image.ndim - 3], [0]))
-
-    return yuv_img
 
 
 def divisible(dim):
@@ -117,3 +101,10 @@ def compute_data_mean(data_folder):
     mean = np.mean(channel_mean)
 
     return mean - channel_mean[...,::-1]  # Convert to BGR for training
+
+
+if __name__ == '__main__':
+    t = torch.rand(2, 14, 32, 32)
+
+    with torch.autocast("cpu"):
+        print(gram(t))

@@ -18,6 +18,10 @@ SUPPORT_WEIGHTS = {
 
 ASSET_HOST = 'https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0'
 
+def is_image_file(path):
+    _, ext = os.path.splitext(path)
+    return ext.lower() in (".png", ".jpg", ".jpeg")
+
 
 def read_image(path):
     """
@@ -31,34 +35,40 @@ def read_image(path):
     return cv2.imread(path)[: ,: ,::-1]
 
 
-def save_checkpoint(model, optimizer, epoch, args, posfix=''):
+def save_checkpoint(model, path, optimizer=None, epoch=None):
     checkpoint = {
         'model_state_dict': model.state_dict(),
-        'optimizer_state_dict': optimizer.state_dict(),
         'epoch': epoch,
     }
-    path = os.path.join(args.checkpoint_dir, f'{model.name}{posfix}.pth')
+    if optimizer is  not None:
+        checkpoint['optimizer_state_dict'] = optimizer.state_dict()
+
     torch.save(checkpoint, path)
 
 
-def load_checkpoint(model, checkpoint_dir, posfix=''):
-    path = os.path.join(checkpoint_dir, f'{model.name}{posfix}.pth')
-    return load_weight(model, path)
+def load_checkpoint(model, path, optimizer=None, strip_optimizer=False) -> int:
+    state_dict = load_state_dict(path)
+    model.load_state_dict(state_dict['model_state_dict'], strict=True)
+    if 'optimizer_state_dict' in state_dict:
+        if optimizer is not None:
+            optimizer.load_state_dict(state_dict['optimizer_state_dict'])
+        if strip_optimizer:
+            del state_dict["optimizer_state_dict"]
+            torch.save(state_dict, path)
+            print(f"Optimizer stripped and saved to {path}")
+
+    epoch = state_dict.get('epoch', 0)
+    return epoch
 
 
-def load_weight(model, weight):
+def load_state_dict(weight) -> dict:
     if weight.lower() in SUPPORT_WEIGHTS:
         weight = _download_weight(weight)
 
-    checkpoint = torch.load(weight,  map_location='cuda:0') if torch.cuda.is_available() else \
-        torch.load(weight,  map_location='cpu')
-    model.load_state_dict(checkpoint['model_state_dict'], strict=True)
-    epoch = checkpoint['epoch']
-    del checkpoint
-    torch.cuda.empty_cache()
-    gc.collect()
+    map_location = 'cuda' if torch.cuda.is_available() else 'cpu'
+    state_dict = torch.load(weight, map_location=map_location)
 
-    return epoch
+    return state_dict
 
 
 def initialize_weights(net):
@@ -113,6 +123,4 @@ def _download_weight(weight):
         urllib.request.urlretrieve(url, save_path, reporthook=t.update_to)
 
     return save_path
-
-
 

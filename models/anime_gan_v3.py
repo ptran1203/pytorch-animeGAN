@@ -2,18 +2,18 @@
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.utils import spectral_norm
-from modeling.conv_blocks import DownConv
-from modeling.conv_blocks import UpConv
-from modeling.conv_blocks import SeparableConv2D
-from modeling.conv_blocks import InvertedResBlock
-from modeling.conv_blocks import ConvBlock
+from models.conv_blocks import DownConv
+from models.conv_blocks import UpConv
+from models.conv_blocks import SeparableConv2D
+from models.conv_blocks import InvertedResBlock
+from models.conv_blocks import ConvBlock
 from utils.common import initialize_weights
 
 
-class Generator(nn.Module):
+class GeneratorV3(nn.Module):
     def __init__(self, dataset=''):
-        super(Generator, self).__init__()
-        self.name = f'generator_{dataset}'
+        super(GeneratorV3, self).__init__()
+        self.name = f'{self.__class__.__name__}_{dataset}'
         bias = False
 
         self.encode_blocks = nn.Sequential(
@@ -60,9 +60,14 @@ class Generator(nn.Module):
 
 
 class Discriminator(nn.Module):
-    def __init__(self,  args):
+    def __init__(
+        self,
+        dataset=None,
+        num_layers=1,
+        use_sn=False,
+    ):
         super(Discriminator, self).__init__()
-        self.name = f'discriminator_{args.dataset}'
+        self.name = f'discriminator_{dataset}'
         self.bias = False
         channels = 32
 
@@ -71,7 +76,7 @@ class Discriminator(nn.Module):
             nn.LeakyReLU(0.2, True)
         ]
 
-        for i in range(args.d_layers):
+        for i in range(num_layers):
             layers += [
                 nn.Conv2d(channels, channels * 2, kernel_size=3, stride=2, padding=1, bias=self.bias),
                 nn.LeakyReLU(0.2, True),
@@ -88,7 +93,7 @@ class Discriminator(nn.Module):
             nn.Conv2d(channels, 1, kernel_size=3, stride=1, padding=1, bias=self.bias),
         ]
 
-        if args.use_sn:
+        if use_sn:
             for i in range(len(layers)):
                 if isinstance(layers[i], nn.Conv2d):
                     layers[i] = spectral_norm(layers[i])

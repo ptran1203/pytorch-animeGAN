@@ -1,8 +1,8 @@
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
-from modeling.vgg import Vgg19
-from utils.image_processing import gram, rgb_to_yuv
+from models.vgg import Vgg19
+from utils.image_processing import gram
 
 
 class ColorLoss(nn.Module):
@@ -10,10 +10,36 @@ class ColorLoss(nn.Module):
         super(ColorLoss, self).__init__()
         self.l1 = nn.L1Loss()
         self.huber = nn.SmoothL1Loss()
+        self._rgb_to_yuv_kernel = torch.tensor([
+            [0.299, -0.14714119, 0.61497538],
+            [0.587, -0.28886916, -0.51496512],
+            [0.114, 0.43601035, -0.10001026]
+        ]).float()
+
+    def to(self, device):
+        new_self = super(ColorLoss, self).to(device)
+        new_self._rgb_to_yuv_kernel = new_self._rgb_to_yuv_kernel.to(device)
+        return new_self
+
+    def rgb_to_yuv(self, image):
+        '''
+        https://en.wikipedia.org/wiki/YUV
+
+        output: Image of shape (H, W, C) (channel last)
+        '''
+        # -1 1 -> 0 1
+        image = (image + 1.0) / 2.0
+
+        yuv_img = torch.tensordot(
+            image,
+            self._rgb_to_yuv_kernel,
+            dims=([image.ndim - 3], [0]))
+
+        return yuv_img
 
     def forward(self, image, image_g):
-        image = rgb_to_yuv(image)
-        image_g = rgb_to_yuv(image_g)
+        image = self.rgb_to_yuv(image)
+        image_g = self.rgb_to_yuv(image_g)
 
         # After convert to yuv, both images have channel last
 
@@ -23,16 +49,19 @@ class ColorLoss(nn.Module):
 
 
 class AnimeGanLoss:
-    def __init__(self, args):
-        self.content_loss = nn.L1Loss().cuda()
-        self.gram_loss = nn.L1Loss().cuda()
-        self.color_loss = ColorLoss().cuda()
+    def __init__(self, args, device):
+        if isinstance(device, str):
+            device = torch.device(device)
+
+        self.content_loss = nn.L1Loss().to(device)
+        self.gram_loss = nn.L1Loss().to(device)
+        self.color_loss = ColorLoss().to(device)
         self.wadvg = args.wadvg
         self.wadvd = args.wadvd
         self.wcon = args.wcon
         self.wgra = args.wgra
         self.wcol = args.wcol
-        self.vgg19 = Vgg19().cuda().eval()
+        self.vgg19 = Vgg19().to(device).eval()
         self.adv_type = args.gan_loss
         self.bce_loss = nn.BCELoss()
 
@@ -40,7 +69,7 @@ class AnimeGanLoss:
         '''
         Compute loss for Generator
 
-        @Arugments:
+        @Args:
             - fake_img: generated image
             - img: image
             - fake_logit: output of Discriminator given fake image
@@ -144,6 +173,10 @@ class LossSummary:
     def avg_loss_D(self):
         return self._avg(self.loss_d_adv)
 
+    def get_loss_description(self):
+        avg_adv, avg_gram, avg_color, avg_content = self.avg_loss_G()
+        avg_adv_d = self.avg_loss_D()
+        return f'loss G: adv {avg_adv:2f} con {avg_content:2f} gram {avg_gram:2f} color {avg_color:2f} / loss D: {avg_adv_d:2f}'
 
     @staticmethod
     def _avg(losses):
