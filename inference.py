@@ -53,9 +53,11 @@ def auto_load_weight(weight, version=None):
         
 
 class Predictor:
-    def __init__(self, weight='hayao', device='cuda', add_mean=False):
+    def __init__(self, weight='hayao', device='cuda', amp=True):
         if not torch.cuda.is_available():
             device = 'cpu'
+        self.amp = amp  # Automatic Mixed Precision
+        self.device_type = 'cuda' if device.startswith('cuda') else 'cpu'
         self.device = torch.device(device)
         self.G = auto_load_weight(weight)
         self.G.to(self.device)
@@ -71,7 +73,10 @@ class Predictor:
             - anime version of image: np.array
         '''
         with torch.no_grad():
-            fake = self.G(self.preprocess_images(image))
+            image = self.preprocess_images(image)
+            with torch.autocast(self.device_type, enabled=self.amp):
+                print(image.dtype, self.G)
+                fake = self.G(image)
             fake = fake.detach().cpu().numpy()
             # Channel last
             fake = fake.transpose(0, 2, 3, 1)
