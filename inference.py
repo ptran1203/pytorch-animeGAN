@@ -75,7 +75,7 @@ class Predictor:
         with torch.no_grad():
             image = self.preprocess_images(image)
             with torch.autocast(self.device_type, enabled=self.amp):
-                print(image.dtype, self.G)
+                # print(image.dtype, self.G)
                 fake = self.G(image)
             fake = fake.detach().cpu().numpy()
             # Channel last
