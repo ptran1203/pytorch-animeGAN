@@ -1,4 +1,3 @@
-import cog
 from pathlib import Path
 from inference import Predictor
 from utils import read_image
@@ -6,29 +5,28 @@ import cv2
 import tempfile
 from utils.image_processing import resize_image, normalize_input, denormalize_input
 import numpy as np
+from cog import BasePredictor, Path, Input
 
 
-class Predictor(cog.Predictor):
+class Predictor(BasePredictor):
     def setup(self):
         pass
 
-    @cog.input(
-        "model", type=str,
-        default='Hayao:v2',
-        options=[
-            'Hayao:v1',
-            'Shinkai:v1',
-            'Hayao:v2'
-        ],
-        help="Anime style model"
-    )
-    @cog.input("image", type=Path, help="input image")
-    def predict(self, image, model='Hayao:v2'):
+    def predict(
+        self,
+        image: Path = Input(description="Image"),
+        model: str = Input(
+            description="Factor to scale image by",
+            default='Hayao:v2',
+            choices=['Hayao', 'Shinkai', 'Hayao:v2']
+        )
+    ) -> Path:
         version = model.split(":")[-1]
         predictor = Predictor(model, version)
         img = read_image(str(image))
         anime_img = predictor.transform(resize_image(img))[0]
-        anime_img = denormalize_input(anime_img, dtype=np.int16)
-        out_path = Path(tempfile.mkdtemp()) / "out.png"
-        cv2.imwrite(str(out_path), anime_img[..., ::-1])
-        return out_path
+        # out_path = Path(tempfile.mkdtemp()) / "out.png"
+        # cv2.imwrite(str(out_path), anime_img[..., ::-1])
+        # return out_path
+        return anime_img
+

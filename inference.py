@@ -76,6 +76,7 @@ class Predictor:
         '''
         with torch.no_grad():
             image = self.preprocess_images(image)
+            # image = image.to(self.device)
             with torch.autocast(self.device_type, enabled=self.amp):
                 # print(image.dtype, self.G)
                 fake = self.G(image)
@@ -158,7 +159,7 @@ class Predictor:
         video_writer = ffmpeg_writer.FFMPEG_VideoWriter(
             temp_file or output_path,
             video_clip.size, video_clip.fps, codec="libx264",
-            preset="medium", bitrate="2000k",
+            # preset="medium", bitrate="2000k",
             audiofile=input_path, threads=None,
             ffmpeg_params=None)
 
