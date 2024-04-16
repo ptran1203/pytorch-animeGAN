@@ -97,7 +97,6 @@ class Predictor:
             raise ValueError(f"Could not get image from {file_path}")
 
         anime_img = self.transform(resize_image(image))[0]
-        anime_img = denormalize_input(anime_img, dtype=np.int16)
         cv2.imwrite(save_path, anime_img[..., ::-1])
         print(f"Anime image saved to {save_path}")
 
@@ -122,7 +121,6 @@ class Predictor:
             anime_img = self.transform(image)[0]
             ext = fname.split('.')[-1]
             fname = fname.replace(f'.{ext}', '')
-            anime_img = denormalize_input(anime_img, dtype=np.int16)
             cv2.imwrite(os.path.join(dest_dir, f'{fname}_anime.jpg'), anime_img[..., ::-1])
 
     def transform_video(self, input_path, output_path, batch_size=4, start=0, end=0):
@@ -148,7 +146,7 @@ class Predictor:
             temp_file = f'tmp_anime.{output_path.split(".")[-1]}'
 
         def transform_and_write(frames, count, writer):
-            anime_images = denormalize_input(self.transform(frames), dtype=np.uint8)
+            anime_images = self.transform(frames)
             for i in range(0, count):
                 img = np.clip(anime_images[i], 0, 255)
                 writer.write_frame(img)
