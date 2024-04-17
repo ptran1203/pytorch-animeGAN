@@ -5,12 +5,16 @@ Pytorch implementation of AnimeGAN for fast photo animation
 * Paper: *AnimeGAN: a novel lightweight GAN for photo animation* - [Semantic scholar](https://www.semanticscholar.org/paper/AnimeGAN%3A-A-Novel-Lightweight-GAN-for-Photo-Chen-Liu/10a9c5d183e7e7df51db8bfa366bc862262b37d7#citing-papers) or from [Yoshino repo](https://github.com/TachibanaYoshino/AnimeGAN/blob/master/doc/Chen2020_Chapter_AnimeGAN.pdf)
 * Original implementation in [Tensorflow](https://github.com/TachibanaYoshino/AnimeGAN) by [Tachibana Yoshino](https://github.com/TachibanaYoshino)
 * [Demo and Docker image on Replicate](https://replicate.ai/ptran1203/pytorch-animegan)
-* New (16/04/2024): **AnimeGANv2** is released with training code
+
 
 | Input | Animation |
 |--|--|
 |![c2](./example/gif/train.gif)|![g2](./example/gif/train_anime.gif)|
 <!-- |![c1](./example/gif/city.gif)|![g1](./example/gif/city_anime.gif)| -->
+
+---
+* 16/04/2024: **AnimeGANv2** (Hayao style) is released with training code
+---
 
 ## Quick start
 
