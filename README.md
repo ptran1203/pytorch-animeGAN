@@ -20,6 +20,7 @@ cd pytorch-animeGAN
 ```
 
 Run Inference on your local machine
+> --src can be directory or image file
 
 ```
 python3 inference_image.py --weight hayao:v2 --src /your/path/to/image_dir --out /path/to/output_dir
@@ -69,31 +70,33 @@ python3 train.py --anime_image_dir dataset/Hayao \
                 --real_image_dir dataset/photo_train \
                 --model v2 \                 # animeGAN version, can be v1 or v2
                 --batch 8 \
+                --amp \                      # Turn on Automatic Mixed Precision training
                 --init_epochs 10 \
                 --exp_dir runs \
                 --save-interval 1 \
                 --gan-loss lsgan \           # one of [lsgan, hinge, bce]
-                --init-lr 0.0001 \
-                --lr-g 0.00002 \
-                --lr-d 0.00004 \
+                --init-lr 1e-4 \
+                --lr-g 2e-5 \
+                --lr-d 4e-5 \
                 --wadvd 300.0\               # Aversarial loss weight for D
                 --wadvg 300.0\               # Aversarial loss weight for G
-                --wcon 1.5\                 # Content loss weight
-                --wgra 3.0\                 # Gram loss weight
-                --wcol 30.0\             w   # Color loss weight
-                --use_sn\                   # If set, use spectral normalization, default is False
+                --wcon 1.5\                  # Content loss weight
+                --wgra 3.0\                  # Gram loss weight
+                --wcol 30.0\                 # Color loss weight
+                --use_sn\                    # If set, use spectral normalization, default is False
 ```
 
 ### 3. Transform images
 
 To convert images in a folder or single image, run `inference_image.py`, for example:
 
-> --src and --dest can be a directory or a file
+>
+> --src and --out can be a directory or a file
 
 ```bash
-python3 inference_image.py --checkpoint hayao:v2\
-                        --src dataset/test/HR_photo\
-                        --dest inference_images\
+python3 inference_image.py --weight hayao:v2 \
+                        --src dataset/test/HR_photo \
+                        --out inference_images
 ```
 
 ### 4. Transform video
@@ -103,10 +106,10 @@ To convert a video to anime version, run `inference_video.py`, for example:
 > Be careful when choosing --batch-size, it might lead to CUDA memory error if the resolution of the video is too large
 
 ```bash
-python3 inference_video.py --checkpoint hayao:v2\
+python3 inference_video.py --weight hayao:v2\
                         --src test_vid_3.mp4\
-                        --dest test_vid_3_anime.mp4\
-                        --batch-size 2
+                        --out test_vid_3_anime.mp4\
+                        --batch-size 4
 ```
 
 
