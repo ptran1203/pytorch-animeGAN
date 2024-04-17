@@ -29,8 +29,7 @@ class Predictor(BasePredictor):
         predictor = MyPredictor(model, version)
         img = read_image(str(image))
         anime_img = predictor.transform(resize_image(img))[0]
-        # out_path = Path(tempfile.mkdtemp()) / "out.png"
-        # cv2.imwrite(str(out_path), anime_img[..., ::-1])
-        # return out_path
-        return anime_img
+        out_path = Path(tempfile.mkdtemp()) / "out.png"
+        cv2.imwrite(str(out_path), anime_img[..., ::-1])
+        return out_path
 

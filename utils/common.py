@@ -62,10 +62,26 @@ def save_checkpoint(model, path, optimizer=None, epoch=None):
 
     torch.save(checkpoint, path)
 
+def maybe_remove_module(state_dict):
+    # Remove added module ins state_dict in ddp training
+    # https://discuss.pytorch.org/t/why-are-state-dict-keys-getting-prepended-with-the-string-module/104627/3
+    new_state_dict = {}
+    module_str = 'module.'
+    for k, v in state_dict.items():
+
+        if k.startswith(module_str):
+            k = k[len(module_str):]
+        new_state_dict[k] = v
+    return new_state_dict
+
 
 def load_checkpoint(model, path, optimizer=None, strip_optimizer=False) -> int:
     state_dict = load_state_dict(path)
-    model.load_state_dict(state_dict['model_state_dict'], strict=True)
+    model_state_dict = maybe_remove_module(state_dict['model_state_dict'])
+    model.load_state_dict(
+        model_state_dict,
+        strict=True
+    )
     if 'optimizer_state_dict' in state_dict:
         if optimizer is not None:
             optimizer.load_state_dict(state_dict['optimizer_state_dict'])
