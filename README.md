@@ -30,6 +30,18 @@ Run Inference on your local machine
 python3 inference_image.py --weight hayao:v2 --src /your/path/to/image_dir --out /path/to/output_dir
 ```
 
+* Python code
+
+```python
+from inference import Predictor
+
+predictor= Predictor('hayao:v2')
+
+url = 'https://github.com/ptran1203/pytorch-animeGAN/blob/master/example/result/real/1%20(20).jpg?raw=true'
+
+predictor.transform_file(url, "anime.jpg")
+```
+
 ## Documentation
 
 - Training notebook on [Google colab](https://colab.research.google.com/github/ptran1203/pytorch-animeGAN/blob/master/notebooks/animeGAN.ipynb)
