@@ -3,6 +3,7 @@ import cv2
 import os
 import numpy as np
 import shutil
+import matplotlib.pyplot as plt
 from models.anime_gan import GeneratorV1
 from models.anime_gan_v2 import GeneratorV2
 from models.anime_gan_v3 import GeneratorV3
@@ -64,6 +65,26 @@ class Predictor:
         self.device = torch.device(device)
         self.G = auto_load_weight(weight)
         self.G.to(self.device)
+
+    def transform_and_show(
+        self,
+        image_path,
+        figsize=(18, 10),
+        save_path=None
+    ):
+        image = resize_image(read_image(image_path))
+        anime_img = self.transform(image)
+        anime_img = anime_img.astype('uint8')
+
+        fig = plt.figure(figsize=figsize)
+        fig.add_subplot(1, 2, 1)
+        plt.imshow(image)
+        fig.add_subplot(1, 2, 2)
+        plt.imshow(anime_img[0])
+        plt.axis('off')
+        plt.show()
+        if save_path is not None:
+            plt.savefig(save_path)
 
     def transform(self, image, denorm=True):
         '''
