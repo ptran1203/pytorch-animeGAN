@@ -78,10 +78,14 @@ class Predictor:
 
         fig = plt.figure(figsize=figsize)
         fig.add_subplot(1, 2, 1)
+        # plt.title("Input")
         plt.imshow(image)
+        plt.axis('off')
         fig.add_subplot(1, 2, 2)
+        # plt.title("Anime style")
         plt.imshow(anime_img[0])
         plt.axis('off')
+        plt.tight_layout()
         plt.show()
         if save_path is not None:
             plt.savefig(save_path)
