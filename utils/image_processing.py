@@ -83,6 +83,31 @@ def denormalize_input(images, dtype=None):
     return images
 
 
+def preprocess_images(images):
+    '''
+    Preprocess image for inference
+
+    @Arguments:
+        - images: np.ndarray
+
+    @Returns
+        - images: torch.tensor
+    '''
+    images = images.astype(np.float32)
+
+    # Normalize to [-1, 1]
+    images = normalize_input(images)
+    images = torch.from_numpy(images)
+
+    # Add batch dim
+    if len(images.shape) == 3:
+        images = images.unsqueeze(0)
+
+    # channel first
+    images = images.permute(0, 3, 1, 2)
+
+    return images
+
 def compute_data_mean(data_folder):
     if not os.path.exists(data_folder):
         raise FileNotFoundError(f'Folder {data_folder} does not exits')

@@ -5,8 +5,3 @@ dataset
 spirit.away
 .DS_Store
 .todo
-*.pth
-*.pt
-.cache
-inference_images
-.cog

@@ -61,6 +61,7 @@ class AnimeGanLoss:
         self.wcon = args.wcon
         self.wgra = args.wgra
         self.wcol = args.wcol
+        self.wtvar = args.wtvar
         self.vgg19 = Vgg19().to(device).eval()
         self.adv_type = args.gan_loss
         self.bce_loss = nn.BCELoss()
@@ -71,32 +72,62 @@ class AnimeGanLoss:
 
         @Args:
             - fake_img: generated image
-            - img: image
+            - img: real image
             - fake_logit: output of Discriminator given fake image
             - anime_gray: grayscale of anime image
 
         @Returns:
-            loss
+            - Adversarial Loss of fake logits
+            - Content loss between real and fake features (vgg19)
+            - Gram loss between anime and fake features (Vgg19)
+            - Color loss between image and fake image
+            - Total variation loss of fake image
         '''
         fake_feat = self.vgg19(fake_img)
         anime_feat = self.vgg19(anime_gray)
-        img_feat = self.vgg19(img).detach()
+        img_feat = self.vgg19(img)#.detach()
 
         return [
+            # Want to be real image.
             self.wadvg * self.adv_loss_g(fake_logit),
             self.wcon * self.content_loss(img_feat, fake_feat),
             self.wgra * self.gram_loss(gram(anime_feat), gram(fake_feat)),
             self.wcol * self.color_loss(img, fake_img),
+            self.wtvar * self.total_variation_loss(fake_img)
         ]
 
-    def compute_loss_D(self, fake_img_d, real_anime_d, real_anime_gray_d, real_anime_smooth_gray_d):
+    def compute_loss_D(
+        self,
+        fake_img_d,
+        real_anime_d,
+        real_anime_gray_d,
+        real_anime_smooth_gray_d
+    ):
         return self.wadvd * (
+            # Classify real anime as real
             self.adv_loss_d_real(real_anime_d) +
+            # Classify generated as fake
             self.adv_loss_d_fake(fake_img_d) +
+            # Classify real anime gray as fake
             self.adv_loss_d_fake(real_anime_gray_d) +
+            # Classify real anime as fake
             0.2 * self.adv_loss_d_fake(real_anime_smooth_gray_d)
         )
 
+    def total_variation_loss(self, fake_img):
+        """
+        A smooth loss in fact. Like the smooth prior in MRF.
+        V(y) = || y_{n+1} - y_n ||_2
+        """
+        # Channel first -> channel last
+        fake_img = fake_img.permute(0, 2, 3, 1)
+        def _l2(x):
+            # sum(t ** 2) / 2
+            return torch.sum(x ** 2) / 2
+
+        dh = fake_img[:, :-1, ...] - fake_img[:, 1:, ...]
+        dw = fake_img[:, :, :-1, ...] - fake_img[:, :, 1:, ...]
+        return _l2(dh) / dh.numel() + _l2(dw) / dw.numel()
 
     def content_loss_vgg(self, image, recontruction):
         feat = self.vgg19(image)
@@ -105,39 +136,44 @@ class AnimeGanLoss:
         return self.content_loss(feat, re_feat)
 
     def adv_loss_d_real(self, pred):
+        """Push pred to class 1 (real)"""
         if self.adv_type == 'hinge':
             return torch.mean(F.relu(1.0 - pred))
 
         elif self.adv_type == 'lsgan':
+            pred = torch.sigmoid(pred)
             return torch.mean(torch.square(pred - 1.0))
 
-        elif self.adv_type == 'normal':
+        elif self.adv_type == 'bce':
             return self.bce_loss(pred, torch.ones_like(pred))
 
         raise ValueError(f'Do not support loss type {self.adv_type}')
 
     def adv_loss_d_fake(self, pred):
+        """Push pred to class 0 (fake)"""
         if self.adv_type == 'hinge':
             return torch.mean(F.relu(1.0 + pred))
 
         elif self.adv_type == 'lsgan':
+            pred = torch.sigmoid(pred)
             return torch.mean(torch.square(pred))
 
-        elif self.adv_type == 'normal':
+        elif self.adv_type == 'bce':
             return self.bce_loss(pred, torch.zeros_like(pred))
 
         raise ValueError(f'Do not support loss type {self.adv_type}')
 
-
     def adv_loss_g(self, pred):
+        """Push pred to class 1 (real)"""
         if self.adv_type == 'hinge':
             return -torch.mean(pred)
 
         elif self.adv_type == 'lsgan':
+            pred = torch.sigmoid(pred)
             return torch.mean(torch.square(pred - 1.0))
 
-        elif self.adv_type == 'normal':
-            return self.bce_loss(pred, torch.zeros_like(pred))
+        elif self.adv_type == 'bce':
+            return self.bce_loss(pred, torch.ones_like(pred))
 
         raise ValueError(f'Do not support loss type {self.adv_type}')
 

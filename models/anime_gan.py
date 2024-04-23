@@ -1,4 +1,4 @@
-
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.utils import spectral_norm
@@ -108,4 +108,6 @@ class Discriminator(nn.Module):
         initialize_weights(self)
 
     def forward(self, img):
-        return self.discriminate(img)
+        logits = self.discriminate(img)
+        # logits = torch.clamp(logits, -64990.0, 64990.0)
+        return logits

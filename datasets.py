@@ -11,6 +11,18 @@ from utils import normalize_input, compute_data_mean, fast_numpyio
 
 CACHE_DIR = '/u02/phatth1/.tmp'
 
+def get_random_crop(image, crop_height, crop_width):
+
+    max_x = max(image.shape[1] - crop_width, 0)
+    max_y = max(image.shape[0] - crop_height, 0)
+
+    x = np.random.randint(0, max_x) if max_x != 0 else 0
+    y = np.random.randint(0, max_y) if max_y != 0 else 0
+
+    crop = image[y: y + crop_height, x: x + crop_width]
+
+    return crop
+
 class AnimeDataSet(Dataset):
     def __init__(
         self,
@@ -18,7 +30,9 @@ class AnimeDataSet(Dataset):
         real_image_dir,
         debug_samples=0,
         cache=False,
-        transform=None
+        transform=None,
+        imgsz=256,
+        resize_method="resize"
     ):
         """   
         folder structure:
@@ -33,13 +47,14 @@ class AnimeDataSet(Dataset):
         print(f'Mean(B, G, R) of {anime_image_dir} are {self.mean}')
 
         self.debug_samples = debug_samples
+        self.resize_method = resize_method
         self.image_files =  {}
         self.photo = 'train_photo'
         self.style = 'style'
         self.smooth = 'smooth'
-        self.dummy = torch.zeros(3, 256, 256)
         self.cache_files = {}
         self.anime_dirname = os.path.basename(anime_image_dir)
+        self.imgsz = imgsz
         for dir, opt in [
             (real_image_dir, self.photo),
             (os.path.join(anime_image_dir, self.style), self.style),
@@ -51,10 +66,14 @@ class AnimeDataSet(Dataset):
         self.transform = transform
         self.cache_data()
 
-        print(f'Dataset: real {len(self.image_files[self.photo])} style {self.len_anime}, smooth {self.len_smooth}')
+        print(f'Dataset: real {self.len_photo} style {self.len_anime}, smooth {self.len_smooth}')
 
     def __len__(self):
-        return self.debug_samples or len(self.image_files[self.photo])
+        return self.debug_samples or self.len_anime
+
+    @property
+    def len_photo(self):
+        return len(self.image_files[self.photo])
 
     @property
     def len_anime(self):
@@ -65,8 +84,9 @@ class AnimeDataSet(Dataset):
         return len(self.image_files[self.smooth])
 
     def __getitem__(self, index):
-        image = self.load_photo(index)
-        anm_idx = random.randint(0, self.len_anime - 1)
+        photo_idx = random.randint(0, self.len_photo - 1)
+        image = self.load_photo(photo_idx)
+        anm_idx = index
 
         anime, anime_gray = self.load_anime(anm_idx)
         smooth_gray = self.load_anime_smooth(anm_idx)
@@ -122,6 +142,13 @@ class AnimeDataSet(Dataset):
         else:
             fpath = self.image_files[self.photo][index]
             image = cv2.imread(fpath)[:,:,::-1]
+            if self.resize_method == "resize":
+                image = cv2.resize(image, (self.imgsz, self.imgsz))
+            else:
+                # Random Crop
+                image = get_random_crop(image, self.imgsz, self.imgsz)
+                image = cv2.resize(image, (self.imgsz, self.imgsz))
+
             image = self._transform(image, addmean=False)
             image = image.transpose(2, 0, 1)
             image = np.ascontiguousarray(image)
@@ -135,6 +162,7 @@ class AnimeDataSet(Dataset):
         else:
             fpath = self.image_files[self.style][index]
             image = cv2.imread(fpath)[:,:,::-1]
+            image = cv2.resize(image, (self.imgsz, self.imgsz))
 
             image_gray = cv2.cvtColor(image.copy(), cv2.COLOR_BGR2GRAY)
             image_gray = np.stack([image_gray, image_gray, image_gray], axis=-1)
@@ -156,6 +184,7 @@ class AnimeDataSet(Dataset):
         else:
             fpath = self.image_files[self.smooth][index]
             image = cv2.imread(fpath, cv2.IMREAD_GRAYSCALE)
+            image = cv2.resize(image, (self.imgsz, self.imgsz))
             image = np.stack([image, image, image], axis=-1)
             image = self._transform(image, addmean=False)
             image = image.transpose(2, 0, 1)
