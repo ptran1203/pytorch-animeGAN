@@ -5,3 +5,6 @@ dataset
 spirit.away
 .DS_Store
 .todo
+.cache
+.cog
+inference_images/
