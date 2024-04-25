@@ -130,14 +130,14 @@ python3 inference_video.py --weight hayao:v2\
 ```
 
 
-| Input | Output(Hayao style v2) |
-|--|--|
-|![c1](./example/result/real/1%20(20).jpg)|![g1](./example/result/anime/1%20(20)_anime.jpg)|
-|![c1](./example/result/real/1%20(21).jpg)|![g1](./example/result/anime/1%20(21)_anime.jpg)|
-|![c1](./example/result/real/1%20(36).jpg)|![g1](./example/result/anime/1%20(36)_anime.jpg)|
-|![c1](./example/result/real/1%20(37).jpg)|![g1](./example/result/anime/1%20(37)_anime.jpg)|
-|![c1](./example/result/real/1%20(38).jpg)|![g1](./example/result/anime/1%20(38)_anime.jpg)|
-|![c1](./example/result/real/1%20(62).jpg)|![g1](./example/result/anime/1%20(62)_anime.jpg)|
+| Input | Hayao style v1 | Hayao style v2 |
+|--|--|--|
+|![c1](./example/result/real/1%20(20).jpg)|![c1](./example/result/hayao/1%20(20).jpg)|![g1](./example/result/anime/1%20(20)_anime.jpg)|
+|![c1](./example/result/real/1%20(21).jpg)|![c1](./example/result/hayao/1%20(21).jpg)|![g1](./example/result/anime/1%20(21)_anime.jpg)|
+|![c1](./example/result/real/1%20(36).jpg)|![c1](./example/result/hayao/1%20(36).jpg)|![g1](./example/result/anime/1%20(36)_anime.jpg)|
+|![c1](./example/result/real/1%20(37).jpg)|![c1](./example/result/hayao/1%20(37).jpg)|![g1](./example/result/anime/1%20(37)_anime.jpg)|
+|![c1](./example/result/real/1%20(38).jpg)|![c1](./example/result/hayao/1%20(38).jpg)|![g1](./example/result/anime/1%20(38)_anime.jpg)|
+|![c1](./example/result/real/1%20(62).jpg)|![c1](./example/result/hayao/1%20(62).jpg)|![g1](./example/result/anime/1%20(62)_anime.jpg)|
 
 
 <!-- ### Objective:
