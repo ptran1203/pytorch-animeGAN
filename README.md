@@ -135,8 +135,8 @@ python3 inference_video.py --weight hayao:v2\
 |![c1](./example/result/real/1%20(21).jpg)|![g1](./example/result/anime/1%20(21)_anime.jpg)|
 |![c1](./example/result/real/1%20(36).jpg)|![g1](./example/result/anime/1%20(36)_anime.jpg)|
 |![c1](./example/result/real/1%20(37).jpg)|![g1](./example/result/anime/1%20(37)_anime.jpg)|
-|![c1](./example/result/real/1%20(40).jpg)|![g1](./example/result/anime/1%20(40)_anime.jpg)|
-|![c1](./example/result/real/1%20(61).jpg)|![g1](./example/result/anime/1%20(61)_anime.jpg)|
+|![c1](./example/result/real/1%20(38).jpg)|![g1](./example/result/anime/1%20(38)_anime.jpg)|
+|![c1](./example/result/real/1%20(62).jpg)|![g1](./example/result/anime/1%20(62)_anime.jpg)|
 
 
 <!-- ### Objective:

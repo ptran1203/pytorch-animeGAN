@@ -7,4 +7,7 @@ spirit.away
 .todo
 .cache
 .cog
+tmp
+zip_code*
+test.ipynb
 inference_images/
