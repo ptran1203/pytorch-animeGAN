@@ -13,6 +13,7 @@ Pytorch implementation of AnimeGAN for fast photo animation
 <!-- |![c1](./example/gif/city.gif)|![g1](./example/gif/city_anime.gif)| -->
 
 ---
+* 23/04/2024: Added DDP training.
 * 16/04/2024: **AnimeGANv2** (Hayao style) is released with training code
 ---
 
@@ -50,18 +51,18 @@ predictor.transform_file(url, "anime.jpg")
 
 ### 1. Prepare dataset
 
-#### 1.1 To download dataset from paper, run below command
+#### 1.1 To download dataset from the paper, run below command
 
 ```bash
 wget -O anime-gan.zip https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/dataset_v1.zip
 unzip anime-gan.zip
 ```
 
-=>  The dataset folder can be found in your current folder with name `dataset`
+=>  The dataset folder can be found in your current folder with named `dataset`
 
 #### 1.2 Create custom data from anime video
 
-You need to have a video file located in your machine.
+You need to have a video file located on your machine.
 
 **Step 1.** Create anime images from the video
 
