@@ -13,12 +13,12 @@ HTTP_PREFIXES = [
 
 
 RELEASED_WEIGHTS = {
-    "hayao_v2": (
+    "hayao:v2": (
         # Dataset trained on Google Landmark micro as training real photo
         "v2",
         "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.1/GeneratorV2_gldv2_Hayao.pt"
     ),
-    "hayao_v1": (
+    "hayao:v1": (
         "v1",
         "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/generator_hayao.pth"
     ),
@@ -26,7 +26,7 @@ RELEASED_WEIGHTS = {
         "v1",
         "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/generator_hayao.pth"
     ),
-    "shinkai_v1": (
+    "shinkai:v1": (
         "v1",
         "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/generator_shinkai.pth"
     ),
