@@ -138,14 +138,14 @@ python3 inference.py --weight hayao:v2\
 ```
 
 
-| Input | Hayao style v1 | Hayao style v2 |
-|--|--|--|
-|![c1](./example/result/real/1%20(20).jpg)|![c1](./example/result/hayao/1%20(20).jpg)|![g1](./example/result/hayao_v2/1%20(20).jpg)|
-|![c1](./example/result/real/1%20(21).jpg)|![c1](./example/result/hayao/1%20(21).jpg)|![g1](./example/result/hayao_v2/1%20(21).jpg)|
-|![c1](./example/result/real/1%20(36).jpg)|![c1](./example/result/hayao/1%20(36).jpg)|![g1](./example/result/hayao_v2/1%20(36).jpg)|
-|![c1](./example/result/real/1%20(37).jpg)|![c1](./example/result/hayao/1%20(37).jpg)|![g1](./example/result/hayao_v2/1%20(37).jpg)|
-|![c1](./example/result/real/1%20(38).jpg)|![c1](./example/result/hayao/1%20(38).jpg)|![g1](./example/result/hayao_v2/1%20(38).jpg)|
-|![c1](./example/result/real/1%20(62).jpg)|![c1](./example/result/hayao/1%20(62).jpg)|![g1](./example/result/hayao_v2/1%20(62).jpg)|
+| Input | Hayao style v2 |
+|--|--|
+|![c1](./example/result/real/1%20(20).jpg)|![g1](./example/result/hayao_v2/1%20(20).jpg)|
+|![c1](./example/result/real/1%20(21).jpg)|![g1](./example/result/hayao_v2/1%20(21).jpg)|
+|![c1](./example/result/real/1%20(36).jpg)|![g1](./example/result/hayao_v2/1%20(36).jpg)|
+|![c1](./example/result/real/1%20(37).jpg)|![g1](./example/result/hayao_v2/1%20(37).jpg)|
+|![c1](./example/result/real/1%20(38).jpg)|![g1](./example/result/hayao_v2/1%20(38).jpg)|
+|![c1](./example/result/real/1%20(62).jpg)|![g1](./example/result/hayao_v2/1%20(62).jpg)|
 
 
 <details>
