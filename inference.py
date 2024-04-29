@@ -19,7 +19,7 @@ VALID_FORMATS = {
     'png', 'bmp',
 }
 
-def auto_load_weight(weight, version=None):
+def auto_load_weight(weight, version=None, map_location=None):
     """Auto load Generator version from weight."""
     weight_name = os.path.basename(weight).lower()
     if version is not None:
@@ -37,7 +37,7 @@ def auto_load_weight(weight, version=None):
         # e.g: Generatorv2_{anything}.pt
         if weight_name in RELEASED_WEIGHTS:
             version = RELEASED_WEIGHTS[weight_name][0]
-            return auto_load_weight(weight, version=version)
+            return auto_load_weight(weight, version=version, map_location=map_location)
 
         elif weight_name.startswith("generatorv2"):
             cls = GeneratorV2
@@ -49,21 +49,22 @@ def auto_load_weight(weight, version=None):
             raise ValueError((f"Can not get Model from {weight_name}, "
                                "you might need to explicitly specify version"))
     model = cls()
-    load_checkpoint(model, weight, strip_optimizer=True)
+    load_checkpoint(model, weight, strip_optimizer=True, map_location=map_location)
     model.eval()
     return model
-        
+
 
 class Predictor:
     def __init__(self, weight='hayao', device='cuda', amp=True):
         if not torch.cuda.is_available():
             device = 'cpu'
+            # Amp not working on cpu
             amp = False
-            print("Amp currently not supported on CPU")            
+
         self.amp = amp  # Automatic Mixed Precision
         self.device_type = 'cuda' if device.startswith('cuda') else 'cpu'
         self.device = torch.device(device)
-        self.G = auto_load_weight(weight)
+        self.G = auto_load_weight(weight, map_location=device)
         self.G.to(self.device)
 
     def transform_and_show(

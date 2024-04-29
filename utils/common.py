@@ -76,8 +76,8 @@ def maybe_remove_module(state_dict):
     return new_state_dict
 
 
-def load_checkpoint(model, path, optimizer=None, strip_optimizer=False) -> int:
-    state_dict = load_state_dict(path)
+def load_checkpoint(model, path, optimizer=None, strip_optimizer=False, map_location=None) -> int:
+    state_dict = load_state_dict(path, map_location)
     model_state_dict = maybe_remove_module(state_dict['model_state_dict'])
     model.load_state_dict(
         model_state_dict,
@@ -95,11 +95,13 @@ def load_checkpoint(model, path, optimizer=None, strip_optimizer=False) -> int:
     return epoch
 
 
-def load_state_dict(weight) -> dict:
+def load_state_dict(weight, map_location) -> dict:
     if weight.lower() in RELEASED_WEIGHTS:
         weight = _download_weight(weight.lower())
 
-    map_location = 'cuda' if torch.cuda.is_available() else 'cpu'
+    if map_location is None:
+        # auto select
+        map_location = 'cuda' if torch.cuda.is_available() else 'cpu'
     state_dict = torch.load(weight, map_location=map_location)
 
     return state_dict
