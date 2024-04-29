@@ -38,7 +38,12 @@ RELEASED_WEIGHTS = {
 
 def is_image_file(path):
     _, ext = os.path.splitext(path)
-    return ext.lower() in (".png", ".jpg", ".jpeg")
+    return ext.lower() in (".png", ".jpg", ".jpeg", ".webp")
+
+def is_video_file(path):
+    # https://moviepy-tburrows13.readthedocs.io/en/improve-docs/ref/VideoClip/VideoFileClip.html
+    _, ext = os.path.splitext(path)
+    return ext.lower() in (".mp4", ".gif", ".mov", ".ogv", ".avi", ".mpeg")
 
 
 def read_image(path):

@@ -10,6 +10,10 @@ def parse_args():
     parser.add_argument('--src', type=str, help='source dir, contain real images')
     parser.add_argument('--device', type=str, default='cuda', help='Device, cuda or cpu')
     parser.add_argument('--out', type=str, default='inference_images', help='destination dir to save generated images')
+    # Video params
+    parser.add_argument('--batch-size', type=int, default=4)
+    parser.add_argument('--start', type=int, default=0, help='Start time of video (second)')
+    parser.add_argument('--end', type=int, default=0, help='End time of video (second), 0 if not set')
 
     return parser.parse_args()
 

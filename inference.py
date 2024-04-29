@@ -1,14 +1,17 @@
+import os
+import time
+import shutil
+
 import torch
 import cv2
-import os
 import numpy as np
-import shutil
+
 from models.anime_gan import GeneratorV1
 from models.anime_gan_v2 import GeneratorV2
 from models.anime_gan_v3 import GeneratorV3
 from utils.common import load_checkpoint, RELEASED_WEIGHTS
 from utils.image_processing import resize_image, normalize_input, denormalize_input
-from utils import read_image, is_image_file
+from utils import read_image, is_image_file, is_video_file
 from tqdm import tqdm
 # from torch.cuda.amp import autocast
 
@@ -25,10 +28,15 @@ except ImportError:
     VideoFileClip = None
 
 
-VALID_FORMATS = {
-    'jpeg', 'jpg', 'jpe',
-    'png', 'bmp',
-}
+def profile(func):
+    def wrap(*args, **kwargs):
+        started_at = time.time()
+        result = func(*args, **kwargs)
+        elapsed = time.time() - started_at
+        print(f"Processed in {elapsed:.3f}s")
+        return result
+    return wrap
+
 
 def auto_load_weight(weight, version=None, map_location=None):
     """Auto load Generator version from weight."""
@@ -126,19 +134,34 @@ class Predictor:
                 fake = denormalize_input(fake, dtype=np.uint8)
             return fake
 
+    def read_and_resize(self, path, max_size=1536):
+        image = read_image(path)
+        h, w = image.shape[:2]
+
+        if max(h, w) > max_size:
+            print(f"Image {os.path.basename(path)} is too big ({h}x{w}), resize to max size {max_size}")
+            image = resize_image(
+                image,
+                width=max_size if w > h else None,
+                height=max_size if w < h else None,
+            )
+            _, ext = os.path.splitext(path)
+            cv2.imwrite(path.replace(ext, ".jpg"), image[:,:,::-1])
+        else:
+            image = resize_image(image)
+        return image
+
+    @profile
     def transform_file(self, file_path, save_path):
         if not is_image_file(save_path):
             raise ValueError(f"{save_path} is not valid")
 
-        image = read_image(file_path)
-
-        if image is None:
-            raise ValueError(f"Could not get image from {file_path}")
-
-        anime_img = self.transform(resize_image(image))[0]
+        image = self.read_and_resize(file_path)
+        anime_img = self.transform(image)[0]
         cv2.imwrite(save_path, anime_img[..., ::-1])
         print(f"Anime image saved to {save_path}")
 
+    @profile
     def transform_in_dir(self, img_dir, dest_dir, max_images=0, img_size=(512, 512)):
         '''
         Read all images from img_dir, transform and write the result
@@ -148,15 +171,15 @@ class Predictor:
         os.makedirs(dest_dir, exist_ok=True)
 
         files = os.listdir(img_dir)
-        files = [f for f in files if self.is_valid_file(f)]
+        files = [f for f in files if is_image_file(f)]
         print(f'Found {len(files)} images in {img_dir}')
 
         if max_images:
             files = files[:max_images]
 
         for fname in tqdm(files):
-            image = cv2.imread(os.path.join(img_dir, fname))[:,:,::-1]
-            image = resize_image(image)
+            path = os.path.join(img_dir, fname)
+            image = self.read_and_resize(path)
             anime_img = self.transform(image)[0]
             ext = fname.split('.')[-1]
             fname = fname.replace(f'.{ext}', '')
@@ -167,14 +190,18 @@ class Predictor:
         Transform a video to animation version
         https://github.com/lengstrom/fast-style-transfer/blob/master/evaluate.py#L21
         '''
+        if VideoFileClip is None:
+            raise ImportError("moviepy is not installed, please install with `pip install moviepy>=1.0.3`")
         # Force to None
         end = end or None
 
         if not os.path.isfile(input_path):
             raise FileNotFoundError(f'{input_path} does not exist')
 
-        output_dir = "/".join(output_path.split("/")[:-1])
-        os.makedirs(output_dir, exist_ok=True)
+        output_dir = os.path.dirname(output_path)
+        if output_dir:
+            os.makedirs(output_dir, exist_ok=True)
+
         is_gg_drive = '/drive/' in output_path
         temp_file = ''
 
@@ -194,9 +221,9 @@ class Predictor:
 
         video_writer = ffmpeg_writer.FFMPEG_VideoWriter(
             temp_file or output_path,
-            video_clip.size, video_clip.fps, codec="libx264",
+            video_clip.size, video_clip.fps,
+            codec="libx264",
             # preset="medium", bitrate="2000k",
-            audiofile=input_path, threads=None,
             ffmpeg_params=None)
 
         total_frames = round(video_clip.fps * video_clip.duration)
@@ -205,7 +232,7 @@ class Predictor:
         batch_shape = (batch_size, video_clip.size[1], video_clip.size[0], 3)
         frame_count = 0
         frames = np.zeros(batch_shape, dtype=np.float32)
-        for frame in tqdm(video_clip.iter_frames()):
+        for frame in tqdm(video_clip.iter_frames(), total=total_frames):
             try:
                 frames[frame_count] = frame
                 frame_count += 1
@@ -255,9 +282,43 @@ class Predictor:
         return images
 
 
-    @staticmethod
-    def is_valid_file(fname):
-        ext = fname.split('.')[-1]
-        return ext in VALID_FORMATS
+def parse_args():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--weight', type=str, default="hayao:v2", help='Model weight')
+    parser.add_argument('--src', type=str, help='Source, can be directory contains images, image file or video file.')
+    parser.add_argument('--device', type=str, default='cuda', help='Device, cuda or cpu')
+    parser.add_argument('--out', type=str, default='inference_images', help='Output, can be directory or file')
+    # Video params
+    parser.add_argument('--batch-size', type=int, default=4, help='Batch size when inference video')
+    parser.add_argument('--start', type=int, default=0, help='Start time of video (second)')
+    parser.add_argument('--end', type=int, default=0, help='End time of video (second), 0 if not set')
 
-        
+    return parser.parse_args()
+
+if __name__ == '__main__':
+    args = parse_args()
+
+    predictor = Predictor(args.weight, args.device)
+
+    if not os.path.exists(args.src):
+        raise FileNotFoundError(args.src)
+
+    if is_video_file(args.src):
+        predictor.transform_video(
+            args.src,
+            args.out,
+            args.batch_size,
+            start=args.start,
+            end=args.end
+        )
+    elif os.path.isdir(args.src):
+        predictor.transform_in_dir(args.src, args.out)
+    elif os.path.isfile(args.src):
+        save_path = args.out
+        if not is_image_file(args.out):
+            os.makedirs(args.out, exist_ok=True)
+            save_path = os.path.join(args.out, os.path.basename(args.src))
+        predictor.transform_file(args.src, save_path)
+    else:
+        raise NotImplementedError(f"{args.src} is not supported")

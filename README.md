@@ -28,7 +28,7 @@ Run Inference on your local machine
 > --src can be directory or image file
 
 ```
-python3 inference_image.py --weight hayao:v2 --src /your/path/to/image_dir --out /path/to/output_dir
+python3 inference.py --weight hayao:v2 --src /your/path/to/image_dir --out /path/to/output_dir
 ```
 
 * Python code
@@ -113,25 +113,25 @@ python3 train.py --anime_image_dir dataset/Hayao \
 
 ### 3. Transform images
 
-To convert images in a folder or single image, run `inference_image.py`, for example:
+To convert images in a folder or single image, run `inference.py`, for example:
 
 >
 > --src and --out can be a directory or a file
 
 ```bash
-python3 inference_image.py --weight hayao:v2 \
-                        --src dataset/test/HR_photo \
-                        --out inference_images
+python3 inference.py --weight path/to/Generator.pt \
+                     --src dataset/test/HR_photo \
+                     --out inference_images
 ```
 
 ### 4. Transform video
 
-To convert a video to anime version, run `inference_video.py`, for example:
+To convert a video to anime version:
 
 > Be careful when choosing --batch-size, it might lead to CUDA memory error if the resolution of the video is too large
 
 ```bash
-python3 inference_video.py --weight hayao:v2\
+python3 inference.py --weight hayao:v2\
                         --src test_vid_3.mp4\
                         --out test_vid_3_anime.mp4\
                         --batch-size 4
@@ -147,6 +147,19 @@ python3 inference_video.py --weight hayao:v2\
 |![c1](./example/result/real/1%20(38).jpg)|![c1](./example/result/hayao/1%20(38).jpg)|![g1](./example/result/hayao_v2/1%20(38).jpg)|
 |![c1](./example/result/real/1%20(62).jpg)|![c1](./example/result/hayao/1%20(62).jpg)|![g1](./example/result/hayao_v2/1%20(62).jpg)|
 
+
+<details>
+<summary><strong> More results - Hayao V2 </strong></summary>    
+
+![](./example/more/hayao_v2/pexels-arnie-chou-304906-1004122.jpg)   
+![](./example/more/hayao_v2/pexels-camilacarneiro-6318793.jpg)
+![](./example/more/hayao_v2/pexels-haohd-19859127.jpg)
+![](./example/more/hayao_v2/pexels-huy-nguyen-748440234-19838813.jpg)
+![](./example/more/hayao_v2/pexels-huy-phan-316220-1422386.jpg)
+![](./example/more/hayao_v2/pexels-jimmy-teoh-294331-951531.jpg)
+![](./example/more/hayao_v2/pexels-nandhukumar-450441.jpg)
+![](./example/more/hayao_v2/pexels-sevenstormphotography-575362.jpg)
+</details>    
 
 <!-- ### Objective:
 
