@@ -3,7 +3,6 @@ import cv2
 import os
 import numpy as np
 import shutil
-import matplotlib.pyplot as plt
 from models.anime_gan import GeneratorV1
 from models.anime_gan_v2 import GeneratorV2
 from models.anime_gan_v3 import GeneratorV3
@@ -12,6 +11,18 @@ from utils.image_processing import resize_image, normalize_input, denormalize_in
 from utils import read_image, is_image_file
 from tqdm import tqdm
 # from torch.cuda.amp import autocast
+
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    plt = None
+
+try:
+    import moviepy.video.io.ffmpeg_writer as ffmpeg_writer
+    from moviepy.video.io.VideoFileClip import VideoFileClip
+except ImportError:
+    ffmpeg_writer = None
+    VideoFileClip = None
 
 
 VALID_FORMATS = {
@@ -149,15 +160,13 @@ class Predictor:
             anime_img = self.transform(image)[0]
             ext = fname.split('.')[-1]
             fname = fname.replace(f'.{ext}', '')
-            cv2.imwrite(os.path.join(dest_dir, f'{fname}_anime.jpg'), anime_img[..., ::-1])
+            cv2.imwrite(os.path.join(dest_dir, f'{fname}.jpg'), anime_img[..., ::-1])
 
     def transform_video(self, input_path, output_path, batch_size=4, start=0, end=0):
         '''
         Transform a video to animation version
         https://github.com/lengstrom/fast-style-transfer/blob/master/evaluate.py#L21
         '''
-        import moviepy.video.io.ffmpeg_writer as ffmpeg_writer
-        from moviepy.video.io.VideoFileClip import VideoFileClip
         # Force to None
         end = end or None
 

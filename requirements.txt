@@ -1,7 +1,7 @@
 torch>=1.8.0
 torchvision==0.9.0
 numpy==1.21.1
-ipython==7.21.0
+# ipython==7.21.0
 opencv-python==4.3.0.38
 tqdm==4.21.0
-moviepy==1.0.3
+# moviepy==1.0.3

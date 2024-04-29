@@ -43,6 +43,14 @@ url = 'https://github.com/ptran1203/pytorch-animeGAN/blob/master/example/result/
 predictor.transform_file(url, "anime.jpg")
 ```
 
+## Pretrained weight
+
+| Model name | Model | Dataset |  Weight |
+|--|--|--|--|
+| Hayao:v2 | AnimeGANv2 | Google Landmark v2 + Hayao style | [GeneratorV2_gldv2_Hayao.pt](https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.1/GeneratorV2_gldv2_Hayao.pt) |
+| Hayao | AnimeGAN | train_photo + Hayao style | [generator_hayao.pt](https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/generator_hayao.pth) |
+| Shinkai | AnimeGAN | train_photo + Shinkai style | [generator_shinkai.pt](https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/generator_shinkai.pth) |
+
 ## Documentation
 
 - Training notebook on [Google colab](https://colab.research.google.com/github/ptran1203/pytorch-animeGAN/blob/master/notebooks/animeGAN.ipynb)
@@ -132,12 +140,12 @@ python3 inference_video.py --weight hayao:v2\
 
 | Input | Hayao style v1 | Hayao style v2 |
 |--|--|--|
-|![c1](./example/result/real/1%20(20).jpg)|![c1](./example/result/hayao/1%20(20).jpg)|![g1](./example/result/anime/1%20(20)_anime.jpg)|
-|![c1](./example/result/real/1%20(21).jpg)|![c1](./example/result/hayao/1%20(21).jpg)|![g1](./example/result/anime/1%20(21)_anime.jpg)|
-|![c1](./example/result/real/1%20(36).jpg)|![c1](./example/result/hayao/1%20(36).jpg)|![g1](./example/result/anime/1%20(36)_anime.jpg)|
-|![c1](./example/result/real/1%20(37).jpg)|![c1](./example/result/hayao/1%20(37).jpg)|![g1](./example/result/anime/1%20(37)_anime.jpg)|
-|![c1](./example/result/real/1%20(38).jpg)|![c1](./example/result/hayao/1%20(38).jpg)|![g1](./example/result/anime/1%20(38)_anime.jpg)|
-|![c1](./example/result/real/1%20(62).jpg)|![c1](./example/result/hayao/1%20(62).jpg)|![g1](./example/result/anime/1%20(62)_anime.jpg)|
+|![c1](./example/result/real/1%20(20).jpg)|![c1](./example/result/hayao/1%20(20).jpg)|![g1](./example/result/hayao_v2/1%20(20).jpg)|
+|![c1](./example/result/real/1%20(21).jpg)|![c1](./example/result/hayao/1%20(21).jpg)|![g1](./example/result/hayao_v2/1%20(21).jpg)|
+|![c1](./example/result/real/1%20(36).jpg)|![c1](./example/result/hayao/1%20(36).jpg)|![g1](./example/result/hayao_v2/1%20(36).jpg)|
+|![c1](./example/result/real/1%20(37).jpg)|![c1](./example/result/hayao/1%20(37).jpg)|![g1](./example/result/hayao_v2/1%20(37).jpg)|
+|![c1](./example/result/real/1%20(38).jpg)|![c1](./example/result/hayao/1%20(38).jpg)|![g1](./example/result/hayao_v2/1%20(38).jpg)|
+|![c1](./example/result/real/1%20(62).jpg)|![c1](./example/result/hayao/1%20(62).jpg)|![g1](./example/result/hayao_v2/1%20(62).jpg)|
 
 
 <!-- ### Objective:
