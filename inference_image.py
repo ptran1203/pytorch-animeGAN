@@ -15,7 +15,7 @@ def parse_args():
 
 
 def main(args):
-    predictor = Predictor(args.weight)
+    predictor = Predictor(args.weight, args.device)
 
     if os.path.exists(args.src) and not os.path.isfile(args.src):
         predictor.transform_in_dir(args.src, args.out)

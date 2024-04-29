@@ -23,6 +23,13 @@ def gaussian_noise():
 def convert_to_readable(seconds):
     return time.strftime('%H:%M:%S', time.gmtime(seconds))
 
+def revert_to_np_image(image_tensor):
+    image = image_tensor.cpu().numpy()
+    # CHW
+    image = image.transpose(1, 2, 0)
+    image = denormalize_input(image, dtype=np.int16)
+    return image[..., ::-1]  # to RGB
+
 
 class DDPTrainer:
     def _init_distributed(self):
@@ -72,6 +79,7 @@ class Trainer(DDPTrainer):
         self.G = generator
         self.D = discriminator
         self.cfg = config
+        self.max_norm = 1
         self.device_type = 'cuda' if self.cfg.device.startswith('cuda') else 'cpu'
         self.optimizer_g = optim.Adam(self.G.parameters(), lr=self.cfg.lr_g, betas=(0.5, 0.999))
         self.optimizer_d = optim.Adam(self.D.parameters(), lr=self.cfg.lr_d, betas=(0.5, 0.999))
@@ -96,7 +104,9 @@ class Trainer(DDPTrainer):
         self.checkpoint_path_G = os.path.join(self.cfg.exp_dir, f"{Gname}.pt")
         self.checkpoint_path_D = os.path.join(self.cfg.exp_dir, f"{Dname}.pt")
         self.save_image_dir = os.path.join(self.cfg.exp_dir, "generated_images")
+        self.example_image_dir = os.path.join(self.cfg.exp_dir, "train_images")
         os.makedirs(self.save_image_dir, exist_ok=True)
+        os.makedirs(self.example_image_dir, exist_ok=True)
 
     def init_weight_G(self, weight: str):
         """Init Generator weight"""
@@ -137,8 +147,8 @@ class Trainer(DDPTrainer):
                 pbar.set_description(f'[Init Training G] content loss: {avg_content_loss:2f}')
 
             save_checkpoint(self.G, self.checkpoint_path_G_init, self.optimizer_g, epoch)
-            self.generate_and_save(self.cfg.test_image_dir, subname='initg')
             if self.cfg.local_rank == 0:
+                self.generate_and_save(self.cfg.test_image_dir, subname='initg')
                 self.logger.info(f"Epoch {epoch}/{self.cfg.init_epochs}")
 
         set_lr(self.optimizer_g, self.cfg.lr_g)
@@ -178,8 +188,8 @@ class Trainer(DDPTrainer):
                 )
 
             self.scaler_d.scale(loss_d).backward()
-            # self.scaler_d.unscale_(self.optimizer_d)
-            # torch.nn.utils.clip_grad_norm_(self.D.parameters(), max_norm=1.0e2)
+            self.scaler_d.unscale_(self.optimizer_d)
+            torch.nn.utils.clip_grad_norm_(self.D.parameters(), max_norm=self.max_norm)
             self.scaler_d.step(self.optimizer_d)
             self.scaler_d.update()
             if self.cfg.ddp:
@@ -193,8 +203,16 @@ class Trainer(DDPTrainer):
                 fake_img = self.G(img)
                 fake_d = self.D(fake_img)
 
-                adv_loss, con_loss, gra_loss, col_loss, tv_loss = self.loss_fn.compute_loss_G(
-                    fake_img, img, fake_d, anime_gray)
+                (
+                    adv_loss, con_loss,
+                    gra_loss, col_loss,
+                    tv_loss
+                ) = self.loss_fn.compute_loss_G(
+                    fake_img,
+                    img,
+                    fake_d,
+                    anime_gray
+                )
                 loss_g = adv_loss + con_loss + gra_loss + col_loss + tv_loss
                 if torch.isnan(adv_loss).any():
                     self.logger.info("----------------------------------------------")
@@ -204,15 +222,15 @@ class Trainer(DDPTrainer):
                     raise ValueError("NAN loss!!")
 
             self.scaler_g.scale(loss_g).backward()
-            # self.scaler_d.unscale_(self.optimizer_g)
-            # torch.nn.utils.clip_grad_norm_(self.G.parameters(), max_norm=1.0e2)
+            self.scaler_d.unscale_(self.optimizer_g)
+            grad = torch.nn.utils.clip_grad_norm_(self.G.parameters(), max_norm=self.max_norm)
             self.scaler_g.step(self.optimizer_g)
             self.scaler_g.update()
             if self.cfg.ddp:
                 torch.distributed.barrier()
 
             self.loss_tracker.update_loss_G(adv_loss, gra_loss, col_loss, con_loss)
-            pbar.set_description(self.loss_tracker.get_loss_description())
+            pbar.set_description(f"{self.loss_tracker.get_loss_description()} - {grad:.3f}")
 
     def get_train_loader(self, dataset):
         if self.cfg.ddp:
@@ -242,8 +260,17 @@ class Trainer(DDPTrainer):
 
         if self.cfg.local_rank == 0:
             self.logger.info(f"Start training for {self.cfg.epochs} epochs")
-        
-        
+
+        for i, data in enumerate(train_dataset):
+            for k in data.keys():
+                image = data[k]
+                cv2.imwrite(
+                    os.path.join(self.example_image_dir, f"data_{k}_{i}.jpg"),
+                    revert_to_np_image(image)
+                )
+            if i == 2:
+                break
+
         end = None
         num_iter = 0
         per_epoch_times = []

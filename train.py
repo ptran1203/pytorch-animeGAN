@@ -38,7 +38,7 @@ def parse_args():
                         help="Resize image method if origin photo larger than imgsz")
     parser.add_argument('--lr_g', type=float, default=2e-5)
     parser.add_argument('--lr_d', type=float, default=4e-5)
-    parser.add_argument('--init_lr', type=float, default=1e-3)
+    parser.add_argument('--init_lr', type=float, default=1e-4)
     parser.add_argument('--wadvg', type=float, default=300.0, help='Adversarial loss weight for G')
     parser.add_argument('--wadvd', type=float, default=300.0, help='Adversarial loss weight for D')
     # Loss weight VGG19
@@ -46,7 +46,7 @@ def parse_args():
     parser.add_argument('--wgra', type=float, default=5.0, help='Gram loss weight') # 2.5 for Hayao, 0.6 for Paprika, 2.0 for Shinkai
     parser.add_argument('--wcol', type=float, default=30.0, help='Color loss weight') # 15. for Hayao, 50. for Paprika, 10. for Shinkai
     parser.add_argument('--wtvar', type=float, default=1.0, help='Total variation loss') # 1. for Hayao, 0.1 for Paprika, 1. for Shinkai
-    parser.add_argument('--d_layers', type=int, default=3, help='Discriminator conv layers')
+    parser.add_argument('--d_layers', type=int, default=2, help='Discriminator conv layers')
     parser.add_argument('--d_noise', action='store_true')
 
     # DDP
@@ -143,12 +143,17 @@ def main(args, logger):
 
 if __name__ == '__main__':
     args = parse_args()
+    real_name = os.path.basename(args.real_image_dir)
+    anime_name = os.path.basename(args.anime_image_dir)
+    args.exp_dir = f"{args.exp_dir}_{real_name}_{anime_name}_{args.imgsz}_{args.wadvg}"
+
     os.makedirs(args.exp_dir, exist_ok=True)
     logger = get_logger(os.path.join(args.exp_dir, "train.log"))
 
-    logger.info("# ==== Train Config ==== #")
-    for arg in vars(args):
-        logger.info(f"{arg} {getattr(args, arg)}")
-    logger.info("==========================")
+    if args.local_rank == 0:
+        logger.info("# ==== Train Config ==== #")
+        for arg in vars(args):
+            logger.info(f"{arg} {getattr(args, arg)}")
+        logger.info("==========================")
 
     main(args, logger)

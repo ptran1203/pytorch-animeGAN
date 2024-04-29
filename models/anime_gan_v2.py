@@ -13,7 +13,7 @@ class GeneratorV2(nn.Module):
         bias = False
 
         self.conv_block1 = nn.Sequential(
-            ConvBlock(3, 32, kernel_size=7, stride=1, padding=3, norm_type="layer", bias=bias),
+            ConvBlock(3, 32, kernel_size=7, stride=1, norm_type="layer", bias=bias),
             ConvBlock(32, 64, kernel_size=3, stride=2, norm_type="layer", bias=bias),
             ConvBlock(64, 64, kernel_size=3, stride=1, norm_type="layer", bias=bias),
         )
@@ -40,7 +40,7 @@ class GeneratorV2(nn.Module):
         self.upsample2 = nn.Sequential(
             UpConvLNormLReLU(128, 64),
             ConvBlock(64, 64, kernel_size=3, stride=1, norm_type="layer", bias=bias),
-            ConvBlock(64, 32, kernel_size=7, stride=1, padding=3, norm_type="layer", bias=bias),
+            ConvBlock(64, 32, kernel_size=7, stride=1, norm_type="layer", bias=bias),
         )
 
         self.decode_blocks = nn.Sequential(

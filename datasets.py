@@ -9,7 +9,7 @@ from glob import glob
 from torch.utils.data import Dataset
 from utils import normalize_input, compute_data_mean, fast_numpyio
 
-CACHE_DIR = '/u02/phatth1/.tmp'
+CACHE_DIR = '.tmp'
 
 def get_random_crop(image, crop_height, crop_width):
 
@@ -146,7 +146,12 @@ class AnimeDataSet(Dataset):
                 image = cv2.resize(image, (self.imgsz, self.imgsz))
             else:
                 # Random Crop
-                image = get_random_crop(image, self.imgsz, self.imgsz)
+                random_size = random.randint(
+                    int(self.imgsz * 0.5),
+                    int(self.imgsz * 1)
+                )
+                image = get_random_crop(
+                    image, random_size, random_size)
                 image = cv2.resize(image, (self.imgsz, self.imgsz))
 
             image = self._transform(image, addmean=False)
@@ -166,14 +171,15 @@ class AnimeDataSet(Dataset):
 
             image_gray = cv2.cvtColor(image.copy(), cv2.COLOR_BGR2GRAY)
             image_gray = np.stack([image_gray, image_gray, image_gray], axis=-1)
+
+            # Transform
             image_gray = self._transform(image_gray, addmean=False)
             image_gray = image_gray.transpose(2, 0, 1)
-
-            image = self._transform(image, addmean=True)
-            image = image.transpose(2, 0, 1)
-
-            image = np.ascontiguousarray(image)
             image_gray = np.ascontiguousarray(image_gray)
+
+            image = self._transform(image, addmean=False)
+            image = image.transpose(2, 0, 1)
+            image = np.ascontiguousarray(image)
 
         return image, image_gray
 
@@ -191,7 +197,7 @@ class AnimeDataSet(Dataset):
             image = np.ascontiguousarray(image)
         return image
 
-    def _transform(self, img, addmean=True):
+    def _transform(self, img, addmean=False):
         if self.transform is not None:
             img =  self.transform(image=img)['image']
 

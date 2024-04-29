@@ -83,11 +83,20 @@ class ConvBlock(nn.Module):
         out_channels,
         kernel_size=3,
         stride=1,
-        padding=1,
+        padding="valid",
         bias=False,
         norm_type="instance"
     ):
         super(ConvBlock, self).__init__()
+
+        if kernel_size == 3 and stride == 1:
+            self.pad = nn.ReflectionPad2d((1, 1, 1, 1))
+        elif kernel_size == 7 and stride == 1:
+            self.pad = nn.ReflectionPad2d((3, 3, 3, 3))
+        elif stride == 2:
+            self.pad = nn.ReflectionPad2d((0, 1, 1, 0))
+        else:
+            self.pad = None
 
         self.conv = nn.Conv2d(
             channels,
@@ -106,10 +115,11 @@ class ConvBlock(nn.Module):
         initialize_weights(self)
 
     def forward(self, x):
+        if self.pad is not None:
+            x = self.pad(x)
         out = self.conv(x)
         out = self.ins_norm(out)
         out = self.activation(out)
-
         return out
 
 

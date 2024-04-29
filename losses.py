@@ -5,15 +5,34 @@ from models.vgg import Vgg19
 from utils.image_processing import gram
 
 
+def to_gray_scale(image):
+    # https://github.com/pytorch/vision/blob/main/torchvision/transforms/v2/functional/_color.py#L33
+    # Image are assum in range 1, -1
+    image = (image + 1.0) / 2.0 # To [0, 1]
+    r, g, b = image.unbind(dim=-3)
+    l_img = r.mul(0.2989).add_(g, alpha=0.587).add_(b, alpha=0.114)
+    l_img = l_img.unsqueeze(dim=-3)
+    l_img = l_img.to(image.dtype)
+    l_img = l_img.expand(image.shape)
+    l_img = l_img / 0.5 - 1.0 # To [-1, 1]
+    return l_img
+
+
 class ColorLoss(nn.Module):
     def __init__(self):
         super(ColorLoss, self).__init__()
         self.l1 = nn.L1Loss()
         self.huber = nn.SmoothL1Loss()
+        # self._rgb_to_yuv_kernel = torch.tensor([
+        #     [0.299, -0.14714119, 0.61497538],
+        #     [0.587, -0.28886916, -0.51496512],
+        #     [0.114, 0.43601035, -0.10001026]
+        # ]).float()
+
         self._rgb_to_yuv_kernel = torch.tensor([
-            [0.299, -0.14714119, 0.61497538],
-            [0.587, -0.28886916, -0.51496512],
-            [0.114, 0.43601035, -0.10001026]
+            [0.299, 0.587, 0.114],
+            [-0.14714119, -0.28886916, 0.43601035],
+            [0.61497538, -0.51496512, -0.10001026],
         ]).float()
 
     def to(self, device):
@@ -29,11 +48,9 @@ class ColorLoss(nn.Module):
         '''
         # -1 1 -> 0 1
         image = (image + 1.0) / 2.0
+        image = image.permute(0, 2, 3, 1) # To channel last
 
-        yuv_img = torch.tensordot(
-            image,
-            self._rgb_to_yuv_kernel,
-            dims=([image.ndim - 3], [0]))
+        yuv_img = image @ self._rgb_to_yuv_kernel.T
 
         return yuv_img
 
@@ -42,10 +59,11 @@ class ColorLoss(nn.Module):
         image_g = self.rgb_to_yuv(image_g)
 
         # After convert to yuv, both images have channel last
-
-        return (self.l1(image[:, :, :, 0], image_g[:, :, :, 0]) +
-                self.huber(image[:, :, :, 1], image_g[:, :, :, 1]) +
-                self.huber(image[:, :, :, 2], image_g[:, :, :, 2]))
+        return (
+            self.l1(image[:, :, :, 0], image_g[:, :, :, 0])
+            + self.huber(image[:, :, :, 1], image_g[:, :, :, 1])
+            + self.huber(image[:, :, :, 2], image_g[:, :, :, 2])
+        )
 
 
 class AnimeGanLoss:
@@ -64,7 +82,7 @@ class AnimeGanLoss:
         self.wtvar = args.wtvar
         self.vgg19 = Vgg19().to(device).eval()
         self.adv_type = args.gan_loss
-        self.bce_loss = nn.BCELoss()
+        self.bce_loss = nn.BCEWithLogitsLoss()
 
     def compute_loss_G(self, fake_img, img, fake_logit, anime_gray):
         '''
@@ -84,14 +102,16 @@ class AnimeGanLoss:
             - Total variation loss of fake image
         '''
         fake_feat = self.vgg19(fake_img)
-        anime_feat = self.vgg19(anime_gray)
-        img_feat = self.vgg19(img)#.detach()
+        gray_feat = self.vgg19(anime_gray).detach()
+        img_feat = self.vgg19(img).detach()
+
+        fake_gray_feat = self.vgg19(to_gray_scale(fake_img))
 
         return [
             # Want to be real image.
             self.wadvg * self.adv_loss_g(fake_logit),
             self.wcon * self.content_loss(img_feat, fake_feat),
-            self.wgra * self.gram_loss(gram(anime_feat), gram(fake_feat)),
+            self.wgra * self.gram_loss(gram(gray_feat), gram(fake_gray_feat)),
             self.wcol * self.color_loss(img, fake_img),
             self.wtvar * self.total_variation_loss(fake_img)
         ]
@@ -101,17 +121,17 @@ class AnimeGanLoss:
         fake_img_d,
         real_anime_d,
         real_anime_gray_d,
-        real_anime_smooth_gray_d
+        real_anime_smooth_gray_d=None
     ):
         return self.wadvd * (
             # Classify real anime as real
-            self.adv_loss_d_real(real_anime_d) +
+            self.adv_loss_d_real(real_anime_d)
             # Classify generated as fake
-            self.adv_loss_d_fake(fake_img_d) +
+            + self.adv_loss_d_fake(fake_img_d)
             # Classify real anime gray as fake
-            self.adv_loss_d_fake(real_anime_gray_d) +
+            + 0.1 * self.adv_loss_d_fake(real_anime_gray_d)
             # Classify real anime as fake
-            0.2 * self.adv_loss_d_fake(real_anime_smooth_gray_d)
+            + 0.01 * self.adv_loss_d_fake(real_anime_smooth_gray_d)
         )
 
     def total_variation_loss(self, fake_img):
@@ -132,8 +152,9 @@ class AnimeGanLoss:
     def content_loss_vgg(self, image, recontruction):
         feat = self.vgg19(image)
         re_feat = self.vgg19(recontruction)
-
-        return self.content_loss(feat, re_feat)
+        feature_loss = self.content_loss(feat, re_feat)
+        content_loss = self.content_loss(image, recontruction)
+        return feature_loss + 0.5 * content_loss
 
     def adv_loss_d_real(self, pred):
         """Push pred to class 1 (real)"""
@@ -141,7 +162,7 @@ class AnimeGanLoss:
             return torch.mean(F.relu(1.0 - pred))
 
         elif self.adv_type == 'lsgan':
-            pred = torch.sigmoid(pred)
+            # pred = torch.sigmoid(pred)
             return torch.mean(torch.square(pred - 1.0))
 
         elif self.adv_type == 'bce':
@@ -155,7 +176,7 @@ class AnimeGanLoss:
             return torch.mean(F.relu(1.0 + pred))
 
         elif self.adv_type == 'lsgan':
-            pred = torch.sigmoid(pred)
+            # pred = torch.sigmoid(pred)
             return torch.mean(torch.square(pred))
 
         elif self.adv_type == 'bce':
@@ -169,7 +190,7 @@ class AnimeGanLoss:
             return -torch.mean(pred)
 
         elif self.adv_type == 'lsgan':
-            pred = torch.sigmoid(pred)
+            # pred = torch.sigmoid(pred)
             return torch.mean(torch.square(pred - 1.0))
 
         elif self.adv_type == 'bce':

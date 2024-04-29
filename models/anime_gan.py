@@ -71,7 +71,7 @@ class Discriminator(nn.Module):
         super(Discriminator, self).__init__()
         self.name = f'discriminator_{dataset}'
         self.bias = False
-        channels = 64
+        channels = 32
 
         layers = [
             nn.Conv2d(3, channels, kernel_size=3, stride=1, padding=1, bias=self.bias),
@@ -109,5 +109,4 @@ class Discriminator(nn.Module):
 
     def forward(self, img):
         logits = self.discriminate(img)
-        # logits = torch.clamp(logits, -64990.0, 64990.0)
         return logits

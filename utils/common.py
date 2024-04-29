@@ -13,11 +13,12 @@ HTTP_PREFIXES = [
 
 
 RELEASED_WEIGHTS = {
-    "hayao:v2": (
+    "hayao_v2": (
+        # Dataset trained on Google Landmark micro as training real photo
         "v2",
-        "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.1/Generatorv2_Hayao.pt"
+        "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.1/GeneratorV2_gldv2_Hayao.pt"
     ),
-    "hayao:v1": (
+    "hayao_v1": (
         "v1",
         "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/generator_hayao.pth"
     ),
@@ -25,7 +26,7 @@ RELEASED_WEIGHTS = {
         "v1",
         "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/generator_hayao.pth"
     ),
-    "shinkai:v1": (
+    "shinkai_v1": (
         "v1",
         "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/generator_shinkai.pth"
     ),
@@ -108,13 +109,16 @@ def initialize_weights(net):
     for m in net.modules():
         try:
             if isinstance(m, nn.Conv2d):
-                m.weight.data.normal_(0, 0.02)
+                # m.weight.data.normal_(0, 0.02)
+                torch.nn.init.xavier_uniform_(m.weight)
                 m.bias.data.zero_()
             elif isinstance(m, nn.ConvTranspose2d):
-                m.weight.data.normal_(0, 0.02)
+                # m.weight.data.normal_(0, 0.02)
+                torch.nn.init.xavier_uniform_(m.weight)
                 m.bias.data.zero_()
             elif isinstance(m, nn.Linear):
-                m.weight.data.normal_(0, 0.02)
+                # m.weight.data.normal_(0, 0.02)
+                torch.nn.init.xavier_uniform_(m.weight)
                 m.bias.data.zero_()
             elif isinstance(m, nn.BatchNorm2d):
                 m.weight.data.fill_(1)
