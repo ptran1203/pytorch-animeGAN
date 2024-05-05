@@ -13,7 +13,7 @@ Pytorch implementation of AnimeGAN for fast photo animation
 <!-- |![c1](./example/gif/city.gif)|![g1](./example/gif/city_anime.gif)| -->
 
 ---
-* 05/05/2024: Add [color_transfer](https://github.com/ptran1203/color_transfer) module to retain original color of generated images, [See here]().
+* 05/05/2024: Add [color_transfer](https://github.com/ptran1203/color_transfer) module to retain original color of generated images, [See here](#with-color-transfer-module).
 * 23/04/2024: Added DDP training.
 * 16/04/2024: **AnimeGANv2** (Hayao style) is released with training code
 ---
