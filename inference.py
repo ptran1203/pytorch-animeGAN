@@ -13,7 +13,8 @@ from utils.common import load_checkpoint, RELEASED_WEIGHTS
 from utils.image_processing import resize_image, normalize_input, denormalize_input
 from utils import read_image, is_image_file, is_video_file
 from tqdm import tqdm
-# from torch.cuda.amp import autocast
+from color_transfer import color_transfer_pytorch
+
 
 try:
     import matplotlib.pyplot as plt
@@ -74,12 +75,22 @@ def auto_load_weight(weight, version=None, map_location=None):
 
 
 class Predictor:
-    def __init__(self, weight='hayao', device='cuda', amp=True):
+    """
+    Generic class for transfering Image to anime like image.
+    """
+    def __init__(
+        self,
+        weight='hayao',
+        device='cuda',
+        amp=True,
+        retain_color=False
+    ):
         if not torch.cuda.is_available():
             device = 'cpu'
             # Amp not working on cpu
             amp = False
 
+        self.retain_color = retain_color
         self.amp = amp  # Automatic Mixed Precision
         self.device_type = 'cuda' if device.startswith('cuda') else 'cpu'
         self.device = torch.device(device)
@@ -126,6 +137,10 @@ class Predictor:
             # with autocast(self.device_type, enabled=self.amp):
                 # print(image.dtype, self.G)
             fake = self.G(image)
+            # Transfer color of fake image look similiar color as image
+            if self.retain_color:
+                fake = color_transfer_pytorch(fake, image)
+                fake = (fake / 0.5) - 1.0  # remap to [-1. 1]
             fake = fake.detach().cpu().numpy()
             # Channel last
             fake = fake.transpose(0, 2, 3, 1)
@@ -289,6 +304,10 @@ def parse_args():
     parser.add_argument('--src', type=str, help='Source, can be directory contains images, image file or video file.')
     parser.add_argument('--device', type=str, default='cuda', help='Device, cuda or cpu')
     parser.add_argument('--out', type=str, default='inference_images', help='Output, can be directory or file')
+    parser.add_argument(
+        '--retain-color',
+        action='store_true',
+        help='If provided the generated image will retain original color of input image')
     # Video params
     parser.add_argument('--batch-size', type=int, default=4, help='Batch size when inference video')
     parser.add_argument('--start', type=int, default=0, help='Start time of video (second)')
@@ -299,7 +318,11 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
 
-    predictor = Predictor(args.weight, args.device)
+    predictor = Predictor(
+        args.weight,
+        args.device,
+        retain_color=args.retain_color
+    )
 
     if not os.path.exists(args.src):
         raise FileNotFoundError(args.src)

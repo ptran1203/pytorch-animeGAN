@@ -102,16 +102,16 @@ class AnimeGanLoss:
             - Total variation loss of fake image
         '''
         fake_feat = self.vgg19(fake_img)
-        gray_feat = self.vgg19(anime_gray).detach()
-        img_feat = self.vgg19(img).detach()
+        gray_feat = self.vgg19(anime_gray)
+        img_feat = self.vgg19(img)
 
-        fake_gray_feat = self.vgg19(to_gray_scale(fake_img))
+        # fake_gray_feat = self.vgg19(to_gray_scale(fake_img))
 
         return [
             # Want to be real image.
             self.wadvg * self.adv_loss_g(fake_logit),
             self.wcon * self.content_loss(img_feat, fake_feat),
-            self.wgra * self.gram_loss(gram(gray_feat), gram(fake_gray_feat)),
+            self.wgra * self.gram_loss(gram(gray_feat), gram(fake_feat)),
             self.wcol * self.color_loss(img, fake_img),
             self.wtvar * self.total_variation_loss(fake_img)
         ]
@@ -129,9 +129,9 @@ class AnimeGanLoss:
             # Classify generated as fake
             + self.adv_loss_d_fake(fake_img_d)
             # Classify real anime gray as fake
-            + 0.1 * self.adv_loss_d_fake(real_anime_gray_d)
+            + 0.5 * self.adv_loss_d_fake(real_anime_gray_d)
             # Classify real anime as fake
-            + 0.01 * self.adv_loss_d_fake(real_anime_smooth_gray_d)
+            + 0.1 * self.adv_loss_d_fake(real_anime_smooth_gray_d)
         )
 
     def total_variation_loss(self, fake_img):

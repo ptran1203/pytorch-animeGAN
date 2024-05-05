@@ -13,7 +13,14 @@ from utils.image_processing import denormalize_input, preprocess_images, resize_
 from losses import LossSummary, AnimeGanLoss
 from utils import load_checkpoint, save_checkpoint, read_image
 from utils.common import set_lr
+from color_transfer import color_transfer_pytorch
 
+
+def transfer_color_and_rescale(src, target):
+    """Transfer color from src image to target then rescale to [-1, 1]"""
+    out = color_transfer_pytorch(src, target)  # [0, 1]
+    out = (out / 0.5) - 1
+    return out 
 
 def gaussian_noise():
     gaussian_mean = torch.tensor(0.0)
@@ -23,12 +30,27 @@ def gaussian_noise():
 def convert_to_readable(seconds):
     return time.strftime('%H:%M:%S', time.gmtime(seconds))
 
+
 def revert_to_np_image(image_tensor):
     image = image_tensor.cpu().numpy()
     # CHW
     image = image.transpose(1, 2, 0)
     image = denormalize_input(image, dtype=np.int16)
     return image[..., ::-1]  # to RGB
+
+
+def save_generated_images(images: torch.Tensor, save_dir: str):
+    """Save generated images `(*, 3, H, W)` range [-1, 1] into disk"""
+    os.makedirs(save_dir, exist_ok=True)
+    images = images.clone().detach().cpu().numpy()
+    images = images.transpose(0, 2, 3, 1)
+    n_images = len(images)
+
+    for i in range(n_images):
+        img = images[i]
+        img = denormalize_input(img, dtype=np.int16)
+        img = img[..., ::-1]
+        cv2.imwrite(os.path.join(save_dir, f"G{i}.jpg"), img)
 
 
 class DDPTrainer:
@@ -165,17 +187,21 @@ class Trainer(DDPTrainer):
             self.optimizer_d.zero_grad()
 
             with autocast(enabled=self.cfg.amp):
-                fake_img = self.G(img).detach()
-
-            # Add some Gaussian noise to images before feeding to D
-            if self.cfg.d_noise:
-                fake_img += gaussian_noise()
-                anime += gaussian_noise()
-                anime_gray += gaussian_noise()
-                anime_smt_gray += gaussian_noise()
-
-            with autocast(enabled=self.cfg.amp):
-                fake_d = self.D(fake_img)
+                fake_img = self.G(img)
+                # Add some Gaussian noise to images before feeding to D
+                if self.cfg.d_noise:
+                    fake_img += gaussian_noise()
+                    anime += gaussian_noise()
+                    anime_gray += gaussian_noise()
+                    anime_smt_gray += gaussian_noise()
+                fake_img_color_mapped = transfer_color_and_rescale(fake_img, anime)
+                # Log
+                # save_generated_images(fake_img, "debug")
+                # save_generated_images(anime, "debug_anime")
+                # save_generated_images(fake_img_color_mapped, "debug_color")
+                # raise
+                
+                fake_d = self.D(fake_img_color_mapped)
                 real_anime_d = self.D(anime)
                 real_anime_gray_d = self.D(anime_gray)
                 real_anime_smt_gray_d = self.D(anime_smt_gray)
@@ -201,7 +227,8 @@ class Trainer(DDPTrainer):
 
             with autocast(enabled=self.cfg.amp):
                 fake_img = self.G(img)
-                fake_d = self.D(fake_img)
+                fake_img_color_mapped = transfer_color_and_rescale(fake_img, anime)
+                fake_d = self.D(fake_img_color_mapped)
 
                 (
                     adv_loss, con_loss,
@@ -211,7 +238,7 @@ class Trainer(DDPTrainer):
                     fake_img,
                     img,
                     fake_d,
-                    anime_gray
+                    anime_gray,
                 )
                 loss_g = adv_loss + con_loss + gra_loss + col_loss + tv_loss
                 if torch.isnan(adv_loss).any():

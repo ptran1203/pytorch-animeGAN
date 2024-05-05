@@ -5,3 +5,4 @@ numpy==1.21.1
 opencv-python==4.3.0.38
 tqdm==4.21.0
 # moviepy==1.0.3
+color_transfer_py==0.0.4

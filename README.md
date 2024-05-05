@@ -13,6 +13,7 @@ Pytorch implementation of AnimeGAN for fast photo animation
 <!-- |![c1](./example/gif/city.gif)|![g1](./example/gif/city_anime.gif)| -->
 
 ---
+* 05/05/2024: Add [color_transfer](https://github.com/ptran1203/color_transfer) module to retain original color of generated images, [See here]().
 * 23/04/2024: Added DDP training.
 * 16/04/2024: **AnimeGANv2** (Hayao style) is released with training code
 ---
@@ -36,7 +37,11 @@ python3 inference.py --weight hayao:v2 --src /your/path/to/image_dir --out /path
 ```python
 from inference import Predictor
 
-predictor= Predictor('hayao:v2')
+predictor= Predictor(
+    'hayao:v2',
+    # if set True, generated image will retain original color as input image
+    retain_color=True
+)
 
 url = 'https://github.com/ptran1203/pytorch-animeGAN/blob/master/example/result/real/1%20(20).jpg?raw=true'
 
@@ -51,7 +56,7 @@ predictor.transform_file(url, "anime.jpg")
 | Hayao | AnimeGAN | train_photo + Hayao style | [generator_hayao.pt](https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/generator_hayao.pth) |
 | Shinkai | AnimeGAN | train_photo + Shinkai style | [generator_shinkai.pt](https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/generator_shinkai.pth) |
 
-## Documentation
+## Train on custom dataset
 
 - Training notebook on [Google colab](https://colab.research.google.com/github/ptran1203/pytorch-animeGAN/blob/master/notebooks/animeGAN.ipynb)
 - Inference notebook on [Google colab](https://colab.research.google.com/github/ptran1203/pytorch-animeGAN/blob/master/notebooks/animeGAN_inference.ipynb)
@@ -137,6 +142,7 @@ python3 inference.py --weight hayao:v2\
                         --batch-size 4
 ```
 
+#### Result of AnimeGAN v2
 
 | Input | Hayao style v2 |
 |--|--|
@@ -147,11 +153,25 @@ python3 inference.py --weight hayao:v2\
 |![c1](./example/result/real/1%20(38).jpg)|![g1](./example/result/hayao_v2/1%20(38).jpg)|
 |![c1](./example/result/real/1%20(62).jpg)|![g1](./example/result/hayao_v2/1%20(62).jpg)|
 
+#### With color transfer module
+
+> The generated images will have color may differ from original images. It's affected by the Anime dataset was trained.
+> To mitigate this issue, I added [color_transfer](https://github.com/ptran1203/color_transfer) module to transfer color of input images to generated images.
+
+
+| Input | Hayao style v2 + Color transfer |
+|--|--|
+|![c1](./example/result/real/1%20(20).jpg)|![g1](./example/result/hayao_v2_retain/1%20(20).jpg)|
+|![c1](./example/result/real/1%20(21).jpg)|![g1](./example/result/hayao_v2_retain/1%20(21).jpg)|
+|![c1](./example/result/real/1%20(36).jpg)|![g1](./example/result/hayao_v2_retain/1%20(36).jpg)|
+|![c1](./example/result/real/1%20(37).jpg)|![g1](./example/result/hayao_v2_retain/1%20(37).jpg)|
+|![c1](./example/result/real/1%20(38).jpg)|![g1](./example/result/hayao_v2_retain/1%20(38).jpg)|
+|![c1](./example/result/real/1%20(62).jpg)|![g1](./example/result/hayao_v2_retain/1%20(62).jpg)|
 
 <details>
 <summary><strong> More results - Hayao V2 </strong></summary>    
 
-![](./example/more/hayao_v2/pexels-arnie-chou-304906-1004122.jpg)   
+![](./example/more/hayao_v2/pexels-arnie-chou-304906-1004122.jpg)
 ![](./example/more/hayao_v2/pexels-camilacarneiro-6318793.jpg)
 ![](./example/more/hayao_v2/pexels-haohd-19859127.jpg)
 ![](./example/more/hayao_v2/pexels-huy-nguyen-748440234-19838813.jpg)
@@ -160,6 +180,20 @@ python3 inference.py --weight hayao:v2\
 ![](./example/more/hayao_v2/pexels-nandhukumar-450441.jpg)
 ![](./example/more/hayao_v2/pexels-sevenstormphotography-575362.jpg)
 </details>    
+
+<details>
+<summary><strong> More results - Hayao V2 Retain color</strong></summary>    
+
+![](./example/more/hayao_v2_retain/pexels-arnie-chou-304906-1004122.jpg)
+![](./example/more/hayao_v2_retain/pexels-camilacarneiro-6318793.jpg)
+![](./example/more/hayao_v2_retain/pexels-haohd-19859127.jpg)
+![](./example/more/hayao_v2_retain/pexels-huy-nguyen-748440234-19838813.jpg)
+![](./example/more/hayao_v2_retain/pexels-huy-phan-316220-1422386.jpg)
+![](./example/more/hayao_v2_retain/pexels-jimmy-teoh-294331-951531.jpg)
+![](./example/more/hayao_v2_retain/pexels-nandhukumar-450441.jpg)
+![](./example/more/hayao_v2_retain/pexels-sevenstormphotography-575362.jpg)
+</details>    
+
 
 <!-- ### Objective:
 

@@ -3,16 +3,7 @@ from utils import compute_data_mean
 from models.anime_gan_v2 import GeneratorV2
 from models.anime_gan import GeneratorV1, Discriminator
 # print(compute_data_mean('dataset/Hayao/style'))
-
-    
-def to_gray_scale(image):
-    r, g, b = image.unbind(dim=-3)
-    l_img = r.mul(0.2989).add_(g, alpha=0.587).add_(b, alpha=0.114)
-    l_img = l_img.unsqueeze(dim=-3)
-    l_img = l_img.to(image.dtype)
-    l_img = l_img.expand(image.shape)
-    return l_img
-
+from color_transfer import color_transfer_pytorch
 image = torch.rand(2, 3, 256, 256)
 
 gray = to_gray_scale(image)
