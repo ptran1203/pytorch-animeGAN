@@ -89,6 +89,9 @@ class Predictor:
             device = 'cpu'
             # Amp not working on cpu
             amp = False
+            print("Use CPU device")
+        else:
+            print(f"Use GPU {torch.cuda.get_device_name()}")
 
         self.retain_color = retain_color
         self.amp = amp  # Automatic Mixed Precision
@@ -174,6 +177,44 @@ class Predictor:
         image = self.read_and_resize(file_path)
         anime_img = self.transform(image)[0]
         cv2.imwrite(save_path, anime_img[..., ::-1])
+        print(f"Anime image saved to {save_path}")
+
+    @profile
+    def transform_gif(self, file_path, save_path, batch_size=4):
+        import imageio
+
+        def _preprocess_gif(img):
+            if img.shape[-1] == 4:
+                img = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
+            return resize_image(img)
+
+        images = imageio.mimread(file_path)
+        images = np.stack([
+            _preprocess_gif(img)
+            for img in images
+        ])
+
+        print(images.shape)
+
+        anime_gif = np.zeros_like(images)
+
+        for i in tqdm(range(0, len(images), batch_size)):
+            end = i + batch_size
+            anime_gif[i: end] = self.transform(
+                images[i: end]
+            )
+
+        if end < len(images) - 1:
+            # transform last frame
+            print("LAST", images[end: ].shape)
+            anime_gif[end:] = self.transform(images[end:])
+
+        print(anime_gif.shape)
+        imageio.mimsave(
+            save_path,
+            anime_gif,
+            
+        )
         print(f"Anime image saved to {save_path}")
 
     @profile
@@ -300,7 +341,12 @@ class Predictor:
 def parse_args():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weight', type=str, default="hayao:v2", help='Model weight')
+    parser.add_argument(
+        '--weight',
+        type=str,
+        default="hayao:v2",
+        help=f'Model weight, can be path or pretrained {tuple(RELEASED_WEIGHTS.keys())}'
+    )
     parser.add_argument('--src', type=str, help='Source, can be directory contains images, image file or video file.')
     parser.add_argument('--device', type=str, default='cuda', help='Device, cuda or cpu')
     parser.add_argument('--out', type=str, default='inference_images', help='Output, can be directory or file')
@@ -342,6 +388,11 @@ if __name__ == '__main__':
         if not is_image_file(args.out):
             os.makedirs(args.out, exist_ok=True)
             save_path = os.path.join(args.out, os.path.basename(args.src))
-        predictor.transform_file(args.src, save_path)
+
+        if args.src.endswith('.gif'):
+            # GIF file
+            predictor.transform_gif(args.src, save_path, args.batch_size)
+        else:
+            predictor.transform_file(args.src, save_path)
     else:
         raise NotImplementedError(f"{args.src} is not supported")
