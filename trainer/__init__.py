@@ -190,32 +190,17 @@ class Trainer(DDPTrainer):
 
             with autocast(enabled=self.cfg.amp):
                 fake_img = self.G(img)
-<<<<<<< HEAD
-
-=======
->>>>>>> 444aa0d9f1f05b73067bb808affd405d861c13dc
                 # Add some Gaussian noise to images before feeding to D
                 if self.cfg.d_noise:
                     fake_img += gaussian_noise()
                     anime += gaussian_noise()
                     anime_gray += gaussian_noise()
                     anime_smt_gray += gaussian_noise()
-<<<<<<< HEAD
 
                 if self.cfg.gray_adv:
                     fake_img = to_gray_scale(fake_img)
 
                 fake_d = self.D(fake_img)
-=======
-                fake_img_color_mapped = transfer_color_and_rescale(fake_img, anime)
-                # Log
-                # save_generated_images(fake_img, "debug")
-                # save_generated_images(anime, "debug_anime")
-                # save_generated_images(fake_img_color_mapped, "debug_color")
-                # raise
-                
-                fake_d = self.D(fake_img_color_mapped)
->>>>>>> 444aa0d9f1f05b73067bb808affd405d861c13dc
                 real_anime_d = self.D(anime)
                 real_anime_gray_d = self.D(anime_gray)
                 real_anime_smt_gray_d = self.D(anime_smt_gray)
@@ -241,16 +226,11 @@ class Trainer(DDPTrainer):
 
             with autocast(enabled=self.cfg.amp):
                 fake_img = self.G(img)
-<<<<<<< HEAD
                 
                 if self.cfg.gray_adv:
                     fake_d = self.D(to_gray_scale(fake_img))
                 else:
                     fake_d = self.D(fake_img)
-=======
-                fake_img_color_mapped = transfer_color_and_rescale(fake_img, anime)
-                fake_d = self.D(fake_img_color_mapped)
->>>>>>> 444aa0d9f1f05b73067bb808affd405d861c13dc
 
                 (
                     adv_loss, con_loss,
