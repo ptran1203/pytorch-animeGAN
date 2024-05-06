@@ -66,7 +66,7 @@ class ColorLoss(nn.Module):
 
 
 class AnimeGanLoss:
-    def __init__(self, args, device):
+    def __init__(self, args, device, gray_adv=False):
         if isinstance(device, str):
             device = torch.device(device)
 
@@ -79,6 +79,8 @@ class AnimeGanLoss:
         self.wgra = args.wgra
         self.wcol = args.wcol
         self.wtvar = args.wtvar
+        # If true, use gray scale image to calculate adversarial loss
+        self.gray_adv = gray_adv
         self.vgg19 = Vgg19().to(device).eval()
         self.adv_type = args.gan_loss
         self.bce_loss = nn.BCEWithLogitsLoss()
@@ -103,7 +105,6 @@ class AnimeGanLoss:
         fake_feat = self.vgg19(fake_img)
         gray_feat = self.vgg19(anime_gray)
         img_feat = self.vgg19(img)
-
         # fake_gray_feat = self.vgg19(to_gray_scale(fake_img))
 
         return [
@@ -122,21 +123,24 @@ class AnimeGanLoss:
         real_anime_gray_d,
         real_anime_smooth_gray_d=None
     ):
-        return self.wadvd * (
-            self.adv_loss_d_real(real_anime_gray_d)
-            + self.adv_loss_d_fake(fake_img_d)
-            + 0.3 * self.adv_loss_d_fake(real_anime_smooth_gray_d)
-        )
-        # return self.wadvd * (
-        #     # Classify real anime as real
-        #     self.adv_loss_d_real(real_anime_d)
-        #     # Classify generated as fake
-        #     + self.adv_loss_d_fake(fake_img_d)
-        #     # Classify real anime gray as fake
-        #     + self.adv_loss_d_fake(real_anime_gray_d)
-        #     # Classify real anime as fake
-        #     + 0.1 * self.adv_loss_d_fake(real_anime_smooth_gray_d)
-        # )
+        if self.gray_adv:
+            # Treat gray scale image as real
+            return self.wadvd * (
+                self.adv_loss_d_real(real_anime_gray_d)
+                + self.adv_loss_d_fake(fake_img_d)
+                + 0.3 * self.adv_loss_d_fake(real_anime_smooth_gray_d)
+            )
+        else:
+            return self.wadvd * (
+                # Classify real anime as real
+                self.adv_loss_d_real(real_anime_d)
+                # Classify generated as fake
+                + self.adv_loss_d_fake(fake_img_d)
+                # Classify real anime gray as fake
+                + self.adv_loss_d_fake(real_anime_gray_d)
+                # Classify real anime as fake
+                + 0.1 * self.adv_loss_d_fake(real_anime_smooth_gray_d)
+            )
 
     def total_variation_loss(self, fake_img):
         """

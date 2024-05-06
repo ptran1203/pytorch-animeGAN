@@ -14,7 +14,6 @@ from tqdm import tqdm
 from utils.image_processing import denormalize_input, preprocess_images, resize_image
 from losses import LossSummary, AnimeGanLoss, to_gray_scale
 from utils import load_checkpoint, save_checkpoint, read_image
-from utils.color_transfer import fast_color_transfer
 from utils.common import set_lr
 
 
@@ -92,7 +91,7 @@ class Trainer(DDPTrainer):
             logger.info(f"---------{self.cfg.local_rank} {self.device}")
         else:
             self.device = torch.device(self.cfg.device)
-        self.loss_fn = AnimeGanLoss(self.cfg, self.device)
+        self.loss_fn = AnimeGanLoss(self.cfg, self.device, self.cfg.gray_adv)
         self.logger = logger
         self._init_working_dir()
         self._init_distributed()
@@ -170,15 +169,16 @@ class Trainer(DDPTrainer):
             with autocast(enabled=self.cfg.amp):
                 fake_img = self.G(img)
 
-            # Add some Gaussian noise to images before feeding to D
-            if self.cfg.d_noise:
-                fake_img += gaussian_noise()
-                anime += gaussian_noise()
-                anime_gray += gaussian_noise()
-                anime_smt_gray += gaussian_noise()
+                # Add some Gaussian noise to images before feeding to D
+                if self.cfg.d_noise:
+                    fake_img += gaussian_noise()
+                    anime += gaussian_noise()
+                    anime_gray += gaussian_noise()
+                    anime_smt_gray += gaussian_noise()
 
-            with autocast(enabled=self.cfg.amp):
-                fake_img = to_gray_scale(fake_img)
+                if self.cfg.gray_adv:
+                    fake_img = to_gray_scale(fake_img)
+
                 fake_d = self.D(fake_img)
                 real_anime_d = self.D(anime)
                 real_anime_gray_d = self.D(anime_gray)
@@ -205,7 +205,11 @@ class Trainer(DDPTrainer):
 
             with autocast(enabled=self.cfg.amp):
                 fake_img = self.G(img)
-                fake_d = self.D( to_gray_scale(fake_img))
+                
+                if self.cfg.gray_adv:
+                    fake_d = self.D(to_gray_scale(fake_img))
+                else:
+                    fake_d = self.D(fake_img)
 
                 (
                     adv_loss, con_loss,

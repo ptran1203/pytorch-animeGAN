@@ -37,11 +37,15 @@ def parse_args():
                         help="Image sizes, can provide multiple values, image size will increase after a proportion of epochs")
     parser.add_argument('--resize_method', type=str, default="crop",
                         help="Resize image method if origin photo larger than imgsz")
+    # Loss stuff
     parser.add_argument('--lr_g', type=float, default=3e-5)
     parser.add_argument('--lr_d', type=float, default=6e-5)
     parser.add_argument('--init_lr', type=float, default=1e-4)
     parser.add_argument('--wadvg', type=float, default=300.0, help='Adversarial loss weight for G')
     parser.add_argument('--wadvd', type=float, default=300.0, help='Adversarial loss weight for D')
+    parser.add_argument(
+        '--gray_adv', action='store_true',
+        help="If given, train adversarial with gray scale image instead of RGB image to reduce color effect of anime style")
     # Loss weight VGG19
     parser.add_argument('--wcon', type=float, default=1.5, help='Content loss weight') #  1.5 for Hayao, 2.0 for Paprika, 1.2 for Shinkai
     parser.add_argument('--wgra', type=float, default=5.0, help='Gram loss weight') # 2.5 for Hayao, 0.6 for Paprika, 2.0 for Shinkai
