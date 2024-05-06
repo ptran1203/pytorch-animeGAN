@@ -62,7 +62,6 @@ def parse_args():
     return parser.parse_args()
 
 
-
 def check_params(args):
     # dataset/Hayao + dataset/train_photo -> train_photo_Hayao
     args.dataset = f"{os.path.basename(args.real_image_dir)}_{os.path.basename(args.anime_image_dir)}"

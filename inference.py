@@ -13,7 +13,8 @@ from utils.common import load_checkpoint, RELEASED_WEIGHTS
 from utils.image_processing import resize_image, normalize_input, denormalize_input
 from utils import read_image, is_image_file, is_video_file
 from tqdm import tqdm
-# from torch.cuda.amp import autocast
+from color_transfer import color_transfer_pytorch
+
 
 try:
     import matplotlib.pyplot as plt
@@ -74,12 +75,25 @@ def auto_load_weight(weight, version=None, map_location=None):
 
 
 class Predictor:
-    def __init__(self, weight='hayao', device='cuda', amp=True):
+    """
+    Generic class for transfering Image to anime like image.
+    """
+    def __init__(
+        self,
+        weight='hayao',
+        device='cuda',
+        amp=True,
+        retain_color=False
+    ):
         if not torch.cuda.is_available():
             device = 'cpu'
             # Amp not working on cpu
             amp = False
+            print("Use CPU device")
+        else:
+            print(f"Use GPU {torch.cuda.get_device_name()}")
 
+        self.retain_color = retain_color
         self.amp = amp  # Automatic Mixed Precision
         self.device_type = 'cuda' if device.startswith('cuda') else 'cpu'
         self.device = torch.device(device)
@@ -126,6 +140,10 @@ class Predictor:
             # with autocast(self.device_type, enabled=self.amp):
                 # print(image.dtype, self.G)
             fake = self.G(image)
+            # Transfer color of fake image look similiar color as image
+            if self.retain_color:
+                fake = color_transfer_pytorch(fake, image)
+                fake = (fake / 0.5) - 1.0  # remap to [-1. 1]
             fake = fake.detach().cpu().numpy()
             # Channel last
             fake = fake.transpose(0, 2, 3, 1)
@@ -159,6 +177,44 @@ class Predictor:
         image = self.read_and_resize(file_path)
         anime_img = self.transform(image)[0]
         cv2.imwrite(save_path, anime_img[..., ::-1])
+        print(f"Anime image saved to {save_path}")
+
+    @profile
+    def transform_gif(self, file_path, save_path, batch_size=4):
+        import imageio
+
+        def _preprocess_gif(img):
+            if img.shape[-1] == 4:
+                img = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
+            return resize_image(img)
+
+        images = imageio.mimread(file_path)
+        images = np.stack([
+            _preprocess_gif(img)
+            for img in images
+        ])
+
+        print(images.shape)
+
+        anime_gif = np.zeros_like(images)
+
+        for i in tqdm(range(0, len(images), batch_size)):
+            end = i + batch_size
+            anime_gif[i: end] = self.transform(
+                images[i: end]
+            )
+
+        if end < len(images) - 1:
+            # transform last frame
+            print("LAST", images[end: ].shape)
+            anime_gif[end:] = self.transform(images[end:])
+
+        print(anime_gif.shape)
+        imageio.mimsave(
+            save_path,
+            anime_gif,
+            
+        )
         print(f"Anime image saved to {save_path}")
 
     @profile
@@ -285,10 +341,19 @@ class Predictor:
 def parse_args():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weight', type=str, default="hayao:v2", help='Model weight')
+    parser.add_argument(
+        '--weight',
+        type=str,
+        default="hayao:v2",
+        help=f'Model weight, can be path or pretrained {tuple(RELEASED_WEIGHTS.keys())}'
+    )
     parser.add_argument('--src', type=str, help='Source, can be directory contains images, image file or video file.')
     parser.add_argument('--device', type=str, default='cuda', help='Device, cuda or cpu')
     parser.add_argument('--out', type=str, default='inference_images', help='Output, can be directory or file')
+    parser.add_argument(
+        '--retain-color',
+        action='store_true',
+        help='If provided the generated image will retain original color of input image')
     # Video params
     parser.add_argument('--batch-size', type=int, default=4, help='Batch size when inference video')
     parser.add_argument('--start', type=int, default=0, help='Start time of video (second)')
@@ -299,7 +364,11 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
 
-    predictor = Predictor(args.weight, args.device)
+    predictor = Predictor(
+        args.weight,
+        args.device,
+        retain_color=args.retain_color
+    )
 
     if not os.path.exists(args.src):
         raise FileNotFoundError(args.src)
@@ -319,6 +388,11 @@ if __name__ == '__main__':
         if not is_image_file(args.out):
             os.makedirs(args.out, exist_ok=True)
             save_path = os.path.join(args.out, os.path.basename(args.src))
-        predictor.transform_file(args.src, save_path)
+
+        if args.src.endswith('.gif'):
+            # GIF file
+            predictor.transform_gif(args.src, save_path, args.batch_size)
+        else:
+            predictor.transform_file(args.src, save_path)
     else:
         raise NotImplementedError(f"{args.src} is not supported")

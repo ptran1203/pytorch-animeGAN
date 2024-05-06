@@ -105,6 +105,10 @@ class AnimeGanLoss:
         fake_feat = self.vgg19(fake_img)
         gray_feat = self.vgg19(anime_gray)
         img_feat = self.vgg19(img)
+<<<<<<< HEAD
+=======
+
+>>>>>>> 444aa0d9f1f05b73067bb808affd405d861c13dc
         # fake_gray_feat = self.vgg19(to_gray_scale(fake_img))
 
         return [

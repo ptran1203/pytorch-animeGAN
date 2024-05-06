@@ -43,7 +43,7 @@ def is_image_file(path):
 def is_video_file(path):
     # https://moviepy-tburrows13.readthedocs.io/en/improve-docs/ref/VideoClip/VideoFileClip.html
     _, ext = os.path.splitext(path)
-    return ext.lower() in (".mp4", ".gif", ".mov", ".ogv", ".avi", ".mpeg")
+    return ext.lower() in (".mp4", ".mov", ".ogv", ".avi", ".mpeg")
 
 
 def read_image(path):
@@ -55,7 +55,13 @@ def read_image(path):
         urllib.request.urlretrieve(path, "temp.jpg")
         path = "temp.jpg"
 
-    return cv2.imread(path)[: ,: ,::-1]
+    img = cv2.imread(path)
+    if img.shape[-1] == 4:
+        # 4 channels image
+        img = cv2.cvtColor(img, cv2.COLOR_BGRA2RGB)
+    else:
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    return img
 
 
 def save_checkpoint(model, path, optimizer=None, epoch=None):
@@ -82,7 +88,7 @@ def maybe_remove_module(state_dict):
 
 
 def load_checkpoint(model, path, optimizer=None, strip_optimizer=False, map_location=None) -> int:
-    state_dict = load_state_dict(path, map_location)
+    state_dict, path = load_state_dict(path, map_location)
     model_state_dict = maybe_remove_module(state_dict['model_state_dict'])
     model.load_state_dict(
         model_state_dict,
@@ -109,7 +115,7 @@ def load_state_dict(weight, map_location) -> dict:
         map_location = 'cuda' if torch.cuda.is_available() else 'cpu'
     state_dict = torch.load(weight, map_location=map_location)
 
-    return state_dict
+    return state_dict, weight
 
 
 def initialize_weights(net):
