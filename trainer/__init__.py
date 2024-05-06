@@ -1,7 +1,9 @@
 import os
+import time
+import shutil
+
 import torch
 import cv2
-import time
 import torch.optim as optim
 import numpy as np
 from glob import glob
@@ -10,8 +12,9 @@ from torch.nn.parallel.distributed import DistributedDataParallel
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 from utils.image_processing import denormalize_input, preprocess_images, resize_image
-from losses import LossSummary, AnimeGanLoss
+from losses import LossSummary, AnimeGanLoss, to_gray_scale
 from utils import load_checkpoint, save_checkpoint, read_image
+from utils.color_transfer import fast_color_transfer
 from utils.common import set_lr
 
 
@@ -79,7 +82,7 @@ class Trainer(DDPTrainer):
         self.G = generator
         self.D = discriminator
         self.cfg = config
-        self.max_norm = 1
+        self.max_norm = 10
         self.device_type = 'cuda' if self.cfg.device.startswith('cuda') else 'cpu'
         self.optimizer_g = optim.Adam(self.G.parameters(), lr=self.cfg.lr_g, betas=(0.5, 0.999))
         self.optimizer_d = optim.Adam(self.D.parameters(), lr=self.cfg.lr_d, betas=(0.5, 0.999))
@@ -165,7 +168,7 @@ class Trainer(DDPTrainer):
             self.optimizer_d.zero_grad()
 
             with autocast(enabled=self.cfg.amp):
-                fake_img = self.G(img).detach()
+                fake_img = self.G(img)
 
             # Add some Gaussian noise to images before feeding to D
             if self.cfg.d_noise:
@@ -175,6 +178,7 @@ class Trainer(DDPTrainer):
                 anime_smt_gray += gaussian_noise()
 
             with autocast(enabled=self.cfg.amp):
+                fake_img = to_gray_scale(fake_img)
                 fake_d = self.D(fake_img)
                 real_anime_d = self.D(anime)
                 real_anime_gray_d = self.D(anime_gray)
@@ -201,7 +205,7 @@ class Trainer(DDPTrainer):
 
             with autocast(enabled=self.cfg.amp):
                 fake_img = self.G(img)
-                fake_d = self.D(fake_img)
+                fake_d = self.D( to_gray_scale(fake_img))
 
                 (
                     adv_loss, con_loss,
@@ -248,6 +252,48 @@ class Trainer(DDPTrainer):
             # collate_fn=collate_fn,
         )
 
+    def maybe_increase_imgsz(self, epoch, train_dataset):
+        """
+        Increase image size at specific epoch
+            + 50% epochs train at imgsz[0]
+            + the rest 50% will increase every `len(epochs) / 2 / (len(imgsz) - 1)`
+
+        Args:
+            epoch: Current epoch
+            train_dataset: Dataset
+
+        Examples:
+        ```    
+        epochs = 100
+        imgsz = [256, 352, 416, 512]
+        => [(0, 256), (50, 352), (66, 416), (82, 512)]
+        ```
+        """
+        epochs = self.cfg.epochs
+        imgsz = self.cfg.imgsz
+        num_size_remains = len(imgsz) - 1
+        half_epochs = epochs // 2
+
+        if len(imgsz) == 1:
+            new_size = imgsz[0]
+        elif epoch < half_epochs:
+            new_size = imgsz[0]
+        else:
+            per_epoch_increment = int(half_epochs / num_size_remains)
+            found = None
+            for i, size in enumerate(imgsz[:]):
+                if epoch < half_epochs + per_epoch_increment * i:
+                    found = size
+                    break
+            if not found:
+                found = imgsz[-1]
+            new_size = found
+
+        self.logger.info(f"Check {imgsz}, {new_size}, {train_dataset.imgsz}")
+        if new_size != train_dataset.imgsz:
+            train_dataset.set_imgsz(new_size)
+            self.logger.info(f"Increase image size to {new_size} at epoch {epoch}")
+
     def train(self, train_dataset: Dataset, start_epoch=0, start_epoch_g=0):
         """
         Train Generator and Discriminator.
@@ -275,6 +321,8 @@ class Trainer(DDPTrainer):
         num_iter = 0
         per_epoch_times = []
         for epoch in range(start_epoch, self.cfg.epochs):
+            self.maybe_increase_imgsz(epoch, train_dataset)
+
             start = time.time()
             self.train_epoch(epoch, self.get_train_loader(train_dataset))
 
@@ -282,6 +330,10 @@ class Trainer(DDPTrainer):
                 save_checkpoint(self.G, self.checkpoint_path_G,self.optimizer_g, epoch)
                 save_checkpoint(self.D, self.checkpoint_path_D, self.optimizer_d, epoch)
                 self.generate_and_save(self.cfg.test_image_dir)
+
+                if epoch % 10 == 0:
+                    self.copy_results(epoch)
+
             num_iter += 1
 
             if self.cfg.local_rank == 0:
@@ -304,21 +356,24 @@ class Trainer(DDPTrainer):
         '''
         Generate and save images
         '''
+        start = time.time()
         self.G.eval()
 
         max_iter = max_imgs
         fake_imgs = []
-
+        real_imgs = []
         image_files = glob(os.path.join(image_dir, "*"))
 
         for i, image_file in enumerate(image_files):
             image = read_image(image_file)
             image = resize_image(image)
+            real_imgs.append(image.copy())
             image = preprocess_images(image)
             image = image.to(self.device)
             with torch.no_grad():
                 with autocast(enabled=self.cfg.amp):
                     fake_img = self.G(image)
+                    # fake_img = to_gray_scale(fake_img)
                 fake_img = fake_img.detach().cpu().numpy()
                 # Channel first -> channel last
                 fake_img  = fake_img.transpose(0, 2, 3, 1)
@@ -329,7 +384,29 @@ class Trainer(DDPTrainer):
 
         # fake_imgs = np.concatenate(fake_imgs, axis=0)
 
-        for i, img in enumerate(fake_imgs):
+        for i, (real_img, fake_img) in enumerate(zip(real_imgs, fake_imgs)):
+            img = np.concatenate((real_img, fake_img), axis=1)  # Concate aross width
             save_path = os.path.join(self.save_image_dir, f'{subname}_{i}.jpg')
             if not cv2.imwrite(save_path, img[..., ::-1]):
                 self.logger.info(f"Save generated image failed, {save_path}, {img.shape}")
+        elapsed = time.time() - start
+        self.logger.info(f"Generated {len(fake_imgs)} images in {elapsed:.3f}s.")
+
+    def copy_results(self, epoch):
+        """Copy result (Weight + Generated images) to each epoch folder
+        Every N epoch
+        """
+        copy_dir = os.path.join(self.cfg.exp_dir, f"epoch_{epoch}")
+        os.makedirs(copy_dir, exist_ok=True)
+
+        shutil.copy2(
+            self.checkpoint_path_G,
+            copy_dir
+        )
+
+        dest = os.path.join(copy_dir, os.path.basename(self.save_image_dir))
+        shutil.copytree(
+            self.save_image_dir,
+            dest,
+            dirs_exist_ok=True
+        )

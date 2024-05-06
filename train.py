@@ -33,11 +33,12 @@ def parse_args():
     parser.add_argument('--save_interval', type=int, default=1)
     parser.add_argument('--debug_samples', type=int, default=0)
     parser.add_argument('--num_workers', type=int, default=2)
-    parser.add_argument('--imgsz', type=int, default=256)
+    parser.add_argument('--imgsz', type=int, nargs="+", default=[256],
+                        help="Image sizes, can provide multiple values, image size will increase after a proportion of epochs")
     parser.add_argument('--resize_method', type=str, default="crop",
                         help="Resize image method if origin photo larger than imgsz")
-    parser.add_argument('--lr_g', type=float, default=2e-5)
-    parser.add_argument('--lr_d', type=float, default=4e-5)
+    parser.add_argument('--lr_g', type=float, default=3e-5)
+    parser.add_argument('--lr_d', type=float, default=6e-5)
     parser.add_argument('--init_lr', type=float, default=1e-4)
     parser.add_argument('--wadvg', type=float, default=300.0, help='Adversarial loss weight for G')
     parser.add_argument('--wadvd', type=float, default=300.0, help='Adversarial loss weight for D')
@@ -104,7 +105,7 @@ def main(args, logger):
     )
 
     if args.resume_G_init.lower() != 'false':
-        start_e_init = load_checkpoint(G, args.resume_G_init)
+        start_e_init = load_checkpoint(G, args.resume_G_init) + 1
         if args.local_rank == 0:
             logger.info(f"G content weight loaded from {args.resume_G_init}")
     elif args.resume_G.lower() != 'false' and args.resume_D.lower() != 'false':
@@ -145,7 +146,7 @@ if __name__ == '__main__':
     args = parse_args()
     real_name = os.path.basename(args.real_image_dir)
     anime_name = os.path.basename(args.anime_image_dir)
-    args.exp_dir = f"{args.exp_dir}_{real_name}_{anime_name}_{args.imgsz}_{args.wadvg}"
+    args.exp_dir = f"{args.exp_dir}_{real_name}_{anime_name}"
 
     os.makedirs(args.exp_dir, exist_ok=True)
     logger = get_logger(os.path.join(args.exp_dir, "train.log"))

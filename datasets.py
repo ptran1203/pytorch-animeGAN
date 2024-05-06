@@ -42,9 +42,13 @@ class AnimeDataSet(Dataset):
             style
                 1.jpg, ..., n.jpg
         """
-        self.cache = cache
-        self.mean = compute_data_mean(os.path.join(anime_image_dir, 'style'))
-        print(f'Mean(B, G, R) of {anime_image_dir} are {self.mean}')
+        self.cache = False  # Disable cache forever
+        # self.mean = compute_data_mean(os.path.join(anime_image_dir, 'style'))
+        # print(f'Mean(B, G, R) of {anime_image_dir} are {self.mean}')
+
+        if isinstance(imgsz, list):
+            # Get first imgsz
+            imgsz = imgsz[0]
 
         self.debug_samples = debug_samples
         self.resize_method = resize_method
@@ -85,18 +89,23 @@ class AnimeDataSet(Dataset):
 
     def __getitem__(self, index):
         photo_idx = random.randint(0, self.len_photo - 1)
-        image = self.load_photo(photo_idx)
         anm_idx = index
+        # photo_idx = index
+        # anm_idx = random.randint(0, self.len_anime - 1)
 
+        image = self.load_photo(photo_idx)
         anime, anime_gray = self.load_anime(anm_idx)
         smooth_gray = self.load_anime_smooth(anm_idx)
 
         return {
-            "image": torch.tensor(image),
-            "anime": torch.tensor(anime),
-            "anime_gray": torch.tensor(anime_gray),
-            "smooth_gray": torch.tensor(smooth_gray)
+            "image": torch.tensor(image).contiguous(),
+            "anime": torch.tensor(anime).contiguous(),
+            "anime_gray": torch.tensor(anime_gray).contiguous(),
+            "smooth_gray": torch.tensor(smooth_gray).contiguous()
         }
+
+    def set_imgsz(self, imgsz):
+        self.imgsz = imgsz
 
     def cache_data(self):
         if not self.cache:

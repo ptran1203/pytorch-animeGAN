@@ -1,83 +1,83 @@
-import torch
-from utils import compute_data_mean
-from models.anime_gan_v2 import GeneratorV2
-from models.anime_gan import GeneratorV1, Discriminator
+# import torch
+# from utils import compute_data_mean
+# from models.anime_gan_v2 import GeneratorV2
+# from models.anime_gan import GeneratorV1, Discriminator
 # print(compute_data_mean('dataset/Hayao/style'))
+import time
+import cv2
+import numpy as np
+import torch
+from enum import Enum
 
+# https://github.com/jorge-pessoa/pytorch-colors/tree/master
+
+
+# class ConvertCode(Enum):
+RGB2LAB = 'RGB2LAB'
+LAB2RGB = 'LAB2RGB'
+RGB2YUV = 'RGB2YUV'
+YUV2RGB = 'YUV2RGB'
+
+_rgb2yuv_kernel = torch.tensor([
+    [0.299, 0.587, 0.114],
+    [-0.14714119, -0.28886916, 0.43601035],
+    [0.61497538, -0.51496512, -0.10001026],
+])
+
+_yuv2rgb_kernel = torch.linalg.inv(_rgb2yuv_kernel)
+
+_kernels = {
+    RGB2YUV: ,
+    YUV2RGB: torch.tensor([
+        [0.299, 0.587, 0.114],
+        [-0.14714119, -0.28886916, 0.43601035],
+        [0.61497538, -0.51496512, -0.10001026],
+    ])
+}
+
+
+def get_kernel(kind: str):
+    pass
     
-def to_gray_scale(image):
-    r, g, b = image.unbind(dim=-3)
-    l_img = r.mul(0.2989).add_(g, alpha=0.587).add_(b, alpha=0.114)
-    l_img = l_img.unsqueeze(dim=-3)
-    l_img = l_img.to(image.dtype)
-    l_img = l_img.expand(image.shape)
-    return l_img
 
-image = torch.rand(2, 3, 256, 256)
+def convert_color(image: torch.Tensor, code: str):
+    """
+    Args:
+        image (torch.Tensor): Image tensor, can have shape: B x C x H x W
+        code (str): convert kind, {'RGB2LAB', 'LAB2RGB'}
 
-gray = to_gray_scale(image)
+    References:
+        + https://docs.opencv.org/4.3.0/de/d25/imgproc_color_conversions.html
+    """
 
-print(gray.shape, gray[0, :, 1, 1])
-
-# G = GeneratorV2()
-# D = Discriminator(num_layers=3, norm_type="layer")
+    return image
 
 
-# image = torch.rand(2, 3, 256, 256)
+def color_transfer_torch(src, target):
+    pass
+    # # Convert to LAB space
+    # src = cv2.cvtColor(src, cv2.COLOR_BGR2LAB)
+    # target = cv2.cvtColor(target, cv2.COLOR_BGR2LAB)
 
-# out = G(image)
+    # src_mean, src_std = get_mean_and_std(src)
+    # target_mean, target_std = get_mean_and_std(target)
 
-# d = D(image)
+    # std_ratio = target_std / src_std
+    # src_dtype = src.dtype
 
-# print(out.shape, d.shape)
+    # image = src.copy().astype(float)
+    # image = (image - src_mean) * std_ratio + target_mean
+    # image = image.astype(src_dtype)
+    # image = cv2.cvtColor(image,cv2.COLOR_LAB2BGR)
 
-# import cv2
-# import numpy as np
-
-# # 
-# img1 = cv2.imread("/u02/phatth1/dataset/Hayao/style/6.jpg")[:, :, ::-1]
-# img2 = cv2.imread("/u02/phatth1/dataset/Hayao/style/6.jpg")[:, :, ::-1]
-# image = np.stack([img1, img2]).astype('float32') / 255.0
-# print(image.shape)
-# image = image.transpose(0, 3, 1, 2)
-# image = torch.tensor(image)
-
-# image = image.permute(0, 2, 3, 1).double()
-
-# _rgb_to_yuv_kernel = torch.tensor([
-#             [0.299, 0.587, 0.114],
-#             [-0.14714119, -0.28886916, 0.43601035],
-#             [0.61497538, -0.51496512, -0.10001026],
-#         ]).double()
-
-# # yuv_img = torch.tensordot(
-# #     image,
-# #     _rgb_to_yuv_kernel,
-# #     dims=([-1], [0]))
-# print(image.shape, _rgb_to_yuv_kernel)
-# yuv_img = image @ _rgb_to_yuv_kernel.T
-
-# yuv_img = yuv_img * 255.0
-# yuv_img = yuv_img.numpy().astype(np.uint8)
-
-# cv2.imwrite("test1.jpg", yuv_img[0])
-# cv2.imwrite("test2.jpg", yuv_img[1])
-
-# # print(image.ndim)
+    # return image
 
 
-# yuv_from_rgb = np.array(
-#     [
-#         [0.299, 0.587, 0.114],
-#         [-0.14714119, -0.28886916, 0.43601035],
-#         [0.61497538, -0.51496512, -0.10001026],
-#     ]
-# )
+img1 = cv2.imread("/u02/phatth1/dataset/test/real/447.jpg")
+img2 = cv2.imread("/u02/phatth1/dataset/Hayao/style/14.jpg")
+img1 = torch.from_numpy(img1).unsqueeze(0).float()
+img2 = torch.from_numpy(img2).unsqueeze(0).float()
 
-# img1 = img1.astype(float) / 255.0
-# yuv_np = img1 @ yuv_from_rgb.T.astype(img1.dtype)
-# yuv_np = (yuv_np * 255).astype(np.uint8)
+yuv = img1 @ _kernels[RGB2YUV]
 
-# print((yuv_np - yuv_img[0]).mean())
-
-# print(yuv_from_rgb.dtype)
+print(yuv)
