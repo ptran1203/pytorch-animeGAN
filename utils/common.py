@@ -34,6 +34,12 @@ RELEASED_WEIGHTS = {
         "v1",
         "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/generator_shinkai.pth"
     ),
+
+    ## Face portrait
+    "arcane:v2": (
+        "v2",
+        "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.1/GeneratorV2_ffhq_Arcane_512.pt"
+    )
 }
 
 def is_image_file(path):

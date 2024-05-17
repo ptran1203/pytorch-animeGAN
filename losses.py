@@ -125,21 +125,21 @@ class AnimeGanLoss:
     ):
         if self.gray_adv:
             # Treat gray scale image as real
-            return self.wadvd * (
+            return (
                 self.adv_loss_d_real(real_anime_gray_d)
                 + self.adv_loss_d_fake(fake_img_d)
                 + 0.3 * self.adv_loss_d_fake(real_anime_smooth_gray_d)
             )
         else:
-            return self.wadvd * (
+            return (
                 # Classify real anime as real
                 self.adv_loss_d_real(real_anime_d)
                 # Classify generated as fake
                 + self.adv_loss_d_fake(fake_img_d)
                 # Classify real anime gray as fake
-                + self.adv_loss_d_fake(real_anime_gray_d)
+                # + self.adv_loss_d_fake(real_anime_gray_d)
                 # Classify real anime as fake
-                + 0.1 * self.adv_loss_d_fake(real_anime_smooth_gray_d)
+                # + 0.1 * self.adv_loss_d_fake(real_anime_smooth_gray_d)
             )
 
     def total_variation_loss(self, fake_img):
@@ -162,7 +162,7 @@ class AnimeGanLoss:
         re_feat = self.vgg19(recontruction)
         feature_loss = self.content_loss(feat, re_feat)
         content_loss = self.content_loss(image, recontruction)
-        return feature_loss + 0.5 * content_loss
+        return feature_loss# + 0.5 * content_loss
 
     def adv_loss_d_real(self, pred):
         """Push pred to class 1 (real)"""

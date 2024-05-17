@@ -64,7 +64,7 @@ class AnimeDataSet(Dataset):
             (os.path.join(anime_image_dir, self.style), self.style),
             (os.path.join(anime_image_dir, self.smooth), self.smooth)
         ]:
-            self.image_files[opt] = glob(os.path.join(dir, "*.*"))
+            self.image_files[opt] = sorted(glob(os.path.join(dir, "*.*")))
             self.cache_files[opt] = [False] * len(self.image_files[opt])
 
         self.transform = transform

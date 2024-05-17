@@ -84,7 +84,7 @@ class Discriminator(nn.Module):
                 nn.Conv2d(in_channels, channels * 2, kernel_size=3, stride=2, padding=1, bias=self.bias),
                 nn.LeakyReLU(0.2, True),
                 nn.Conv2d(channels * 2, channels * 4, kernel_size=3, stride=1, padding=1, bias=self.bias),
-                get_norm(norm_type)(channels * 4),
+                get_norm(norm_type, channels * 4),
                 nn.LeakyReLU(0.2, True),
             ]
             in_channels = channels * 4
@@ -93,7 +93,7 @@ class Discriminator(nn.Module):
         channels *= 2
         layers += [
             nn.Conv2d(channels, channels, kernel_size=3, stride=1, padding=1, bias=self.bias),
-            get_norm(norm_type)(channels),
+            get_norm(norm_type, channels),
             nn.LeakyReLU(0.2, True),
             nn.Conv2d(channels, 1, kernel_size=3, stride=1, padding=1, bias=self.bias),
         ]

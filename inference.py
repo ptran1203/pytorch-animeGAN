@@ -83,7 +83,8 @@ class Predictor:
         weight='hayao',
         device='cuda',
         amp=True,
-        retain_color=False
+        retain_color=False,
+        imgsz=None,
     ):
         if not torch.cuda.is_available():
             device = 'cpu'
@@ -92,7 +93,8 @@ class Predictor:
             print("Use CPU device")
         else:
             print(f"Use GPU {torch.cuda.get_device_name()}")
-
+        
+        self.imgsz = imgsz
         self.retain_color = retain_color
         self.amp = amp  # Automatic Mixed Precision
         self.device_type = 'cuda' if device.startswith('cuda') else 'cpu'
@@ -155,8 +157,9 @@ class Predictor:
     def read_and_resize(self, path, max_size=1536):
         image = read_image(path)
         h, w = image.shape[:2]
-
-        if max(h, w) > max_size:
+        if self.imgsz is not None:
+            image = resize_image(image, width=self.imgsz)
+        elif max(h, w) > max_size:
             print(f"Image {os.path.basename(path)} is too big ({h}x{w}), resize to max size {max_size}")
             image = resize_image(
                 image,
@@ -167,6 +170,8 @@ class Predictor:
             cv2.imwrite(path.replace(ext, ".jpg"), image[:,:,::-1])
         else:
             image = resize_image(image)
+        # image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        # image = np.stack([image, image, image], -1)
         return image
 
     @profile
@@ -233,13 +238,15 @@ class Predictor:
         if max_images:
             files = files[:max_images]
 
-        for fname in tqdm(files):
+        bar = tqdm(files)
+        for fname in bar:
             path = os.path.join(img_dir, fname)
             image = self.read_and_resize(path)
             anime_img = self.transform(image)[0]
             ext = fname.split('.')[-1]
             fname = fname.replace(f'.{ext}', '')
             cv2.imwrite(os.path.join(dest_dir, f'{fname}.jpg'), anime_img[..., ::-1])
+            bar.set_description(f"shape: {image.shape}")
 
     def transform_video(self, input_path, output_path, batch_size=4, start=0, end=0):
         '''
@@ -349,6 +356,7 @@ def parse_args():
     )
     parser.add_argument('--src', type=str, help='Source, can be directory contains images, image file or video file.')
     parser.add_argument('--device', type=str, default='cuda', help='Device, cuda or cpu')
+    parser.add_argument('--imgsz', type=int, default=None, help='Resize image to specified size if provided')
     parser.add_argument('--out', type=str, default='inference_images', help='Output, can be directory or file')
     parser.add_argument(
         '--retain-color',
@@ -367,7 +375,8 @@ if __name__ == '__main__':
     predictor = Predictor(
         args.weight,
         args.device,
-        retain_color=args.retain_color
+        retain_color=args.retain_color,
+        imgsz=args.imgsz,
     )
 
     if not os.path.exists(args.src):
