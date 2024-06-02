@@ -13,6 +13,7 @@ Pytorch implementation of AnimeGAN for fast photo animation
 <!-- |![c1](./example/gif/city.gif)|![g1](./example/gif/city_anime.gif)| -->
 
 ---
+* 02/06/2024 Arcane and Shinkai style released.
 * 05/05/2024: Add [color_transfer](https://github.com/ptran1203/color_transfer) module to retain original color of generated images, [See here](#with-color-transfer-module).
 * 23/04/2024: Added DDP training.
 * 16/04/2024: **AnimeGANv2** (Hayao style) is released with training code
@@ -52,9 +53,11 @@ predictor.transform_file(url, "anime.jpg")
 
 | Model name | Model | Dataset |  Weight |
 |--|--|--|--|
-| Hayao:v2 | AnimeGANv2 | Google Landmark v2 + Hayao style | [GeneratorV2_gldv2_Hayao.pt](https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.1/GeneratorV2_gldv2_Hayao.pt) |
 | Hayao | AnimeGAN | train_photo + Hayao style | [generator_hayao.pt](https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/generator_hayao.pth) |
 | Shinkai | AnimeGAN | train_photo + Shinkai style | [generator_shinkai.pt](https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/generator_shinkai.pth) |
+| Hayao:v2 | AnimeGANv2 | Google Landmark v2 + Hayao style | [GeneratorV2_gldv2_Hayao.pt](https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.2/GeneratorV2_gldv2_Hayao.pt) |
+| Shinkai:v2 | AnimeGANv2 | Google Landmark v2 + Shinkai style | [GeneratorV2_gldv2_Shinkai.pt](https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.2/GeneratorV2_gldv2_Shinkai.pt) |
+| Arcane:v2 | AnimeGANv2 | Face ffhq + Arcane style | [GeneratorV2_ffhq_Arcane_512.pt](https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.2/GeneratorV2_ffhq_Arcane_512.pt) |
 
 ## Train on custom dataset
 
@@ -148,25 +151,22 @@ python3 inference.py --weight hayao:v2\
 |--|--|
 |![c1](./example/result/real/1%20(20).jpg)|![g1](./example/result/hayao_v2/1%20(20).jpg)|
 |![c1](./example/result/real/1%20(21).jpg)|![g1](./example/result/hayao_v2/1%20(21).jpg)|
-|![c1](./example/result/real/1%20(36).jpg)|![g1](./example/result/hayao_v2/1%20(36).jpg)|
 |![c1](./example/result/real/1%20(37).jpg)|![g1](./example/result/hayao_v2/1%20(37).jpg)|
 |![c1](./example/result/real/1%20(38).jpg)|![g1](./example/result/hayao_v2/1%20(38).jpg)|
 |![c1](./example/result/real/1%20(62).jpg)|![g1](./example/result/hayao_v2/1%20(62).jpg)|
 
-#### With color transfer module
+- Arcane
 
-> The generated images will have color may differ from original images. It's affected by the Anime dataset was trained.
-> To mitigate this issue, I added [color_transfer](https://github.com/ptran1203/color_transfer) module to transfer color of input images to generated images.
-
-
-| Input | Hayao style v2 + Color transfer |
+| Input | Arcane |
 |--|--|
-|![c1](./example/result/real/1%20(20).jpg)|![g1](./example/result/hayao_v2_retain/1%20(20).jpg)|
-|![c1](./example/result/real/1%20(21).jpg)|![g1](./example/result/hayao_v2_retain/1%20(21).jpg)|
-|![c1](./example/result/real/1%20(36).jpg)|![g1](./example/result/hayao_v2_retain/1%20(36).jpg)|
-|![c1](./example/result/real/1%20(37).jpg)|![g1](./example/result/hayao_v2_retain/1%20(37).jpg)|
-|![c1](./example/result/real/1%20(38).jpg)|![g1](./example/result/hayao_v2_retain/1%20(38).jpg)|
-|![c1](./example/result/real/1%20(62).jpg)|![g1](./example/result/hayao_v2_retain/1%20(62).jpg)|
+|![c1](./example/face/boy.PNG)|![g1](./example/arcane/boy.jpg)|
+|![c1](./example/face/boy2.PNG)|![g1](./example/arcane/boy2.jpg)|
+|![c1](./example/face/girl.PNG)|![g1](./example/arcane/girl.jpg)|
+|![c1](./example/face/girl4.PNG)|![g1](./example/arcane/girl4.jpg)|
+|![c1](./example/face/girl6.PNG)|![g1](./example/arcane/girl6.jpg)|
+|![c1](./example/face/man.PNG)|![g1](./example/arcane/man.jpg)|
+|![c1](./example/face/man2.PNG)|![g1](./example/arcane/man2.jpg)|
+
 
 <details>
 <summary><strong> More results - Hayao V2 </strong></summary>    
@@ -178,20 +178,7 @@ python3 inference.py --weight hayao:v2\
 ![](./example/more/hayao_v2/pexels-huy-phan-316220-1422386.jpg)
 ![](./example/more/hayao_v2/pexels-jimmy-teoh-294331-951531.jpg)
 ![](./example/more/hayao_v2/pexels-nandhukumar-450441.jpg)
-![](./example/more/hayao_v2/pexels-sevenstormphotography-575362.jpg)
-</details>    
-
-<details>
-<summary><strong> More results - Hayao V2 Retain color</strong></summary>    
-
-![](./example/more/hayao_v2_retain/pexels-arnie-chou-304906-1004122.jpg)
-![](./example/more/hayao_v2_retain/pexels-camilacarneiro-6318793.jpg)
-![](./example/more/hayao_v2_retain/pexels-haohd-19859127.jpg)
-![](./example/more/hayao_v2_retain/pexels-huy-nguyen-748440234-19838813.jpg)
-![](./example/more/hayao_v2_retain/pexels-huy-phan-316220-1422386.jpg)
-![](./example/more/hayao_v2_retain/pexels-jimmy-teoh-294331-951531.jpg)
-![](./example/more/hayao_v2_retain/pexels-nandhukumar-450441.jpg)
-![](./example/more/hayao_v2_retain/pexels-sevenstormphotography-575362.jpg)
+<!-- ![](./example/more/hayao_v2/pexels-sevenstormphotography-575362.jpg) -->
 </details>    
 
 
