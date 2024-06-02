@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from functools import partial
 
 
 class LayerNorm2d(nn.LayerNorm):
@@ -16,10 +17,12 @@ class LayerNorm2d(nn.LayerNorm):
         return x
 
 
-def get_norm(norm_type):
+def get_norm(norm_type, channels):
     if norm_type == "instance":
-        return nn.InstanceNorm2d
+        return nn.InstanceNorm2d(channels)
     elif norm_type == "layer":
-        return LayerNorm2d
+        # return LayerNorm2d
+        return nn.GroupNorm(num_groups=1, num_channels=channels, affine=True)
+        # return partial(nn.GroupNorm, 1, out_ch, 1e-5, True)
     else:
         raise ValueError(norm_type)

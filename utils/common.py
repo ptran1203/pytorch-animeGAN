@@ -13,11 +13,6 @@ HTTP_PREFIXES = [
 
 
 RELEASED_WEIGHTS = {
-    "hayao:v2": (
-        # Dataset trained on Google Landmark micro as training real photo
-        "v2",
-        "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.1/GeneratorV2_gldv2_Hayao.pt"
-    ),
     "hayao:v1": (
         "v1",
         "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/generator_hayao.pth"
@@ -34,6 +29,23 @@ RELEASED_WEIGHTS = {
         "v1",
         "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/generator_shinkai.pth"
     ),
+    
+    ## VER 2 ##
+    "hayao:v2": (
+        # Dataset trained on Google Landmark micro as training real photo
+        "v2",
+        "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.2/GeneratorV2_gldv2_Hayao.pt"
+    ),
+    "shinkai:v2": (
+        # Dataset trained on Google Landmark micro as training real photo
+        "v2",
+        "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.2/GeneratorV2_gldv2_Shinkai.pt"
+    ),
+    ## Face portrait
+    "arcane:v2": (
+        "v2",
+        "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.2/GeneratorV2_ffhq_Arcane_512.pt"
+    )
 }
 
 def is_image_file(path):

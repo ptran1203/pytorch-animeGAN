@@ -38,8 +38,8 @@ def parse_args():
     parser.add_argument('--resize_method', type=str, default="crop",
                         help="Resize image method if origin photo larger than imgsz")
     # Loss stuff
-    parser.add_argument('--lr_g', type=float, default=3e-5)
-    parser.add_argument('--lr_d', type=float, default=6e-5)
+    parser.add_argument('--lr_g', type=float, default=2e-5)
+    parser.add_argument('--lr_d', type=float, default=4e-5)
     parser.add_argument('--init_lr', type=float, default=1e-4)
     parser.add_argument('--wadvg', type=float, default=300.0, help='Adversarial loss weight for G')
     parser.add_argument('--wadvd', type=float, default=300.0, help='Adversarial loss weight for D')
