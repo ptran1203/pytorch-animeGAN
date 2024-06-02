@@ -161,13 +161,13 @@ python3 inference.py --weight hayao:v2\
 
 | Input | Arcane |
 |--|--|
-|![c1](./example/face/leo.PNG)|![g1](./example/arcane/leo.jpg)|
-|![c1](./example/face/cap.PNG)|![g1](./example/arcane/cap.jpg)|
-|![c1](./example/face/dune2.PNG)|![g1](./example/arcane/dune2.jpg)|
+|![c1](./example/face/leo.jpg)|![g1](./example/arcane/leo.jpg)|
+|![c1](./example/face/cap.jpg)|![g1](./example/arcane/cap.jpg)|
+|![c1](./example/face/dune2.jpg)|![g1](./example/arcane/dune2.jpg)|
 |![c1](./example/face/nat_.jpg)|![g1](./example/arcane/nat_.jpg)|
-|![c1](./example/face/seydoux.PNG)|![g1](./example/arcane/seydoux.jpg)|
-|![c1](./example/face/girl.PNG)|![g1](./example/arcane/girl.jpg)|
-|![c1](./example/face/girl4.PNG)|![g1](./example/arcane/girl4.jpg)|
+|![c1](./example/face/seydoux.jpg)|![g1](./example/arcane/seydoux.jpg)|
+|![c1](./example/face/girl.jpg)|![g1](./example/arcane/girl.jpg)|
+|![c1](./example/face/girl4.jpg)|![g1](./example/arcane/girl4.jpg)|
 
 
 <details>

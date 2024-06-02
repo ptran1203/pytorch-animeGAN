@@ -156,6 +156,7 @@ class Predictor:
 
     def read_and_resize(self, path, max_size=1536):
         image = read_image(path)
+        _, ext = os.path.splitext(path)
         h, w = image.shape[:2]
         if self.imgsz is not None:
             image = resize_image(image, width=self.imgsz)
@@ -166,12 +167,12 @@ class Predictor:
                 width=max_size if w > h else None,
                 height=max_size if w < h else None,
             )
-            _, ext = os.path.splitext(path)
             cv2.imwrite(path.replace(ext, ".jpg"), image[:,:,::-1])
         else:
             image = resize_image(image)
         # image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
         # image = np.stack([image, image, image], -1)
+        # cv2.imwrite(path.replace(ext, ".jpg"), image[:,:,::-1])
         return image
 
     @profile
