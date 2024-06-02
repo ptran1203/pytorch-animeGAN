@@ -243,7 +243,7 @@ class Predictor:
             path = os.path.join(img_dir, fname)
             image = self.read_and_resize(path)
             anime_img = self.transform(image)[0]
-            anime_img = resize_image(anime_img, width=256)
+            # anime_img = resize_image(anime_img, width=320)
             ext = fname.split('.')[-1]
             fname = fname.replace(f'.{ext}', '')
             cv2.imwrite(os.path.join(dest_dir, f'{fname}.jpg'), anime_img[..., ::-1])

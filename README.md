@@ -147,6 +147,8 @@ python3 inference.py --weight hayao:v2\
 
 #### Result of AnimeGAN v2
 
+- Hayao
+
 | Input | Hayao style v2 |
 |--|--|
 |![c1](./example/result/real/1%20(20).jpg)|![g1](./example/result/hayao_v2/1%20(20).jpg)|
@@ -159,13 +161,13 @@ python3 inference.py --weight hayao:v2\
 
 | Input | Arcane |
 |--|--|
-|![c1](./example/face/boy.PNG)|![g1](./example/arcane/boy.jpg)|
-|![c1](./example/face/boy2.PNG)|![g1](./example/arcane/boy2.jpg)|
+|![c1](./example/face/leo.PNG)|![g1](./example/arcane/leo.jpg)|
+|![c1](./example/face/cap.PNG)|![g1](./example/arcane/cap.jpg)|
+|![c1](./example/face/dune2.PNG)|![g1](./example/arcane/dune2.jpg)|
+|![c1](./example/face/nat_.jpg)|![g1](./example/arcane/nat_.jpg)|
+|![c1](./example/face/seydoux.PNG)|![g1](./example/arcane/seydoux.jpg)|
 |![c1](./example/face/girl.PNG)|![g1](./example/arcane/girl.jpg)|
 |![c1](./example/face/girl4.PNG)|![g1](./example/arcane/girl4.jpg)|
-|![c1](./example/face/girl6.PNG)|![g1](./example/arcane/girl6.jpg)|
-|![c1](./example/face/man.PNG)|![g1](./example/arcane/man.jpg)|
-|![c1](./example/face/man2.PNG)|![g1](./example/arcane/man2.jpg)|
 
 
 <details>
