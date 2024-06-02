@@ -147,7 +147,7 @@ python3 inference.py --weight hayao:v2\
 
 #### Result of AnimeGAN v2
 
-- Hayao
+##### Hayao
 
 | Input | Hayao style v2 |
 |--|--|
@@ -157,7 +157,7 @@ python3 inference.py --weight hayao:v2\
 |![c1](./example/result/real/1%20(38).jpg)|![g1](./example/result/hayao_v2/1%20(38).jpg)|
 |![c1](./example/result/real/1%20(62).jpg)|![g1](./example/result/hayao_v2/1%20(62).jpg)|
 
-- Arcane
+##### Arcane
 
 | Input | Arcane |
 |--|--|
