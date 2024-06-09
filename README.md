@@ -1,9 +1,11 @@
 # AnimeGAN Pytorch <a href="https://colab.research.google.com/github/ptran1203/pytorch-animeGAN/blob/master/notebooks/animeGAN_inference.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" data-canonical-src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 
+
 Pytorch implementation of AnimeGAN for fast photo animation
 
 * Paper: *AnimeGAN: a novel lightweight GAN for photo animation* - [Semantic scholar](https://www.semanticscholar.org/paper/AnimeGAN%3A-A-Novel-Lightweight-GAN-for-Photo-Chen-Liu/10a9c5d183e7e7df51db8bfa366bc862262b37d7#citing-papers) or from [Yoshino repo](https://github.com/TachibanaYoshino/AnimeGAN/blob/master/doc/Chen2020_Chapter_AnimeGAN.pdf)
 * Original implementation in [Tensorflow](https://github.com/TachibanaYoshino/AnimeGAN) by [Tachibana Yoshino](https://github.com/TachibanaYoshino)
+* [Try it on Hugging Face](https://huggingface.co/spaces/ptran1203/pytorchAnimeGAN) [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/ptran1203/pytorchAnimeGAN) 
 * [Demo and Docker image on Replicate](https://replicate.ai/ptran1203/pytorch-animegan)
 * Sample anime video: https://www.youtube.com/watch?v=45ASFOR3rNU
 
@@ -13,7 +15,8 @@ Pytorch implementation of AnimeGAN for fast photo animation
 <!-- |![c1](./example/gif/city.gif)|![g1](./example/gif/city_anime.gif)| -->
 
 ---
-* 02/06/2024 Arcane ([result here](#arcane)) and Shinkai style released
+* 09/06/2024: Integrated on Hugging Face Spaces, [try it here](https://huggingface.co/spaces/ptran1203/pytorchAnimeGAN)
+* 02/06/2024: Arcane ([result here](#arcane)) and Shinkai style released
 * 05/05/2024: Add [color_transfer](https://github.com/ptran1203/color_transfer) module to retain original color of generated images, [See here](#with-color-transfer-module).
 * 23/04/2024: Added DDP training.
 * 16/04/2024: **AnimeGANv2** (Hayao style) is released with training code
