@@ -44,7 +44,7 @@ RELEASED_WEIGHTS = {
     ## Face portrait
     "arcane:v2": (
         "v2",
-        "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.2/GeneratorV2_ffhq_Arcane_512.pt"
+        "https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.2/GeneratorV2_ffhq_Arcane_210624_e350.pt"
     )
 }
 

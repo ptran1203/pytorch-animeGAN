@@ -60,7 +60,7 @@ predictor.transform_file(url, "anime.jpg")
 | Shinkai | AnimeGAN | train_photo + Shinkai style | [generator_shinkai.pt](https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.0/generator_shinkai.pth) |
 | Hayao:v2 | AnimeGANv2 | Google Landmark v2 + Hayao style | [GeneratorV2_gldv2_Hayao.pt](https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.2/GeneratorV2_gldv2_Hayao.pt) |
 | Shinkai:v2 | AnimeGANv2 | Google Landmark v2 + Shinkai style | [GeneratorV2_gldv2_Shinkai.pt](https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.2/GeneratorV2_gldv2_Shinkai.pt) |
-| Arcane:v2 | AnimeGANv2 | Face ffhq + Arcane style | [GeneratorV2_ffhq_Arcane_512.pt](https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.2/GeneratorV2_ffhq_Arcane_512.pt) |
+| Arcane:v2 | AnimeGANv2 | Face ffhq + Arcane style | [GeneratorV2_ffhq_Arcane_210624_e350.pt](https://github.com/ptran1203/pytorch-animeGAN/releases/download/v1.2/GeneratorV2_ffhq_Arcane_210624_e350.pt) |
 
 ## Train on custom dataset
 
@@ -165,11 +165,11 @@ python3 inference.py --weight hayao:v2\
 | Input | Arcane |
 |--|--|
 |![c1](./example/face/leo.jpg)|![g1](./example/arcane/leo.jpg)|
-|![c1](./example/face/cap.jpg)|![g1](./example/arcane/cap.jpg)|
+|![c1](./example/face/anne.jpg)|![g1](./example/arcane/anne.jpg)|
 |![c1](./example/face/dune2.jpg)|![g1](./example/arcane/dune2.jpg)|
 |![c1](./example/face/nat_.jpg)|![g1](./example/arcane/nat_.jpg)|
 |![c1](./example/face/seydoux.jpg)|![g1](./example/arcane/seydoux.jpg)|
-|![c1](./example/face/girl.jpg)|![g1](./example/arcane/girl.jpg)|
+|![c1](./example/face/tobey.jpg)|![g1](./example/arcane/tobey.jpg)|
 |![c1](./example/face/girl4.jpg)|![g1](./example/arcane/girl4.jpg)|
 
 
